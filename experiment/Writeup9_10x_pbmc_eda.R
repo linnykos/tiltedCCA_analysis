@@ -134,6 +134,12 @@ quantile_vec3 <- stats::quantile(mat3, probs = seq(0,1,length.out = 21))
 quantile_vec1; quantile_vec2; quantile_vec3
 length(which(mat1 == 0))/prod(dim(mat1))
 length(pbmc[["ATAC"]]@counts@i)/prod(dim(pbmc[["ATAC"]]@counts))
+length(which(pbmc[["ATAC"]]@counts@x==1))/length(pbmc[["ATAC"]]@counts@x)
+length(which(pbmc[["ATAC"]]@counts@x==2))/length(pbmc[["ATAC"]]@counts@x)
+length(which(pbmc[["ATAC"]]@counts@x==3))/length(pbmc[["ATAC"]]@counts@x)
+length(which(pbmc[["ATAC"]]@counts@x==4))/length(pbmc[["ATAC"]]@counts@x)
+length(which(pbmc[["ATAC"]]@counts@x<=4))/length(pbmc[["ATAC"]]@counts@x)
+
 
 png("../../out/Writeup9_10x_pbmc_atac3_hist.png", height = 1500, width = 2500, units = "px", res = 300)
 graphics::hist(mat3, breaks = 50, col = "gray", 
