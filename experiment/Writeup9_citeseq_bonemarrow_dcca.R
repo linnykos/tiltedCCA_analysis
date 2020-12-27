@@ -185,5 +185,32 @@ Seurat::VlnPlot(bm2, features = "dcca_weight", group.by = 'celltype.l2', sort = 
   NoLegend() + ggplot2::ggtitle("D-CCA's RNA weight")
 graphics.off()
 
+##################################
+
+svd_1 <- RSpectra::svds(mat_1, k = K)
+svd_2 <- RSpectra::svds(mat_2, k = K)
+mat_total <- cbind(mat_1/svd_1$d[1], mat_2/svd_2$d[1])
+
+pca_total <- RSpectra::svds(mat_total, k = 2*K)
+tmp <- multiomicCCA:::.mult_mat_vec(pca_total$u, pca_total$d)
+rownames(tmp) <- colnames(bm)
+set.seed(10)
+zz <- Seurat::RunUMAP(tmp, reduction.key = 'PCAFused_')
+bm2[["pca_fused_umap"]] <- zz
+png("../../out/Writeup9_citeseq_bonemarrow_pca_fused_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(bm2, reduction = 'pca_fused_umap', group.by = 'celltype.l2', label = TRUE, 
+                         repel = TRUE, label.size = 2.5) + NoLegend()
+plot1 + ggplot2::ggtitle("PCA fused UMAP")
+graphics.off()
 
 
+tmp <- cbind(multiomicCCA:::.mult_mat_vec(svd_1$u, svd_1$d/svd_1$d), multiomicCCA:::.mult_mat_vec(svd_2$u, svd_2$d/svd_2$d))
+rownames(tmp) <- colnames(bm)
+set.seed(10)
+zz <- Seurat::RunUMAP(tmp, reduction.key = 'PCAConcat_')
+bm2[["pca_concate_umap"]] <- zz
+png("../../out/Writeup9_citeseq_bonemarrow_pca_concate_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(bm2, reduction = 'pca_concate_umap', group.by = 'celltype.l2', label = TRUE, 
+                         repel = TRUE, label.size = 2.5) + NoLegend()
+plot1 + ggplot2::ggtitle("PCA-concatenated UMAP")
+graphics.off()
