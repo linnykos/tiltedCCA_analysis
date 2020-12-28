@@ -7,10 +7,15 @@ set.seed(10)
 
 library(Seurat); library(Signac)
 load("../../out/Writeup9_10x_pbmc_dimred_all.RData")
+# we don't use Writeup10's preprocessing since the cluster names in the 
+# https://satijalab.org/seurat/v4.0/weighted_nearest_neighbor_analysis.html vignette
+# don't align with the preprocessing given in https://satijalab.org/signac/articles/pbmc_multiomic.html
+# (I could use the latter's cell-type labeling but... too much of a hassle for now)
 
-#############################
-# first define cell-types
-# from https://satijalab.org/seurat/v4.0/weighted_nearest_neighbor_analysis.html
+#########################################
+
+
+set.seed(10)
 pbmc <- Seurat::FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
 pbmc <- Seurat::RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
 pbmc <- Seurat::FindClusters(pbmc, graph.name = "wsnn", algorithm = 3, verbose = FALSE) ## see http://www.ludowaltman.nl/slm/ for SLM (smart local moving)
@@ -28,8 +33,9 @@ pbmc <- Seurat::RenameIdents(pbmc, '6_2' ='gdT', '6_3' = 'gdT')
 pbmc$celltype <- Seurat::Idents(pbmc)
 
 head(pbmc@meta.data)
+table(pbmc@meta.data[,"celltype"])
 
-##########################################3
+##########################################
 
 # first try separate PCAs, already calculated
 png("../../out/Writeup10_pbmc_10x_seurat_rna_umap.png", height = 1500, width = 1500, units = "px", res = 300)
@@ -50,17 +56,9 @@ plot1 <- DimPlot(pbmc, reduction = "wnn.umap", group.by = "celltype",
 plot1 + ggplot2::ggtitle("WNN UMAP (Seurat)")
 graphics.off()
 
-##################################
+dim(pbmc[["lsi"]])
 
-# check if scale.data really is scaled (it is)
-mat <- pbmc[["ATAC"]]@scale.data
-mat[70:80,90:100]
-mean(mat[1,]); sd(mat[1,]); length(which(abs(mat[1,]) == 10))
-zz <- which(apply(mat, 1, function(x){any(x != 0) & length(which(abs(x)==10)) == 0}))
-head(zz)
-mean(mat[8,]); sd(mat[8,]); length(which(abs(mat[8,]) == 10))
-class(mat)
-rm(list=c("mat"))
+##################################
 
 # pick a rank
 mat_1 <- t(pbmc[["SCT"]]@scale.data)

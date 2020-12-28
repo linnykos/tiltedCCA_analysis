@@ -1,35 +1,13 @@
 ## mainly from: https://satijalab.org/signac/articles/pbmc_multiomic.html
-rm(list=ls())
-set.seed(10)
+rm(list=ls()); set.seed(10)
 
-library(Seurat)
-library(Signac)
-library(EnsDb.Hsapiens.v86)
-library(GenomeInfoDb)
-library(dplyr)
-library(ggplot2)
+library(Seurat); library(Signac); library(EnsDb.Hsapiens.v86); library(GenomeInfoDb)
+library(dplyr); library(ggplot2)
 
-date_of_run <- Sys.time()
-session_info <- sessionInfo()
+date_of_run <- Sys.time(); session_info <- sessionInfo()
 
-dat <- Matrix::readMM("../../data/filtered_feature_bc_matrix/matrix.mtx")
-dat2 <- as.matrix(dat)
-
-barcodes <- read.table("../../data/filtered_feature_bc_matrix/barcodes.tsv", sep = "\t")
-features <- read.table("../../data/filtered_feature_bc_matrix/features.tsv", sep = "\t")
-head(features)
-nrow(features)
-table(features[,3])
-table(features[,4])
-
-colnames(dat2) <- barcodes[,1]
-rownames(dat2) <- features[,1]
-
-# extract RNA and ATAC data
-gene_idx <- which(features[,3] == "Gene Expression")
-atac_idx <- which(features[,3] == "Peaks")
-rna_counts <- dat2[gene_idx,]
-atac_counts <- dat2[atac_idx,]
+inputdata_10x <- Seurat::Read10X_h5("../../data/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5")
+rna_counts <- inputdata_10x$`Gene Expression`; atac_counts <- inputdata_10x$Peaks
 
 # Create Seurat object
 pbmc <- Seurat::CreateSeuratObject(counts = rna_counts)
@@ -46,8 +24,7 @@ Signac::genome(annotations) <- "hg38"
 
 # note: also requires pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz.tbi to be in the directory
 frag_file <- "../../data/pbmc_granulocyte_sorted_10k_atac_fragments.tsv.gz"
-rm(list=c("dat", "dat2", "barcodes", "features", "rna_counts")); gc(verbose = T)
-object.size(pbmc)/1e9; object.size(atac_counts)/1e9
+rm(list=c("inputdata_10x", "rna_counts")); gc(verbose = T)
 chrom_assay <- Signac::CreateChromatinAssay(
   counts = atac_counts,
   sep = c(":", "-"),
@@ -56,56 +33,41 @@ chrom_assay <- Signac::CreateChromatinAssay(
   min.cells = 10,
   annotation = annotations
 )
-
 pbmc[["ATAC"]] <- chrom_assay
 
-## from https://satijalab.org/signac/articles/pbmc_multiomic.html
-DefaultAssay(pbmc) <- "ATAC"
-
-rm(list=c("annotations", "frag_file", "atac_counts", "atac_idx", "gene_idx")); gc(verbose = T)
-object.size(pbmc)/1e9
-
-pbmc <- Signac::NucleosomeSignal(pbmc) # needs to count up to 119 mil
-pbmc <- Signac::TSSEnrichment(pbmc)
-
-pbmc <- base::subset(
+pbmc <- subset(
   x = pbmc,
-  subset = nCount_ATAC < 100000 &
+  subset = nCount_ATAC < 7e4 &
+    nCount_ATAC > 5e3 &
     nCount_RNA < 25000 &
-    nCount_ATAC > 1000 &
     nCount_RNA > 1000 &
-    nucleosome_signal < 2 &
-    TSS.enrichment > 1
+    percent.mt < 20
 )
 
+rm(list=c("annotations", "frag_file", "atac_counts", "grange_counts", "grange_use")); gc(verbose = T)
+
+########################
+
 set.seed(10)
-dim(pbmc@assays$RNA@counts)
 Seurat::DefaultAssay(pbmc) <- "RNA"
 pbmc <- Seurat::SCTransform(pbmc, assay = "RNA", verbose = FALSE)
-pbmc@assays$RNA@counts[80:90,90:100]
 pbmc <- Seurat::RunPCA(pbmc, assay = "SCT") 
 set.seed(10)
 pbmc <- Seurat::RunUMAP(pbmc, dims = 1:50, reduction.name = 'umap.rna', reduction.key = 'rnaUMAP_')
 
-#####################
+#########################
 
-# from https://satijalab.org/signac/articles/pbmc_vignette.html
 Seurat::DefaultAssay(pbmc) <- "ATAC"
 set.seed(10)
-dim(pbmc@assays$ATAC@counts)
-pbmc <- Signac::FindTopFeatures(pbmc, min.cutoff = '5') # there's there's contention on the order of operations here
-# this min.cutoff is from https://satijalab.org/signac/articles/pbmc_multiomic.html
+pbmc <- Signac::FindTopFeatures(pbmc, min.cutoff = 'q0')
 pbmc <- Signac::RunTFIDF(pbmc)
 pbmc <- Signac::RunSVD(pbmc)
-dim(pbmc[["lsi"]]@cell.embeddings); dim(pbmc[["lsi"]]@feature.loadings)
 set.seed(10)
 pbmc <- Seurat::RunUMAP(pbmc, reduction = 'lsi', dims = 2:50,
                         reduction.name = "umap.atac",
                         reduction.key = "atacUMAP_")
 
-dim(pbmc@assays$ATAC@scale.data)
 pbmc <- Seurat::ScaleData(pbmc, features = Seurat::VariableFeatures(object = pbmc))
-dim(pbmc@assays$ATAC@scale.data)
 
 ###########################
 
@@ -129,11 +91,7 @@ pbmc <- Seurat::RenameIdents(pbmc, '18' = 'MAIT')
 pbmc <- Seurat::RenameIdents(pbmc, '6_2' ='gdT', '6_3' = 'gdT')
 pbmc$celltype <- Seurat::Idents(pbmc)
 
-head(pbmc@meta.data)
-table(pbmc@meta.data[,"celltype"])
+###################
 
-#############################3
-
-rm(list = c("chrom_assay", "grange_counts", "grange_use"))
-source_code <- readLines("experiment/Writeup10_10x_pbmc_preprocess.R")
+source_code <- readLines("experiment/Writeup10_10x_pbmc_preprocess2.R")
 save.image(file = "../../out/Writeup10_10x_pbmc_preprocess.RData")
