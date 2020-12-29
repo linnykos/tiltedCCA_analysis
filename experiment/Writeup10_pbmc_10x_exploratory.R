@@ -7,13 +7,6 @@ set.seed(10)
 
 library(Seurat); library(Signac)
 load("../../out/Writeup9_10x_pbmc_dimred_all.RData")
-# we don't use Writeup10's preprocessing since the cluster names in the 
-# https://satijalab.org/seurat/v4.0/weighted_nearest_neighbor_analysis.html vignette
-# don't align with the preprocessing given in https://satijalab.org/signac/articles/pbmc_multiomic.html
-# (I could use the latter's cell-type labeling but... too much of a hassle for now)
-
-#########################################
-
 
 set.seed(10)
 pbmc <- Seurat::FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
@@ -31,9 +24,6 @@ pbmc <- Seurat::RenameIdents(pbmc, '2' = 'CD8 Naive', '9'= "CD8 Naive", '12' = '
 pbmc <- Seurat::RenameIdents(pbmc, '18' = 'MAIT')
 pbmc <- Seurat::RenameIdents(pbmc, '6_2' ='gdT', '6_3' = 'gdT')
 pbmc$celltype <- Seurat::Idents(pbmc)
-
-head(pbmc@meta.data)
-table(pbmc@meta.data[,"celltype"])
 
 ##########################################
 
@@ -58,6 +48,11 @@ graphics.off()
 
 dim(pbmc[["lsi"]])
 
+png("../../out/Writeup10_pbmc_10x_seurat_weight.png", height = 1500, width = 2500, units = "px", res = 300)
+Seurat::VlnPlot(pbmc, features = "SCT.weight", group.by = 'celltype', sort = TRUE, pt.size = 0.1) +
+  NoLegend() + ggplot2::ggtitle("Seurat WNN's RNA weight")
+graphics.off()
+
 ##################################
 
 # pick a rank
@@ -78,5 +73,37 @@ graphics.off()
 
 ##############################
 # try method 2, just concenating the matrices naively
+rm(list = c("annotations", "barcodes", "features", "grange_counts", "grange_use",
+            "pca_log_rna", "pca_sct_rna", "pca_tfidf_atac", "plot1", "svd_res_1",
+            "svd_res_2", "umap_sct_rna", "umap_tfidf_atac", "zz")); gc(verbose = T)
+svd_res_1 <- RSpectra::svds(mat_1, k = 1)
+svd_res_2 <- RSpectra::svds(mat_2, k = 1)
 mat_total <- cbind(mat_1/svd_res_1$d[1], mat_2/svd_res_2$d[1]) # oops! error, "cannot allocate vector of size 8.3 Gb"
+pca_total <- RSpectra::svds(mat_total, k = 2*K)
+tmp <- multiomicCCA:::.mult_mat_vec(pca_total$u, pca_total$d)
+rownames(tmp) <- rownames(pbmc[["pca"]])
+set.seed(10)
+zz <- Seurat::RunUMAP(tmp, reduction.key = 'PCATotal_')
+pbmc[["pca_total_umap"]] <- zz
+png("../../out/Writeup10_pbmc_10x_pca_total_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(pbmc, reduction = 'pca_total_umap', group.by = "celltype", 
+                         label = TRUE, label.size = 2.5, repel = TRUE) + Seurat::NoLegend()
+plot1 + ggplot2::ggtitle("PCA total UMAP")
+graphics.off()
 
+# try method 3, concatenating the low-dimen embedding
+mat_1 <- pbmc[["pca"]]@cell.embeddings
+mat_2 <- pbmc[["lsi"]]@cell.embeddings
+svd_res_1 <- RSpectra::svds(mat_1, k = 1)
+svd_res_2 <- RSpectra::svds(mat_2, k = 1)
+
+mat_total <- cbind(mat_1/svd_res_1$d[1], mat_2/svd_res_2$d[1])
+rownames(mat_total) <- rownames(pbmc[["pca"]])
+set.seed(10)
+zz <- Seurat::RunUMAP(mat_total, reduction.key = 'PCAConcat_')
+pbmc[["pca_concate_umap"]] <- zz
+png("../../out/Writeup10_pbmc_10x_pca_concate_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(pbmc, reduction = 'pca_concate_umap', group.by = "celltype", 
+                         label = TRUE, label.size = 2.5, repel = TRUE) + Seurat::NoLegend()
+plot1 + ggplot2::ggtitle("PCA-concatenated UMAP")
+graphics.off()

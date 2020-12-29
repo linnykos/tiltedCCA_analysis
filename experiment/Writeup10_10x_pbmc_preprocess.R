@@ -136,4 +136,4 @@ table(pbmc@meta.data[,"celltype"])
 
 rm(list = c("chrom_assay", "grange_counts", "grange_use"))
 source_code <- readLines("experiment/Writeup10_10x_pbmc_preprocess.R")
-save.image(file = "../../out/Writeup10_10x_pbmc_preprocess.RData")
+# save.image(file = "../../out/Writeup10_10x_pbmc_preprocess.RData")
