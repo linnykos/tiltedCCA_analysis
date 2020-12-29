@@ -163,4 +163,5 @@ pbmc <- Seurat::RunUMAP(object = pbmc, nn.name = "wknn", verbose = TRUE)
 ###################
 
 source_code <- readLines("experiment/Writeup10_10x_pbmc_preprocess3.R")
+rm(list = c("reference", "predictions", "transfer_anchors"))
 save.image(file = "../../out/Writeup10_10x_pbmc_preprocess3.RData")
