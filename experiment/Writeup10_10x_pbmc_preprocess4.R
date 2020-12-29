@@ -114,7 +114,8 @@ pbmc <- Seurat::RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.uma
 ###############################
 
 rm(list = c("chrom_assay", "reference", "predictions", "transfer_anchors"))
-source_code <- readLines("experiment/Writeup10_10x_pbmc_preprocess3.R")
+source_code <- readLines("experiment/Writeup10_10x_pbmc_preprocess4.R")
+save.image("../../out/Writeup10_10x_pbmc_preprocess4.RData")
 
 
 
