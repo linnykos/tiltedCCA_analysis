@@ -1,4 +1,4 @@
-rm(list=ls()); set.seed(10)
+rm(list=ls()); set.seed(10); gcinfo(TRUE)
 
 library(Seurat); library(Signac); library(EnsDb.Hsapiens.v86); 
 library(BSgenome.Hsapiens.UCSC.hg38); library(GenomeInfoDb)

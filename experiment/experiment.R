@@ -1,6 +1,6 @@
 rm(list=ls())
 set.seed(5)
-n <- 100; K <- 2
+n <- 100; K <- 3
 common_space <- scale(MASS::mvrnorm(n = n, mu = rep(0,K), Sigma = diag(K)), center = T, scale = F)
 
 p1 <- 5; p2 <- 10
@@ -13,33 +13,34 @@ mat_2 <- common_space %*% transform_mat_2 + scale(MASS::mvrnorm(n = n, mu = rep(
 # dcca_res <- dcca(mat_1, mat_2, rank_1 = K, rank_2 = K, rank_12 = K)
 
 ######
-rank_1 = K; rank_2 = K; rank_12 = K; enforce_rank = T
+rank_1 = K; rank_2 = K; rank_12 = K; enforce_rank = T; verbose = T
 
-stopifnot(nrow(mat_1) == nrow(mat_2), rank_12 <= min(c(rank_1, rank_2)), 
-          rank_1 <= min(dim(mat_1)), rank_2 <= min(dim(mat_2)))
 n <- nrow(mat_1)
 mat_1 <- scale(mat_1, center = T, scale = F)
 mat_2 <- scale(mat_2, center = T, scale = F)
 
+if(verbose) print("D-CCA: Starting matrix shrinkage")
 if(enforce_rank | nrow(mat_1) < 2*ncol(mat_1)) mat_1 <- .spoet(mat_1, rank_1)
 if(enforce_rank | nrow(mat_2) < 2*ncol(mat_2)) mat_2 <- .spoet(mat_2, rank_2)
+
+###########
+
+svd_res_1 <- .svd_truncated(mat_1, rank_1)
+svd_res_2 <- .svd_truncated(mat_2, rank_2)
 
 cov_1 <- stats::cov(mat_1) * (n-1)/n
 cov_2 <- stats::cov(mat_2) * (n-1)/n
 cov_12 <- crossprod(mat_1, mat_2)/n
 full_rank <- Matrix::rankMatrix(cov_12)
 
-cca_res <- .cca(cov_1, cov_2, cov_12, K = K)
+cov_1_invhalf <- .mult_mat_vec(svd_res_1$v, 1/svd_res_1$d)
+cov_2_invhalf <- .mult_mat_vec(svd_res_2$v, 1/svd_res_2$d)
 
-score_1 <- mat_1 %*% cca_res$factor_1/sqrt(n)
-score_2 <- mat_2 %*% cca_res$factor_2/sqrt(n)
+# test that it really is an inverse
+sum(abs(diag(K) - n*crossprod(cov_1_invhalf, cov_1 %*% cov_1_invhalf)))
+sum(abs(diag(K) - n*crossprod(cov_2_invhalf, cov_2 %*% cov_2_invhalf)))
 
-crossprod(score_1)
-crossprod(score_2)
+prod_v1 <- n*crossprod(cov_1_invhalf, cov_12) %*% cov_2_invhalf
+prod_v2 <- crossprod(svd_res_1$u, svd_res_2$u)
+sum(abs(prod_v1 - prod_v2))
 
-
-cca_res <- .cca(cov_1, cov_2, cov_12, K = full_rank)
-score_1 <- mat_1 %*% cca_res$factor_1 #note: this is unnormalized
-score_2 <- mat_2 %*% cca_res$factor_2
-
-R_vec <- sapply(cca_res$obj_vec, function(x){1-sqrt((1-x)/(1+x))})
