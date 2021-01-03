@@ -14,7 +14,7 @@ mat_2 <- t(pbmc[["ATAC"]]@scale.data)
 
 set.seed(10)
 K <- 7
-meta_clustering <- stats::kmeans(pbmc[["umap.rna"]]@cell.embeddings, centers = 100*K)$cluster
+meta_clustering <- stats::kmeans(pbmc[["umap.rna"]]@cell.embeddings, centers = 50*K)$cluster
 table(table(meta_clustering))
 
 head(rownames(mat_1)); head(colnames(mat_1))
@@ -27,8 +27,8 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, rank_1 = K, rank_2 = K,
                                       meta_clustering = meta_clustering,
                                       apply_shrinkage = F, verbose = T) # takes around 8 minutes
 
-source_code <- readLines("experiment/Writeup10_10x_pbmc_dcca_metacell.R")
-save.image("../../out/Writeup10_10x_pbmc_dcca_metacell.RData")
+source_code <- readLines("experiment/Writeup10_10x_pbmc_dcca_metacells.R")
+save.image("../../out/Writeup10_10x_pbmc_dcca_metacells.RData")
 
 
 
