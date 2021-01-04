@@ -22,6 +22,7 @@ head(rownames(mat_2)); head(colnames(mat_2))
 dim(mat_1); dim(mat_2)
 rm(list = "pbmc"); gc(T)
 
+gcinfo(F)
 set.seed(10)
 dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, rank_1 = K, rank_2 = K,
                                       meta_clustering = meta_clustering,
