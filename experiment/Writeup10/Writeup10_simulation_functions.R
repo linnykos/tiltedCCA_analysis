@@ -23,8 +23,18 @@ analyze_seurat_pipeline <- function(mat_1, mat_2){
   seurat_obj
 }
 
-# apply_seurat_map <- function(mat, seurat_obj){
-#   rownames(mat) <- colnames(pbmc)
-#   umap_res <- Seurat::RunUMAP(mat, reduction.key = 'tmp')
-#   umap_res@cell.embeddings
-# }
+construct_noiseless_data <- function(common_score, distinct_score_1, distinct_score_2,
+                                     coef_mat_1, coef_mat_2){
+  
+  rank_c <- ncol(common_score)
+  common_mat_1 <- common_score %*% coef_mat_1[1:rank_c,,drop = F]
+  distinct_mat_1 <- distinct_score_1 %*% coef_mat_1
+  common_mat_2 <- common_score %*% coef_mat_2[1:rank_c,,drop = F] 
+  distinct_mat_2 <- distinct_score_2 %*% coef_mat_2
+  
+  structure(list(common_score = common_score,
+      distinct_score_1 = distinct_score_1,
+      distinct_score_2 = distinct_score_2,
+      common_mat_1 = common_mat_1, common_mat_2 = common_mat_2, 
+      distinct_mat_1 = distinct_mat_1, distinct_mat_2 = distinct_mat_2), class = "dcca_decomp")
+}
