@@ -6,12 +6,15 @@ library(dplyr); library(ggplot2); library(multiomicCCA)
 
 date_of_run <- Sys.time(); session_info <- sessionInfo()
 load("../../out/Writeup10_10x_pbmc_preprocess4.RData"); pbmc[["ATAC"]] = NULL
-load("../../out/Writeup10_10x_pbmc_dcca_metacells.RData")
+load("../../out/Writeup10_10x_pbmc_dcca_metacells2.RData")
 
 #############
 
-res <- dcca_decomposition(dcca_res, rank_12 = K)
+res <- dcca_decomposition(dcca_res, rank_c = K)
+rownames(res$common_mat_1) <- colnames(pbmc)
 
+set.seed(10)
+tmp <- extract_embedding(res, common = T)
 tmp <- dcca_res$common_factors
 rownames(tmp) <- colnames(pbmc)
 set.seed(10)
