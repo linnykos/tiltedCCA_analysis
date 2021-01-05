@@ -22,40 +22,52 @@ coef_mat_2 <- matrix(stats::rnorm(K*p_2), K, p_2)
 
 set.seed(10)
 dat <- generate_data(score_1, score_2, coef_mat_1, coef_mat_2)
-
-par(mfrow = c(1,3))
 zlim <- range(c(dat$common_score, dat$distinct_score_1, dat$distinct_score_2))
-image(t(dat$common_score), zlim = zlim)
-image(t(dat$distinct_score_1), zlim = zlim)
-image(t(dat$distinct_score_2), zlim = zlim)
+c1 <- svd(dat$common_score)$d[1]; d1 <- svd(dat$distinct_score_1)$d[1]; d2 <- svd(dat$distinct_score_2)$d[1]
+png("../../out/simulation/Writeup10/Writeup10_simulation1_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
+par(mfrow = c(1,3))
+image(t(dat$common_score), zlim = zlim, main = "Common loading")
+image(t(dat$distinct_score_1), zlim = zlim, main = paste0("Distinct loading 1 (", round(d1/(c1+d1),2), "% var.)"))
+image(t(dat$distinct_score_2), zlim = zlim, main = paste0("Distinct loading 2 (", round(d2/(c1+d2),2), "% var.)"))
+graphics.off()
 
 # generate true images
 true_dat <- construct_noiseless_data(dat$common_score, dat$distinct_score_1, dat$distinct_score_2,
                                      coef_mat_1, coef_mat_2)
+
+png("../../out/simulation/Writeup10/Writeup10_simulation1_true_embedding.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 set.seed(10)
 tmp <- extract_embedding(true_dat, common = T, distinct_1 = F, distinct_2 = F)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Common view (Truth)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Common view (Truth)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(true_dat, common = F, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Distinct view (Truth)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Distinct views (Truth)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(true_dat, common = T, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Entire view (Truth)")
-
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Entire view (Truth)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 # try Seurat 
 
 set.seed(10)
 seurat_obj <- analyze_seurat_pipeline(dat$mat_1, dat$mat_2)
 
+png("../../out/simulation/Writeup10/Writeup10_simulation1_wnn.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 tmp <- seurat_obj[["umap1"]]@cell.embeddings
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Mode 1")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Only view 1",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 tmp <- seurat_obj[["umap2"]]@cell.embeddings
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Mode 2")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Only view 2",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 tmp <- seurat_obj[["wnn.umap"]]@cell.embeddings
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "WNN")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Entire view (WNN)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 # try DCCA
 
@@ -63,16 +75,21 @@ set.seed(10)
 dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 res <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
 
+png("../../out/simulation/Writeup10/Writeup10_simulation1_dcca.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 set.seed(10)
 tmp <- extract_embedding(res, common = T, distinct_1 = F, distinct_2 = F)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Common view (DCCA)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Common view (DCCA)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(res, common = F, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Distinct view (DCCA)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Distinct views (DCCA)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(res, common = T, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Entire view (DCCA)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Entire view (DCCA)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 
 # concatenated PCA
@@ -80,10 +97,13 @@ svd_res_1 <- .svd_truncated(dat$mat_1, K)
 svd_res_2 <- .svd_truncated(dat$mat_2, K)
 zz2 <- cbind(.mult_mat_vec(svd_res_1$u, svd_res_1$d), 
             .mult_mat_vec(svd_res_2$u, svd_res_2$d))
+png("../../out/simulation/Writeup10/Writeup10_simulation1_pca.png", height = 1100, width = 1000, units = "px", res = 300)
 set.seed(10)
 tmp2 <- Seurat::RunUMAP(zz2, verbose = F)@cell.embeddings
 par(mfrow = c(1,1))
-plot(tmp2[,1], tmp2[,2], asp = T, pch = 16, col = membership_vec, main = "PCA concatenated")
+plot(tmp2[,1], tmp2[,2], asp = T, pch = 16, col = membership_vec, main = "PCA concatenated",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 ####################################################
 ####################################################
@@ -119,38 +139,52 @@ coef_mat_2 <- matrix(stats::rnorm(K*p_2), K, p_2)
 set.seed(10)
 dat <- generate_data(score_1, score_2, coef_mat_1, coef_mat_2)
 
-par(mfrow = c(1,3))
 zlim <- range(c(dat$common_score, dat$distinct_score_1, dat$distinct_score_2))
-image(t(dat$common_score), zlim = zlim)
-image(t(dat$distinct_score_1), zlim = zlim)
-image(t(dat$distinct_score_2), zlim = zlim)
+c1 <- svd(dat$common_score)$d[1]; d1 <- svd(dat$distinct_score_1)$d[1]; d2 <- svd(dat$distinct_score_2)$d[1]
+png("../../out/simulation/Writeup10/Writeup10_simulation2_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
+par(mfrow = c(1,3))
+image(t(dat$common_score), zlim = zlim, main = "Common loading")
+image(t(dat$distinct_score_1), zlim = zlim, main = paste0("Distinct loading 1 (", round(d1/(c1+d1),2), "% var.)"))
+image(t(dat$distinct_score_2), zlim = zlim, main = paste0("Distinct loading 2 (", round(d2/(c1+d2),2), "% var.)"))
+graphics.off()
 
 # generate true images
 true_dat <- construct_noiseless_data(dat$common_score, dat$distinct_score_1, dat$distinct_score_2,
                                      coef_mat_1, coef_mat_2)
+
+png("../../out/simulation/Writeup10/Writeup10_simulation2_true_embedding.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 set.seed(10)
 tmp <- extract_embedding(true_dat, common = T, distinct_1 = F, distinct_2 = F)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Common view (Truth)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Common view (Truth)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(true_dat, common = F, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Distinct view (Truth)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Distinct views (Truth)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(true_dat, common = T, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Entire view (Truth)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Entire view (Truth)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 # try Seurat 
 
 set.seed(10)
 seurat_obj <- analyze_seurat_pipeline(dat$mat_1, dat$mat_2)
 
+png("../../out/simulation/Writeup10/Writeup10_simulation2_wnn.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 tmp <- seurat_obj[["umap1"]]@cell.embeddings
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Mode 1")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Only view 1",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 tmp <- seurat_obj[["umap2"]]@cell.embeddings
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Mode 2")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Only view 2",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 tmp <- seurat_obj[["wnn.umap"]]@cell.embeddings
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "WNN")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Entire view (WNN)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 # try DCCA
 
@@ -158,27 +192,34 @@ set.seed(10)
 dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 res <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
 
+png("../../out/simulation/Writeup10/Writeup10_simulation2_dcca.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 set.seed(10)
 tmp <- extract_embedding(res, common = T, distinct_1 = F, distinct_2 = F)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Common view (DCCA)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Common view (DCCA)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(res, common = F, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Distinct view (DCCA)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Distinct views (DCCA)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(res)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Entire view (DCCA)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Entire view (DCCA)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 # concatenated PCA
 svd_res_1 <- .svd_truncated(dat$mat_1, K)
 svd_res_2 <- .svd_truncated(dat$mat_2, K)
 zz2 <- cbind(.mult_mat_vec(svd_res_1$u, svd_res_1$d), 
              .mult_mat_vec(svd_res_2$u, svd_res_2$d))
+png("../../out/simulation/Writeup10/Writeup10_simulation2_pca.png", height = 1100, width = 1000, units = "px", res = 300)
 set.seed(10)
 tmp2 <- Seurat::RunUMAP(zz2, verbose = F)@cell.embeddings
 par(mfrow = c(1,1))
-plot(tmp2[,1], tmp2[,2], asp = T, pch = 16, col = true_membership_vec, main = "PCA concatenated")
-
+plot(tmp2[,1], tmp2[,2], asp = T, pch = 16, col = true_membership_vec, main = "PCA concatenated",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 ####################################################
 ####################################################
@@ -211,44 +252,52 @@ coef_mat_2 <- matrix(stats::rnorm(K*p_2), K, p_2)
 set.seed(10)
 dat <- generate_data(score_1, score_2, coef_mat_1, coef_mat_2)
 
-par(mfrow = c(1,3))
 zlim <- range(c(dat$common_score, dat$distinct_score_1, dat$distinct_score_2))
-image(t(dat$common_score), zlim = zlim)
-image(t(dat$distinct_score_1), zlim = zlim)
-image(t(dat$distinct_score_2), zlim = zlim)
+c1 <- svd(dat$common_score)$d[1]; d1 <- svd(dat$distinct_score_1)$d[1]; d2 <- svd(dat$distinct_score_2)$d[1]
+png("../../out/simulation/Writeup10/Writeup10_simulation3_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
+par(mfrow = c(1,3))
+image(t(dat$common_score), zlim = zlim, main = "Common loading")
+image(t(dat$distinct_score_1), zlim = zlim, main = paste0("Distinct loading 1 (", round(d1/(c1+d1),2), "% var.)"))
+image(t(dat$distinct_score_2), zlim = zlim, main = paste0("Distinct loading 2 (", round(d2/(c1+d2),2), "% var.)"))
+graphics.off()
 
 # generate true images
 true_dat <- construct_noiseless_data(dat$common_score, dat$distinct_score_1, dat$distinct_score_2,
                                      coef_mat_1, coef_mat_2)
+
+png("../../out/simulation/Writeup10/Writeup10_simulation3_true_embedding.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 set.seed(10)
 tmp <- extract_embedding(true_dat, common = T, distinct_1 = F, distinct_2 = F)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Common view (Truth)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Common view (Truth)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(true_dat, common = F, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Distinct view (Truth)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Distinct views (Truth)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(true_dat, common = T, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Entire view (Truth)")
-
-
-# set.seed(10)
-# tmp <- Seurat::RunUMAP(common_loading, verbose = F)@cell.embeddings
-# par(mfrow = c(1,1))
-# plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "All DCCA")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Entire view (Truth)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 # try Seurat 
 
 set.seed(10)
 seurat_obj <- analyze_seurat_pipeline(dat$mat_1, dat$mat_2)
 
+png("../../out/simulation/Writeup10/Writeup10_simulation3_wnn.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 tmp <- seurat_obj[["umap1"]]@cell.embeddings
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Mode 1")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Only view 1",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 tmp <- seurat_obj[["umap2"]]@cell.embeddings
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Mode 2")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Only view 2",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 tmp <- seurat_obj[["wnn.umap"]]@cell.embeddings
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "WNN")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Entire view (WNN)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 # try DCCA
 
@@ -256,16 +305,21 @@ set.seed(10)
 dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 res <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
 
+png("../../out/simulation/Writeup10/Writeup10_simulation3_dcca.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 set.seed(10)
 tmp <- extract_embedding(res, common = T, distinct_1 = F, distinct_2 = F)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Common view (DCCA)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Common view (DCCA)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(res, common = F, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Distinct view (DCCA)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Distinct views (DCCA)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
 set.seed(10)
 tmp <- extract_embedding(res, common = T, distinct_1 = T, distinct_2 = T)
-plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Entire view (DCCA)")
+plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = true_membership_vec, main = "Entire view (DCCA)",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
 # concatenated PCA
 svd_res_1 <- .svd_truncated(dat$mat_1, K)
@@ -274,7 +328,9 @@ zz2 <- cbind(.mult_mat_vec(svd_res_1$u, svd_res_1$d),
              .mult_mat_vec(svd_res_2$u, svd_res_2$d))
 set.seed(10)
 tmp2 <- Seurat::RunUMAP(zz2, verbose = F)@cell.embeddings
+png("../../out/simulation/Writeup10/Writeup10_simulation3_pca.png", height = 1100, width = 1000, units = "px", res = 300)
 par(mfrow = c(1,1))
-plot(tmp2[,1], tmp2[,2], asp = T, pch = 16, col = true_membership_vec, main = "PCA concatenated")
-
+plot(tmp2[,1], tmp2[,2], asp = T, pch = 16, col = true_membership_vec, main = "PCA concatenated",
+     xlab = "UMAP 1", ylab = "UMAP 2")
+graphics.off()
 
