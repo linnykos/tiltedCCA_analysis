@@ -1,4 +1,4 @@
-rm(list=ls()); set.seed(10); gcinfo(TRUE)
+rm(list=ls()); set.seed(10); # gcinfo(TRUE)
 
 library(Seurat); library(Signac); library(EnsDb.Hsapiens.v86); 
 library(BSgenome.Hsapiens.UCSC.hg38); library(GenomeInfoDb)
@@ -13,7 +13,7 @@ mat_1 <- t(pbmc[["SCT"]]@scale.data)
 mat_2 <- t(pbmc[["ATAC"]]@scale.data)
 
 set.seed(10)
-K <- 7
+rank_1 <- 17; rank_2 <- 13; K <- min(c(rank_1, rank_2))
 meta_clustering <- stats::kmeans(pbmc[["umap.rna"]]@cell.embeddings, centers = 50*K)$cluster
 table(table(meta_clustering))
 
@@ -24,12 +24,12 @@ rm(list = "pbmc"); gc(T)
 
 gcinfo(F)
 set.seed(10)
-dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, rank_1 = K, rank_2 = K,
+dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, rank_1 = rank_1, rank_2 = rank_2,
                                       meta_clustering = meta_clustering,
                                       apply_shrinkage = F, verbose = T) # takes around 8 minutes
 
 source_code <- readLines("experiment/Writeup10_10x_pbmc_dcca_metacells.R")
-save.image("../../out/Writeup10_10x_pbmc_dcca_metacells.RData")
+save.image("../../out/Writeup10_10x_pbmc_dcca_metacells2.RData")
 
 
 
