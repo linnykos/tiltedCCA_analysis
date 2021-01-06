@@ -17,6 +17,8 @@ gene_coords_use <- gene_coords[gene_coords$gene_name %in% genes,]
 
 link_mat <- Signac:::DistanceToTSS(peak, gene_coords_use, distance = 500000)
 
+dim(link_mat)
+
 # now let's quantify how many peaks are associatd with each gene
 quantile(diff(link_mat@p))
 # we can also quantify how often which peaks are associated with genes

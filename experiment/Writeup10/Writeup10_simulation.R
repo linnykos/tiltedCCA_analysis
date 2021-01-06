@@ -26,9 +26,9 @@ zlim <- range(c(dat$common_score, dat$distinct_score_1, dat$distinct_score_2))
 c1 <- svd(dat$common_score)$d[1]; d1 <- svd(dat$distinct_score_1)$d[1]; d2 <- svd(dat$distinct_score_2)$d[1]
 png("../../out/simulation/Writeup10/Writeup10_simulation1_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
 par(mfrow = c(1,3))
-image(t(dat$common_score), zlim = zlim, main = "Common loading")
-image(t(dat$distinct_score_1), zlim = zlim, main = paste0("Distinct loading 1 (", round(d1/(c1+d1),2), "% var.)"))
-image(t(dat$distinct_score_2), zlim = zlim, main = paste0("Distinct loading 2 (", round(d2/(c1+d2),2), "% var.)"))
+image(t(dat$common_score), zlim = zlim, main = "Common score")
+image(t(dat$distinct_score_1), zlim = zlim, main = paste0("Distinct score 1 (", round(d1/(c1+d1),2), "% var.)"))
+image(t(dat$distinct_score_2), zlim = zlim, main = paste0("Distinct score 2 (", round(d2/(c1+d2),2), "% var.)"))
 graphics.off()
 
 # generate true images
@@ -143,9 +143,9 @@ zlim <- range(c(dat$common_score, dat$distinct_score_1, dat$distinct_score_2))
 c1 <- svd(dat$common_score)$d[1]; d1 <- svd(dat$distinct_score_1)$d[1]; d2 <- svd(dat$distinct_score_2)$d[1]
 png("../../out/simulation/Writeup10/Writeup10_simulation2_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
 par(mfrow = c(1,3))
-image(t(dat$common_score), zlim = zlim, main = "Common loading")
-image(t(dat$distinct_score_1), zlim = zlim, main = paste0("Distinct loading 1 (", round(d1/(c1+d1),2), "% var.)"))
-image(t(dat$distinct_score_2), zlim = zlim, main = paste0("Distinct loading 2 (", round(d2/(c1+d2),2), "% var.)"))
+image(t(dat$common_score), zlim = zlim, main = "Common score")
+image(t(dat$distinct_score_1), zlim = zlim, main = paste0("Distinct score 1 (", round(d1/(c1+d1),2), "% var.)"))
+image(t(dat$distinct_score_2), zlim = zlim, main = paste0("Distinct score 2 (", round(d2/(c1+d2),2), "% var.)"))
 graphics.off()
 
 # generate true images
@@ -256,9 +256,9 @@ zlim <- range(c(dat$common_score, dat$distinct_score_1, dat$distinct_score_2))
 c1 <- svd(dat$common_score)$d[1]; d1 <- svd(dat$distinct_score_1)$d[1]; d2 <- svd(dat$distinct_score_2)$d[1]
 png("../../out/simulation/Writeup10/Writeup10_simulation3_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
 par(mfrow = c(1,3))
-image(t(dat$common_score), zlim = zlim, main = "Common loading")
-image(t(dat$distinct_score_1), zlim = zlim, main = paste0("Distinct loading 1 (", round(d1/(c1+d1),2), "% var.)"))
-image(t(dat$distinct_score_2), zlim = zlim, main = paste0("Distinct loading 2 (", round(d2/(c1+d2),2), "% var.)"))
+image(t(dat$common_score), zlim = zlim, main = "Common score")
+image(t(dat$distinct_score_1), zlim = zlim, main = paste0("Distinct score 1 (", round(d1/(c1+d1),2), "% var.)"))
+image(t(dat$distinct_score_2), zlim = zlim, main = paste0("Distinct score 2 (", round(d2/(c1+d2),2), "% var.)"))
 graphics.off()
 
 # generate true images

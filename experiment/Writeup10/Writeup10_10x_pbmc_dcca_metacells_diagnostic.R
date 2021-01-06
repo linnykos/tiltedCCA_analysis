@@ -4,9 +4,9 @@ library(Seurat); library(Signac); library(EnsDb.Hsapiens.v86);
 library(BSgenome.Hsapiens.UCSC.hg38); library(GenomeInfoDb)
 library(dplyr); library(ggplot2); library(multiomicCCA)
 
-date_of_run <- Sys.time(); session_info <- sessionInfo()
 load("../../out/Writeup10_10x_pbmc_preprocess4.RData"); pbmc[["ATAC"]] = NULL
 load("../../out/Writeup10_10x_pbmc_dcca_metacells2.RData")
+date_of_run <- Sys.time(); session_info <- sessionInfo()
 
 #############
 
@@ -39,6 +39,7 @@ for(i in 1:length(tmp1)){
   lines(rep(i,2), c(0,tmp1[i]), col = 1)
   lines(rep(i,2), c(1,tmp1[i]), col = 2)
 }
+legend("topright", c("Common", "Distinct"), fill= c(1,2))
 
 # amount of variability, rna vs atac
 ylim <- range(c(tmp4$d, tmp5$d))
