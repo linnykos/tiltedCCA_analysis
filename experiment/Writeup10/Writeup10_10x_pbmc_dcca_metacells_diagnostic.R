@@ -125,6 +125,14 @@ text(x = (((1:len)-1)*1.5+1.5/2),
 
 graphics.off()
 
+#####################################
+
+png("../../out/figures/Writeup10/Writeup10_pbmc_10x_dcca_crossprod.png", height = 1500, width = 2500, units = "px", res = 300)
+par(mfrow = c(1,2))
+image(stats::cor(dcca_res$common_score, dcca_res$distinct_score_1), asp = T, main = "Crossproduct: U and V1")
+image(stats::cor(dcca_res$common_score, dcca_res$distinct_score_2), asp = T, main = "Crossproduct: U and V2")
+graphics.off()
+
 # var_list <- ls()
 # var_list <- var_list[!var_list %in% "weight_mat"]
 # rm(list = var_list)

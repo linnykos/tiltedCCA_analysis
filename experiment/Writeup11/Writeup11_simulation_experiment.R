@@ -2,6 +2,10 @@ rm(list=ls())
 library(Seurat)
 source("../multiomicCCA_analysis/experiment/Writeup11/Writeup11_simulation_functions.R")
 
+# try a setting where the common loading separates (12) from (34), 
+# distinct 1 separates (1) from (2) [with high weights] and 
+# distinct 2 seperates (3) from (4) analogously
+# common space will have very small weight
 set.seed(10)
 B_mat <- matrix(c(0.9, 0.4, 0.1,
                   0.4, 0.9, 0.1,
@@ -26,38 +30,53 @@ coef_mat_2 <- apply(coef_mat_2, 2, sort)
 coef_mat_1 <- coef_mat_1/max(svd(coef_mat_1)$d[1])*0.9
 coef_mat_2 <- coef_mat_2/max(svd(coef_mat_2)$d[1])*0.9
 
+########
+
 svd_1 <- .svd_truncated(prob_mat1, K)
 svd_2 <- .svd_truncated(prob_mat2, K)
+# zz <- t(svd_1$u) %*% svd_2$u; Matrix::rankMatrix(zz)
+# image(zz)
+
+################
+
 mat_1 <- svd_1$u %*% diag(svd_1$d) %*% coef_mat_1
 mat_2 <- svd_2$u %*% diag(svd_2$d) %*% coef_mat_2
+
+# par(mfrow=c(1,2))
+# image(t(mat_1)); image(t(mat_2))
+
+svd_full_1 <- .svd_truncated(mat_1, K)
+svd_full_2 <- .svd_truncated(mat_2, K)
+
+# par(mfrow=c(1,2))
+# image(t(svd_full_1$u)); image(t(svd_full_2$u))
+
+####################
 
 set.seed(10)
 dmca_res <- dmca_factor(mat_1, mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 res <- dmca_decomposition(dmca_res, verbose = F)
-
-par(mfrow = c(1,4))
-Matrix::rankMatrix(res$common_score_1)
-plot_scores(res)
+plot_scores(res, mode = 2)
 plot_embeddings(res, true_membership_vec)
 
-image(t(res$common_score_1+res$distinct_score_1))
-image(t(res$common_score_2+res$distinct_score_2))
-svd_1b <- .svd_truncated(res$common_mat_1 + res$distinct_mat_1, K)
-svd_2b <- .svd_truncated(res$common_mat_2 + res$distinct_mat_2, K)
-image(t(svd_1b$u))
-image(t(svd_2b$u))
-
-###############################
-
-zz <- .svd_truncated(res$coef_1, K)
-res$common_score_1 <- res$common_score_1 %*% .mult_mat_vec(zz$u, zz$d)
-res$distinct_score_1 <- res$distinct_score_1 %*% .mult_mat_vec(zz$u, zz$d)
-zz <- .svd_truncated(res$coef_2, K)
-res$common_score_2 <- res$common_score_2 %*% .mult_mat_vec(zz$u, zz$d)
-res$distinct_score_2 <- res$distinct_score_2 %*% .mult_mat_vec(zz$u, zz$d)
-
-plot_scores(res)
-
+# why is there signal in the common space...?
+par(mfrow=c(1,2))
 image(t(res$common_score_1 + res$distinct_score_1))
+image(t(res$common_score_2 + res$distinct_score_2))
+image(crossprod(mat_1, mat_2))
+
+
+
+set.seed(10)
+dcca_res <- dcca_factor(mat_1, mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
+res <- dcca_decomposition(dcca_res, rank_c = 2, verbose = F)
+plot_scores(res, mode = 1)
+plot_embeddings(res, true_membership_vec)
+
+par(mfrow=c(1,2))
+image(t(res$common_score + res$distinct_score_1))
+image(t(res$common_score + res$distinct_score_2))
+
+
 
 
