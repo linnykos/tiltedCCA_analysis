@@ -11,6 +11,31 @@ library(dplyr)
 
 #3########################
 
+png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc_rna_custom_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(pbmc, reduction = 'rna.umap', group.by = 'celltype.l2', label = TRUE, 
+                         repel = TRUE, label.size = 2.5) + Seurat::NoLegend()
+plot1 + ggplot2::ggtitle("RNA UMAP (Custom, Vanilla)")
+graphics.off()
+
+png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc_protein_custom_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(pbmc, reduction = 'adt.umap', group.by = 'celltype.l2', label = TRUE, 
+                         repel = TRUE, label.size = 2.5) + Seurat::NoLegend()
+plot1 + ggplot2::ggtitle("Protein UMAP (Custom, Vanilla)")
+graphics.off()
+
+png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc_wnn_custom_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(pbmc, reduction = 'wnn.umap', group.by = 'celltype.l2', label = TRUE, 
+                         repel = TRUE, label.size = 2.5) + Seurat::NoLegend()
+plot1 + ggplot2::ggtitle("WNN UMAP (Custom, Seurat)")
+graphics.off()
+
+png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc_seurat_weight.png", height = 1500, width = 2500, units = "px", res = 300)
+Seurat::VlnPlot(pbmc, features = "RNA.weight", group.by = 'celltype.l2', sort = TRUE, pt.size = 0.1) +
+  NoLegend() + ggplot2::ggtitle("Seurat WNN's RNA weight")
+graphics.off()
+
+#############################
+
 png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc_rna_donor_umap.png", height = 1500, width = 1500, units = "px", res = 300)
 plot1 <- Seurat::DimPlot(pbmc, reduction = 'rna.umap', group.by = 'donor', label = TRUE, 
                          repel = TRUE, label.size = 2.5) + Seurat::NoLegend()
@@ -23,14 +48,26 @@ plot1 <- Seurat::DimPlot(pbmc, reduction = 'adt.umap', group.by = 'donor', label
 plot1 + ggplot2::ggtitle("Protein UMAP (Donor, Vanilla)")
 graphics.off()
 
+png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc_wnn_donor_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(pbmc, reduction = 'wnn.umap', group.by = 'donor', label = TRUE, 
+                         repel = TRUE, label.size = 2.5) + Seurat::NoLegend()
+plot1 + ggplot2::ggtitle("WNN UMAP (Donor, Seurat)")
+graphics.off()
+
 png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc_rna_time_umap.png", height = 1500, width = 1500, units = "px", res = 300)
 plot1 <- Seurat::DimPlot(pbmc, reduction = 'rna.umap', group.by = 'time', label = TRUE, 
                          repel = TRUE, label.size = 2.5) + Seurat::NoLegend()
 plot1 + ggplot2::ggtitle("RNA UMAP (Time, Vanilla)")
 graphics.off()
 
-png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc_time_donor_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc_protein_time_umap.png", height = 1500, width = 1500, units = "px", res = 300)
 plot1 <- Seurat::DimPlot(pbmc, reduction = 'adt.umap', group.by = 'time', label = TRUE, 
                          repel = TRUE, label.size = 2.5) + Seurat::NoLegend()
 plot1 + ggplot2::ggtitle("Protein UMAP (Time, Vanilla)")
+graphics.off()
+
+png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc_wnn_time_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(pbmc, reduction = 'wnn.umap', group.by = 'time', label = TRUE, 
+                         repel = TRUE, label.size = 2.5) + Seurat::NoLegend()
+plot1 + ggplot2::ggtitle("WNN UMAP (Time, Seurat)")
 graphics.off()

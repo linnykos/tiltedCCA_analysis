@@ -44,20 +44,26 @@ graphics.off()
 
 ##############
 
-zz <- apply(pbmc[["SCT"]]@data, 1, mean)
+pbmc[["wknn"]] <- NULL
+pbmc[["wsnn"]] <- NULL
+pbmc[["apca"]] <- NULL
+pbmc[["aumap"]] <- NULL
+pbmc[["pca"]] <- NULL
+pbmc[["spca"]] <- NULL
+pbmc[["umap"]] <- NULL
+pbmc[["wnn.umap"]] <- NULL
 
 # preprocess data
 Seurat::DefaultAssay(pbmc) <- "SCT"
 dim(pbmc)
-pbmc <- Seurat::ScaleData(pbmc)
+pbmc <- Seurat::ScaleData(pbmc, split.by = list(pbmc@meta.data$donor, pbmc@meta.data$time))
 pbmc <- Seurat::RunPCA(pbmc)
 dim(pbmc[["SCT"]]@scale.data)
 
 Seurat::DefaultAssay(pbmc) <- "ADT"
 dim(pbmc)
 Seurat::VariableFeatures(pbmc) <- rownames(pbmc[["ADT"]])
-pbmc <- Seurat::NormalizeData(pbmc, normalization.method = 'CLR', margin = 2) 
-pbmc <- Seurat::ScaleData(pbmc)
+pbmc <- Seurat::ScaleData(pbmc, split.by = list(pbmc@meta.data$donor, pbmc@meta.data$time))
 pbmc <- Seurat::RunPCA(pbmc, reduction.name = 'apca')
 dim(pbmc[["ADT"]]@scale.data)
 
@@ -71,6 +77,9 @@ pbmc <- Seurat::FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "apca
 head(pbmc@meta.data)
 set.seed(10)
 pbmc <- Seurat::RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
+
+pbmc[["pca"]]@stdev
+abs(diff(pbmc[["pca"]]@stdev)/pbmc[["pca"]]@stdev[-1])
 set.seed(10)
 pbmc <- Seurat::RunUMAP(pbmc, reduction = 'pca', dims = 1:40, assay = 'SCT',
                         reduction.name = 'rna.umap', reduction.key = 'rnaUMAP_')
