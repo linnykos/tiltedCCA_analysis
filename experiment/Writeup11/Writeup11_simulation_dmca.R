@@ -132,7 +132,7 @@ dat <- generate_data(score_1, score_2, coef_mat_1, coef_mat_2, reorthogonalize =
 
 zlim <- range(c(dat$common_score, dat$distinct_score_1, dat$distinct_score_2))
 c1 <- svd(dat$common_score)$d[1]; d1 <- svd(dat$distinct_score_1)$d[1]; d2 <- svd(dat$distinct_score_2)$d[1]
-png("../../out/simulation/Writeup11/Writeup11_simulation3_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
+png("../../out/simulation/Writeup11/Writeup11_simulation3_dmca_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
 par(mfrow = c(1,3))
 image(t(dat$common_score), zlim = zlim, main = "Common score")
 image(t(dat$distinct_score_1), zlim = zlim, main = paste0("Distinct score 1 (", round(d1/(c1+d1),2), "% var.)"))
@@ -143,7 +143,7 @@ graphics.off()
 true_dat <- construct_noiseless_data(dat$common_score, dat$distinct_score_1, dat$distinct_score_2,
                                      coef_mat_1, coef_mat_2)
 
-png("../../out/simulation/Writeup11/Writeup11_simulation3_true_embedding.png", height = 800, width = 2000, units = "px", res = 300)
+png("../../out/simulation/Writeup11/Writeup11_simulation3_dmca_true_embedding.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 set.seed(10)
 tmp <- extract_embedding(true_dat, common_1 = T, common_2 = T, distinct_1 = F, distinct_2 = F)
@@ -165,7 +165,7 @@ set.seed(10)
 dmca_res <- dmca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 res <- dmca_decomposition(dmca_res, verbose = F)
 
-png("../../out/simulation/Writeup11/Writeup11_simulation3_dcca.png", height = 800, width = 2000, units = "px", res = 300)
+png("../../out/simulation/Writeup11/Writeup11_simulation3_dmca.png", height = 800, width = 2000, units = "px", res = 300)
 par(mfrow = c(1,3))
 set.seed(10)
 tmp <- extract_embedding(res, common_1 = T, common_2 = T, distinct_1 = F, distinct_2 = F)

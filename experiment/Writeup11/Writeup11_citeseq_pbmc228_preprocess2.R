@@ -44,3 +44,15 @@ pbmc <- Seurat::RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.uma
 save.image("../../../../out/Writeup11/Writeup11_citeseq_pbmc228_preprocessed2.RData")
 
 
+png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc224_wnn_donor_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(pbmc, reduction = 'wnn.umap', group.by = 'donor', label = TRUE, 
+                         repel = TRUE, label.size = 2.5) + Seurat::NoLegend()
+plot1 + ggplot2::ggtitle("WNN UMAP (Donor, Seurat)")
+graphics.off()
+
+png("../../../../out/figures/Writeup11/Writeup11_citeseq_pbmc224_wnn_time_umap.png", height = 1500, width = 1500, units = "px", res = 300)
+plot1 <- Seurat::DimPlot(pbmc, reduction = 'wnn.umap', group.by = 'time', label = TRUE, 
+                         repel = TRUE, label.size = 2.5) + Seurat::NoLegend()
+plot1 + ggplot2::ggtitle("WNN UMAP (Time, Seurat)")
+graphics.off()
+

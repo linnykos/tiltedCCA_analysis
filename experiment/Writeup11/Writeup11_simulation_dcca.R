@@ -21,30 +21,52 @@ coef_mat_1 <- matrix(stats::rnorm(K*p_1), K, p_1)
 coef_mat_2 <- matrix(stats::rnorm(K*p_2), K, p_2)
 
 set.seed(10)
-dat <- generate_data_dcca(score_1, score_2, coef_mat_1, coef_mat_2)
+dat <- generate_data_dcca(score_1, score_2, coef_mat_1, coef_mat_2, noise_func = function(x){x})
+png("../../out/simulation/Writeup11/Writeup11_simulation1_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
 plot_scores(dat, mode = 1)
-plot_embeddings(dat, membership_vec = true_membership_vec, mode = "dcca")
+graphics.off()
+png("../../out/simulation/Writeup11/Writeup11_simulation1_true_embedding.png", height = 800, width = 2000, units = "px", res = 300)
+plot_embeddings(dat, membership_vec = true_membership_vec)
+graphics.off()
+png("../../out/simulation/Writeup11/Writeup11_simulation1_true_embedding_nonoise.png", height = 800, width = 2000, units = "px", res = 300)
+plot_embeddings(dat, membership_vec = true_membership_vec, noise_val = 0)
+graphics.off()
 
 set.seed(10)
 dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 dcca_decomp <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
-plot_embeddings(dcca_decomp, membership_vec = true_membership_vec, mode = "dcca")
-
 dcca_decomp2 <- dcca_variance_decomposition(dcca_res, rank_c = K, verbose = F)
+svd_list <- multiomicCCA::extract_svd_embedding(dcca_decomp)
+
+png("../../out/simulation/Writeup11/Writeup11_simulation1_information_rank1.png", height = 1200, width = 1000, units = "px", res = 300)
+pipeline_information_plot(dcca_decomp, true_membership_vec,  main = "Simulation 1 (Rank-1)")
+graphics.off()
+
 res <- explained_variance(dcca_decomp2, verbose = F)
 weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-par(mfrow = c(1,1), mar = c(6, 4, 3.5, 0.5))
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
+png("../../out/simulation/Writeup11/Writeup11_simulation1_information_projection.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 1 (Projection)")
+title(xlab="Cell-type", mgp=c(1,1,0))
+graphics.off()
 
-tmp <- dcca_information_weight(mat = dcca_decomp$common_mat_1+dcca_decomp$distinct_mat_1,
-                               common_mat = dcca_decomp$common_mat_1)
-weight_vec1 <- tmp$alpha_vec
-tmp <- dcca_information_weight(mat = dcca_decomp$common_mat_2+dcca_decomp$distinct_mat_2,
-                               common_mat = dcca_decomp$common_mat_2)
-weight_vec2 <- tmp$alpha_vec
-weight_mat <- data.frame(Mode_1 = 1-weight_vec1, Mode_2 = 1-weight_vec2, cell_type = true_membership_vec)
-par(mfrow = c(1,1), mar = c(6, 4, 3.5, 0.5))
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
+res <- custom_explained_variance(dcca_decomp)
+weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
+png("../../out/simulation/Writeup11/Writeup11_simulation1_information_ratio.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 1 (L2 Ratio)")
+graphics.off()
+
+res <- custom_explained_variance2(dcca_decomp, true_membership_vec)
+weight_mat <- data.frame(Mode_1 = res$weight_vec_1, Mode_2 = res$weight_vec_2, cell_type = 1:length(unique(true_membership_vec)))
+png("../../out/simulation/Writeup11/Writeup11_simulation1_information_r2.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 1 (R-Squared)")
+graphics.off()
+
 
 #####################################
 
@@ -77,53 +99,64 @@ coef_mat_1 <- matrix(stats::rnorm(K*p_1), K, p_1)
 coef_mat_2 <- matrix(stats::rnorm(K*p_2), K, p_2)
 
 set.seed(10)
-dat <- generate_data_dcca(score_1, score_2, coef_mat_1, coef_mat_2); class(dat) <- "dcca_decomp"
+dat <- generate_data_dcca(score_1, score_2, coef_mat_1, coef_mat_2, noise_func = function(x){x}); class(dat) <- "dcca_decomp"
+png("../../out/simulation/Writeup11/Writeup11_simulation2_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
 plot_scores(dat, mode = 1)
-plot_embeddings(dat, membership_vec = true_membership_vec, mode = "dcca")
-pipeline_information_plot(dat, true_membership_vec)
-res <- custom_explained_variance2(dat, true_membership_vec)
-weight_mat <- data.frame(Mode_1 = res$weight_vec_1, Mode_2 = res$weight_vec_2, cell_type = 1:length(unique(true_membership_vec)))
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), 
-                 reorder_types = F, plot_individual = F)
+graphics.off()
+png("../../out/simulation/Writeup11/Writeup11_simulation2_true_embedding.png", height = 800, width = 2000, units = "px", res = 300)
+plot_embeddings(dat, membership_vec = true_membership_vec)
+graphics.off()
 
 set.seed(10)
 dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 dcca_decomp <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
-plot_embeddings(dcca_decomp, membership_vec = true_membership_vec, mode = "dcca")
-pipeline_information_plot(dcca_decomp, true_membership_vec)
-
 dcca_decomp2 <- dcca_variance_decomposition(dcca_res, rank_c = K, verbose = F)
+svd_list <- multiomicCCA::extract_svd_embedding(dcca_decomp)
+
+png("../../out/simulation/Writeup11/Writeup11_simulation2_information_rank1.png", height = 1200, width = 1000, units = "px", res = 300)
+pipeline_information_plot(dcca_decomp, true_membership_vec,  main = "Simulation 2 (Rank-1)")
+graphics.off()
+
 res <- explained_variance(dcca_decomp2, verbose = F)
 weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-par(mfrow = c(1,1), mar = c(6, 4, 3.5, 0.5))
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
+png("../../out/simulation/Writeup11/Writeup11_simulation2_information_projection.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 2 (Projection)")
+title(xlab="Cell-type", mgp=c(1,1,0))
+graphics.off()
 
-# try quadratic
-res <- explained_variance(dcca_decomp2, weight_func = function(x){x^2}, verbose = F)
-weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
-# try exponential
-res <- explained_variance(dcca_decomp2, weight_func = function(x){exp(x)}, verbose = F)
-weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
-# try sum-of-square partition
 res <- custom_explained_variance(dcca_decomp)
 weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
-# try sum-of-square partition squared
-res <- custom_explained_variance(dcca_decomp, weight_func = function(x){x^2})
-weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
-# try sum-of-square partition exp
-res <- custom_explained_variance(dcca_decomp, weight_func = function(x){exp(x)})
-weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
-
+png("../../out/simulation/Writeup11/Writeup11_simulation2_information_ratio.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 2 (L2 Ratio)")
+graphics.off()
 
 res <- custom_explained_variance2(dcca_decomp, true_membership_vec)
 weight_mat <- data.frame(Mode_1 = res$weight_vec_1, Mode_2 = res$weight_vec_2, cell_type = 1:length(unique(true_membership_vec)))
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), 
-                 reorder_types = F, plot_individual = F)
+png("../../out/simulation/Writeup11/Writeup11_simulation2_information_r2.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 2 (R-Squared)")
+graphics.off()
+
+res <- explained_variance(dcca_decomp2, weight_func = function(x){x^2}, verbose = F)
+weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
+png("../../out/simulation/Writeup11/Writeup11_simulation2_information_projection2.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 2 (Squared\nProjection)")
+graphics.off()
+
+res <- custom_explained_variance(dcca_decomp, weight_func = function(x){x^2})
+weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
+png("../../out/simulation/Writeup11/Writeup11_simulation2_information_ratio2.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 2 (Squared\nL2 Ratio)")
+graphics.off()
 
 ####################################################
 
@@ -153,55 +186,61 @@ coef_mat_1 <- matrix(stats::rnorm(K*p_1), K, p_1)
 coef_mat_2 <- matrix(stats::rnorm(K*p_2), K, p_2)
 
 set.seed(10)
-dat <- generate_data_dcca(score_1, score_2, coef_mat_1, coef_mat_2)
+dat <- generate_data_dcca(score_1, score_2, coef_mat_1, coef_mat_2, noise_func = function(x){x}); class(dat) <- "dcca_decomp"
+png("../../out/simulation/Writeup11/Writeup11_simulation3_true_score.png", height = 1200, width = 2500, units = "px", res = 300)
 plot_scores(dat, mode = 1)
-plot_embeddings(dat, membership_vec = true_membership_vec, mode = "dcca")
+graphics.off()
+png("../../out/simulation/Writeup11/Writeup11_simulation3_true_embedding.png", height = 800, width = 2000, units = "px", res = 300)
+plot_embeddings(dat, membership_vec = true_membership_vec)
+graphics.off()
 
 set.seed(10)
 dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 dcca_decomp <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
-plot_embeddings(dcca_decomp, membership_vec = true_membership_vec, mode = "dcca")
-
-tmp <- dcca_information_weight(mat = dcca_decomp$common_mat_1+dcca_decomp$distinct_mat_1,
-                               common_mat = dcca_decomp$common_mat_1)
-weight_vec1 <- tmp$alpha_vec
-tmp <- dcca_information_weight(mat = dcca_decomp$common_mat_2+dcca_decomp$distinct_mat_2,
-                               common_mat = dcca_decomp$common_mat_2)
-weight_vec2 <- tmp$alpha_vec
-weight_mat <- data.frame(Mode_1 = 1-weight_vec1, Mode_2 = 1-weight_vec2, cell_type = true_membership_vec)
-par(mfrow = c(1,1), mar = c(6, 4, 3.5, 0.5))
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
-
 dcca_decomp2 <- dcca_variance_decomposition(dcca_res, rank_c = K, verbose = F)
+svd_list <- multiomicCCA::extract_svd_embedding(dcca_decomp)
+
+png("../../out/simulation/Writeup11/Writeup11_simulation3_information_rank1.png", height = 1200, width = 1000, units = "px", res = 300)
+pipeline_information_plot(dcca_decomp, true_membership_vec,  main = "Simulation 2 (Rank-1)")
+graphics.off()
+
 res <- explained_variance(dcca_decomp2, verbose = F)
 weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-par(mfrow = c(1,1), mar = c(6, 4, 3.5, 0.5))
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
+png("../../out/simulation/Writeup11/Writeup11_simulation3_information_projection.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 3 (Projection)")
+title(xlab="Cell-type", mgp=c(1,1,0))
+graphics.off()
 
-# try quadratic
-res <- explained_variance(dcca_decomp2, weight_func = function(x){x^2}, verbose = F)
-weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
-# try exponential
-res <- explained_variance(dcca_decomp2, weight_func = function(x){exp(x)}, verbose = F)
-weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
-# try sum-of-square partition
 res <- custom_explained_variance(dcca_decomp)
 weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
-# try sum-of-square partition squared
-res <- custom_explained_variance(dcca_decomp, weight_func = function(x){x^2})
-weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
-# try sum-of-square partition exp
-res <- custom_explained_variance(dcca_decomp, weight_func = function(x){exp(x)})
-weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
+png("../../out/simulation/Writeup11/Writeup11_simulation3_information_ratio.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 3 (L2 Ratio)")
+graphics.off()
 
 res <- custom_explained_variance2(dcca_decomp, true_membership_vec)
 weight_mat <- data.frame(Mode_1 = res$weight_vec_1, Mode_2 = res$weight_vec_2, cell_type = 1:length(unique(true_membership_vec)))
-information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), 
-                 reorder_types = F, plot_individual = F)
+png("../../out/simulation/Writeup11/Writeup11_simulation3_information_r2.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 3 (R-Squared)")
+graphics.off()
 
+res <- explained_variance(dcca_decomp2, weight_func = function(x){x^2}, verbose = F)
+weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
+png("../../out/simulation/Writeup11/Writeup11_simulation3_information_projection2.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 3 (Squared\nProjection)")
+graphics.off()
 
+res <- custom_explained_variance(dcca_decomp, weight_func = function(x){x^2})
+weight_mat <- data.frame(Mode_1 = res$cell_weight_vec1, Mode_2 = res$cell_weight_vec2, cell_type = true_membership_vec)
+png("../../out/simulation/Writeup11/Writeup11_simulation3_information_ratio2.png", height = 1200, width = 1000, units = "px", res = 300)
+par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                 main = "Simulation 3 (Squared\nL2 Ratio)")
+graphics.off()

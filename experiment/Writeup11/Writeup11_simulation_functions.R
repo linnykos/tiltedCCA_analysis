@@ -44,18 +44,23 @@ plot_scores <- function(dat, mode = 1){
   invisible()
 }
 
-plot_embeddings <- function(dat, membership_vec, mode = "dcca"){
+plot_embeddings <- function(obj, membership_vec, mode = "dcca", noise_val = 0.05 ){
+  svd_list <- extract_svd_embedding(obj, mode = mode)
+  
   par(mfrow = c(1,3))
   set.seed(10)
-  tmp <- extract_embedding(dat, common_1 = T, common_2 = T, distinct_1 = F, distinct_2 = F, mode = mode)
+  tmp <- extract_umap_embedding(svd_list, common_1 = T, common_2 = T, distinct_1 = F, distinct_2 = F, 
+                                vis_param = obj$vis_param, noise_val = noise_val)
   plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Common view",
        xlab = "UMAP 1", ylab = "UMAP 2")
   set.seed(10)
-  tmp <- extract_embedding(dat, common_1 = F, common_2 = F, distinct_1 = T, distinct_2 = T, mode = mode)
+  tmp <- extract_umap_embedding(svd_list, common_1 = F, common_2 = F, distinct_1 = T, distinct_2 = T, 
+                                vis_param = obj$vis_param, noise_val = noise_val)
   plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Distinct views",
        xlab = "UMAP 1", ylab = "UMAP 2")
   set.seed(10)
-  tmp <- extract_embedding(dat, common_1 = T, common_2 = T, distinct_1 = T, distinct_2 = T, mode = mode)
+  tmp <- extract_umap_embedding(svd_list, common_1 = T, common_2 = T, distinct_1 = T, distinct_2 = T, 
+                                vis_param = obj$vis_param, noise_val = noise_val)
   plot(tmp[,1], tmp[,2], asp = T, pch = 16, col = membership_vec, main = "Entire view",
        xlab = "UMAP 1", ylab = "UMAP 2")
   
@@ -106,7 +111,7 @@ custom_explained_variance2 <- function(dcca_decomp, membership_vec){
        weight_vec_2 = weight_vec_2)
 }
 
-pipeline_information_plot <- function(dcca_decomp, true_membership_vec){
+pipeline_information_plot <- function(dcca_decomp, true_membership_vec, main = ""){
   tmp <- dcca_information_weight(mat = dcca_decomp$common_mat_1+dcca_decomp$distinct_mat_1,
                                  common_mat = dcca_decomp$common_mat_1)
   weight_vec1 <- tmp$alpha_vec
@@ -114,7 +119,9 @@ pipeline_information_plot <- function(dcca_decomp, true_membership_vec){
                                  common_mat = dcca_decomp$common_mat_2)
   weight_vec2 <- tmp$alpha_vec
   weight_mat <- data.frame(Mode_1 = 1-weight_vec1, Mode_2 = 1-weight_vec2, cell_type = true_membership_vec)
-  par(mfrow = c(1,1), mar = c(6, 4, 3.5, 0.5))
-  information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F)
+  par(mfrow = c(1,1), mar = c(4, 4, 3.5, 0.5))
+  information_plot(weight_mat, col_vec = 1:length(unique(true_membership_vec)), reorder_types = F,
+                   main = main)
+  title(xlab="Cell-type", mgp=c(1,1,0))
 }
 
