@@ -36,6 +36,35 @@ zz1 <- .extract_matrix_helper(prep_list$common_score, prep_list$distinct_score_1
                              prep_list$svd_list$e1, common_bool = T, distinct_bool = F)
 zz2 <- .extract_matrix_helper(prep_list$common_score, prep_list$distinct_score_1,
                               prep_list$svd_list$e1, common_bool = F, distinct_bool = T)
+
+apply(zz1, 2, sd)
+apply(zz2, 2, sd)
+apply(zz1, 2, mean)
+apply(zz2, 2, mean)
+
+for(i in 1:ncol(zz1)){
+  sd1 <- sd(zz1[,i]); sd2 <- sd(zz2[,i])
+  if(sd1 < sd2){
+    zz1[,i] <- zz1[,i] + rnorm(n, sd = sd2 - sd1)
+  } else {
+    zz2[,i] <- zz2[,i] + rnorm(n, sd = sd1 - sd2)
+  }
+}
+apply(zz1, 2, sd)
+apply(zz2, 2, sd)
+
+par(mfrow = c(1,2))
+set.seed(10)
+tmp <- Seurat::RunUMAP(zz1, metric = "euclidean", verbose = F)@cell.embeddings
+plot(tmp[,1], tmp[,2], col = true_membership_vec, pch = 16, main = "Common")
+set.seed(10)
+tmp <- Seurat::RunUMAP(zz2, metric = "euclidean", verbose = F)@cell.embeddings
+plot(tmp[,1], tmp[,2], col = true_membership_vec, pch = 16, main = "Distinct")
+
+
+####################
+
+
 zz <- rbind(zz1, zz2)
 set.seed(10)
 tmp <- Seurat::RunUMAP(zz, metric = "euclidean", verbose = F)@cell.embeddings
