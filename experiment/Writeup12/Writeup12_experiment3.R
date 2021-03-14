@@ -33,9 +33,44 @@ dcca_decomp <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
 
 prep_list <- .prepare_umap_embedding(dcca_decomp)
 zz1 <- .extract_matrix_helper(prep_list$common_score, prep_list$distinct_score_1,
-                             prep_list$svd_list$e1, common_bool = T, distinct_bool = F)
+                              prep_list$svd_list$e1, common_bool = T, distinct_bool = F)
 zz2 <- .extract_matrix_helper(prep_list$common_score, prep_list$distinct_score_1,
                               prep_list$svd_list$e1, common_bool = F, distinct_bool = T)
+
+par(mfrow = c(1,2))
+set.seed(10)
+tmp <- Seurat::RunUMAP(zz1, metric = "euclidean", verbose = F)@cell.embeddings
+plot(tmp[,1], tmp[,2], col = true_membership_vec, pch = 16, main = "Common")
+set.seed(10)
+tmp <- Seurat::RunUMAP(zz2, metric = "euclidean", verbose = F)@cell.embeddings
+plot(tmp[,1], tmp[,2], col = true_membership_vec, pch = 16, main = "Distinct")
+
+## 
+common_score <- prep_list$common_score
+distinct_score <- prep_list$distinct_score_1
+for(i in 1:ncol(common_score)){
+  sd1 <- sd(common_score[,i]); sd2 <- sd(distinct_score[,i])
+  if(sd1 < sd2){
+    common_score[,i] <- common_score[,i] + rnorm(n, sd = max(sd2 - sd1, sd1/3))
+  } else {
+    distinct_score[,i] <- distinct_score[,i] + rnorm(n, sd = max(sd1 - sd2, sd2/3))
+  }
+}
+
+zz1b <- .extract_matrix_helper(common_score, distinct_score,
+                             prep_list$svd_list$e1, common_bool = T, distinct_bool = F)
+zz2b <- .extract_matrix_helper(common_score, distinct_score,
+                              prep_list$svd_list$e1, common_bool = F, distinct_bool = T)
+
+par(mfrow = c(1,2))
+set.seed(10)
+tmp <- Seurat::RunUMAP(zz1b, verbose = F)@cell.embeddings
+plot(tmp[,1], tmp[,2], col = true_membership_vec, pch = 16, main = "Common")
+set.seed(10)
+tmp <- Seurat::RunUMAP(zz2b, verbose = F)@cell.embeddings
+plot(tmp[,1], tmp[,2], col = true_membership_vec, pch = 16, main = "Distinct")
+
+
 
 apply(zz1, 2, sd)
 apply(zz2, 2, sd)
