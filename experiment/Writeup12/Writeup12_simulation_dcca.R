@@ -74,6 +74,7 @@ set.seed(10)
 K <- ncol(svd_u_1)
 dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 dcca_decomp <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
+dcca_decomp$common_perc
 
 # plot_embeddings(dcca_decomp, membership_vec = true_membership_vec)
 # png("../../out/simulation/Writeup12/Writeup12_simulation2_embedding.png", height = 1000, width = 1700, units = "px", res = 300)
@@ -92,8 +93,14 @@ plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T)
 plot_embeddings(dcca_decomp, true_membership_vec, data_1 = T, data_2 = F, pca = T)
 plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T, pca = T)
 
-res <- explained_variance(dcca_decomp, true_membership_vec)
-res
+set.seed(10)
+K <- ncol(svd_u_1)
+dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F, fix_common_perc = T)
+dcca_decomp <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
+plot_scores_heatmap(dcca_decomp, membership_vec = true_membership_vec)
+plot_embeddings(dcca_decomp, true_membership_vec, data_1 = T, data_2 = F, pca = T)
+plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T, pca = T)
+plot_scores(dcca_decomp, membership_vec = true_membership_vec, decomposition = T)
 
 ##################################
 
