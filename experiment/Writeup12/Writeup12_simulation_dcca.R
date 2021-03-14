@@ -49,11 +49,11 @@ plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T, pca = 
 # high distinct 1, low distinct 2 with 3 clusters
 set.seed(10)
 n_clust <- 100
-B_mat1 <- matrix(c(1, 0, 0, 
-                  0, 1, 0,
-                  0, 0, 1), 3, 3, byrow = T)
-B_mat2 <- matrix(c(1, 1, 0, 
-                   1, 1, 0,
+B_mat1 <- matrix(c(0.9, 0, 0, 
+                  0, 0.9, 0,
+                  0, 0, 0.9), 3, 3, byrow = T)
+B_mat2 <- matrix(c(0.9, 0.85, 0, 
+                   0.85, 0.9, 0,
                    0, 0, 1), 3, 3, byrow = T)
 K <- ncol(B_mat1)
 membership_vec <- c(rep(1, n_clust), rep(2, n_clust), rep(3, n_clust))
@@ -68,7 +68,7 @@ svd_v_1 <- generate_random_orthogonal(p_1, K-1)
 svd_v_2 <- generate_random_orthogonal(p_2, K-1)
 
 set.seed(10)
-dat <- generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2)
+dat <- generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2, noise_val = 2.5)
 
 set.seed(10)
 K <- ncol(svd_u_1)
@@ -90,6 +90,7 @@ plot_scores(dcca_decomp, membership_vec = true_membership_vec, decomposition = T
 par(mar = c(4,4,4,0.5))
 plot_embeddings(dcca_decomp, true_membership_vec, data_1 = T, data_2 = F)
 plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T)
+plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T, add_noise = F)
 plot_embeddings(dcca_decomp, true_membership_vec, data_1 = T, data_2 = F, pca = T)
 plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T, pca = T)
 
@@ -104,23 +105,18 @@ plot_scores(dcca_decomp, membership_vec = true_membership_vec, decomposition = T
 
 ##################################
 
-# high distinct 1, high distinct 2 with 3 clusters
+# even more dramatic high distinct 1, low distinct 2 with 3 clusters
 set.seed(10)
 n_clust <- 100
 high <- 0.9; low <- 0.05
-B_mat1 <- matrix(c(high, high, low, low, 
-                   high, high, low, low, 
-                   low, low, high, low,
-                   low, low, low, high), 4, 4, byrow = T)
-B_mat2 <- matrix(c(high, low, low, low,
-                   low, high, high, low,
-                   low, high, high, low,
-                   low, low, low, high), 4, 4, byrow = T)
+B_mat1 <- matrix(c(0.9, 0.1, 0.1,
+                   0.1, 0.9, 0.1,
+                   0.1, 0.1, 0.9), 3, 3, byrow = T)
 K <- ncol(B_mat1)
-membership_vec <- c(rep(1, n_clust), rep(2, n_clust), rep(3, n_clust), rep(4, n_clust))
+membership_vec <- c(rep(1, n_clust), rep(2, n_clust), rep(3, n_clust))
 n <- length(membership_vec); true_membership_vec <- membership_vec
 svd_u_1 <- generate_sbm_orthogonal(B_mat1, membership_vec, centered = T)[,1:2]
-svd_u_2 <- generate_sbm_orthogonal(B_mat2, membership_vec, centered = T)[,1:2]
+svd_u_2 <- generate_random_orthogonal(n, 2)
 
 set.seed(10)
 p_1 <- 20; p_2 <- 40
@@ -129,12 +125,13 @@ svd_v_1 <- generate_random_orthogonal(p_1, 2)
 svd_v_2 <- generate_random_orthogonal(p_2, 2)
 
 set.seed(10)
-dat <- generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_1)
+dat <- generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_1, noise_val = 2)
 
 set.seed(10)
 K <- 2
 dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 dcca_decomp <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
+dcca_decomp$common_perc
 
 # png("../../out/simulation/Writeup12/Writeup12_simulation3_embedding.png", height = 1000, width = 1700, units = "px", res = 300)
 par(mar = c(4,4,4,0.5))
@@ -155,9 +152,16 @@ plot_embeddings(dcca_decomp, true_membership_vec, data_1 = T, data_2 = T)
 plot_embeddings(dcca_decomp, true_membership_vec, data_1 = T, data_2 = F, pca = T)
 plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T, pca = T)
 
+set.seed(10)
+K <- 2
+dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F, fix_common_perc = T)
+dcca_decomp <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
+dcca_decomp$common_perc
+plot_scores_heatmap(dcca_decomp, membership_vec = true_membership_vec)
+plot_embeddings(dcca_decomp, true_membership_vec, data_1 = T, data_2 = F, pca = T)
+plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T, pca = T)
+plot_scores(dcca_decomp, membership_vec = true_membership_vec, decomposition = T)
 
-res <- explained_variance(dcca_decomp, true_membership_vec)
-res
 
 ####################################3
 
@@ -192,6 +196,7 @@ set.seed(10)
 K <- ncol(svd_u_1)
 dcca_res <- dcca_factor(dat$mat_1, dat$mat_2, rank_1 = K, rank_2 = K, apply_shrinkage = F, verbose = F)
 dcca_decomp <- dcca_decomposition(dcca_res, rank_c = K, verbose = F)
+dcca_decomp$common_perc
 
 par(mar = c(4,4,4,0.5))
 plot_data(dcca_decomp, membership_vec = true_membership_vec)
@@ -207,8 +212,6 @@ plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T, pca = 
 plot_scores(dcca_decomp, true_membership_vec)
 plot_scores(dcca_decomp, true_membership_vec, decomposition = T)
 
-res <- explained_variance(dcca_decomp, true_membership_vec)
-res
 ##################################
 
 # high distinct 1, high distinct 2 with 5 clusters
