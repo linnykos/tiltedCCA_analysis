@@ -1,89 +1,57 @@
+rm(list=ls())
+x=1
+set.seed(x)
+vec1 <- abs(rnorm(2)); vec1 <- vec1/.l2norm(vec1)
+vec2 <- abs(rnorm(2)); vec2 <- vec2/.l2norm(vec2)
+circle <- .construct_circle(vec1, vec2)
+tmp <- .rightmost_vector(vec1, vec2)
+vec1 <- tmp$vec_left; vec2 <- tmp$vec_right
+lower_radian <- .find_radian(circle, tmp$vec_right)
+upper_radian <- .find_radian(circle, tmp$vec_left)
+stopifnot(lower_radian < upper_radian)
+distinct_perc_2 <- runif(1)
+distinct_perc_2
 
-# high distinct 1, low distinct 2 with 3 clusters
-set.seed(10)
-n_clust <- 100
-B_mat1 <- matrix(c(0.9, 0, 0, 
-                   0, 0.9, 0,
-                   0, 0, 0.9), 3, 3, byrow = T)
-B_mat2 <- matrix(c(0.9, 0.85, 0, 
-                   0.85, 0.9, 0,
-                   0, 0, 1), 3, 3, byrow = T)
-K <- ncol(B_mat1)
-membership_vec <- c(rep(1, n_clust), rep(2, n_clust), rep(3, n_clust))
-n <- length(membership_vec); true_membership_vec <- membership_vec
-svd_u_1 <- generate_sbm_orthogonal(B_mat1, membership_vec, centered = T)
-svd_u_2 <- generate_sbm_orthogonal(B_mat2, membership_vec, centered = T)
+res <- .binary_search_radian(circle, lower_radian, upper_radian, 
+                             distinct_perc_2, max_iter = 50, tol = 1e-6)
+common_vec <- .position_from_circle(circle, res)
 
-set.seed(10)
-p_1 <- 20; p_2 <- 40
-svd_d_1 <- sqrt(n*p_1)*c(1.5,1); svd_d_2 <- sqrt(n*p_2)*c(1.5,1)
-svd_v_1 <- generate_random_orthogonal(p_1, K-1)
-svd_v_2 <- generate_random_orthogonal(p_2, K-1)
+distinct1 <- vec1 - common_vec
+distinct2 <- vec2 - common_vec
+ratio <- .l2norm(distinct2)/(.l2norm(distinct1) + .l2norm(distinct2))
+ratio
 
-# set.seed(10)
-# dat <- generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2)
+plot(NA, xlim = c(0,1), ylim = c(0,1), asp = T)
+lines(c(0,vec1[1]), c(0,vec1[2]))
+lines(c(0,vec2[1]), c(0,vec2[2]))
+lines(c(0,common_vec[1]), c(0, common_vec[2]), col = "green")
 
-############
+##########################
 
-num_neigh = max(round(nrow(svd_u_1)/20), 40)
-noise_val = 1
+lower <- lower_radian; upper <- upper_radian
+right_vec <- .position_from_circle(circle, lower_radian)
+left_vec <- .position_from_circle(circle, upper_radian)
+iter <- 1; prev_mid <- NA
+tol <- 1e-6; max_iter = 10
 
-n <- nrow(svd_u_1); p1 <- nrow(svd_v_1); p2 <- nrow(svd_v_2)
-agg_mat <- crossprod(svd_u_1, svd_u_2)
-cca_svd <- svd(agg_mat)
-score_1 <- svd_u_1 %*% cca_svd$u
-score_2 <- svd_u_2 %*% cca_svd$v
-
-mat_1 <- tcrossprod(.mult_mat_vec(svd_u_1, svd_d_1), svd_v_1)
-mat_2 <- tcrossprod(.mult_mat_vec(svd_u_2, svd_d_2), svd_v_2)
-nn_1 <- RANN::nn2(.mult_mat_vec(svd_u_1, svd_d_1), k = num_neigh)$nn.idx
-nn_2 <- RANN::nn2(.mult_mat_vec(svd_u_2, svd_d_2), k = num_neigh)$nn.idx
-
-# res <- .common_decomposition(score_1, score_2, nn_1, nn_2)
-#############
-
-fix_common_perc = F
-tol = 1e-6
-
-stopifnot((!any(is.na(nn_1)) & !any(is.na(nn_2)) & !fix_common_perc) | 
-            (all(is.na(nn_1)) & all(is.na(nn_2)) & fix_common_perc))
-
-rank_c <- min(ncol(score_1), ncol(score_2))
-stopifnot(all(sapply(1:rank_c, function(k){
-  val <- score_1[,k] %*% score_2[,k]; val >= 0 
-}))) # ensures score matrices contain pair of acute vectors
-
-basis_list <- lapply(1:rank_c, function(k){
-  .representation_2d(score_1[,k], score_2[,k])
-})
-
-.latent_common_perc(score_1[,1], score_2[,1], nn_1, nn_2)
-plot(score_1[,1], score_2[,1], asp = T)
-
-# if(fix_common_perc){
-#   common_perc <- rep(0.5, rank_c)
-# } else {
-#   common_perc <- sapply(1:rank_c, function(k){
-#     if(sum(abs(basis_list[[k]]$rep1 - basis_list[[k]]$rep2)) < tol){
-#       .5
-#     } else {
-#       .latent_common_perc(score_1[,k], score_2[,k], nn_1, nn_2)
-#     }
-#   })
-# }
-
-#33333333#3
-
-score_vec_1 <- score_1[,1]; score_vec_2 <- score_2[,1]
-stopifnot(length(score_vec_1) == length(score_vec_2))
-
-n <- length(score_vec_1)
-mode1_common_perc <- sapply(1:n, function(i){
-  print(i)
-  val_1in1 <- stats::sd(score_vec_1[i] - score_vec_1[nn_1[i,]])
-  val_1in2 <- stats::sd(score_vec_1[i] - score_vec_1[nn_2[i,]])
-  val_2in1 <- stats::sd(score_vec_2[i] - score_vec_2[nn_1[i,]])
-  val_2in2 <- stats::sd(score_vec_2[i] - score_vec_2[nn_2[i,]])
+while(iter < max_iter){
+  mid <- (lower+upper)/2
+  print(paste0("mid: ", round(mid,2)))
+  common_vec <- .position_from_circle(circle, mid)
+  left_distinct <- left_vec - common_vec
+  right_distinct <- right_vec - common_vec
+  ratio <- .l2norm(left_distinct)/(.l2norm(left_distinct)+.l2norm(right_distinct))
+  print(paste0("ratio: ", round(ratio,2), ", target: ", round(distinct_perc_2, 2)))
+  if(abs(ratio - distinct_perc_2) <= tol) break()
   
-  .sigmoid_ratio(max(val_1in2/val_1in1, 1), max(val_2in1/val_2in2, 1))
-})
+  if(ratio > distinct_perc_2){
+    # need to make left_distinct smaller, so move radian right (i.e., smaller radian)
+    lower <- mid
+  } else {
+    upper <- mid
+  }
+  if(!is.na(prev_mid) && abs(mid - prev_mid) < tol) break()
+  
+  prev_mid <- mid
+  iter <- iter+1
+}
