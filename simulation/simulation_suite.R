@@ -28,9 +28,9 @@ res <- simulator::simulator(rule, criterion, df_param, ntrials = 1,
 ###################
 
 # choose a particular setting to investigate
-i <- 6
+i <- 1
 dcca_decomp <- res[[i]][[1]]$result$dcca_decomp
-true_membership_vec <- res[[i]][[1]]$result$true_membership_vec
+true_membership_vec <- as.factor(res[[i]][[1]]$result$true_membership_vec)
 
 dcca_decomp$distinct_perc_2
 par(mar = c(4,4,4,0.5))
@@ -38,8 +38,14 @@ plot_data(dcca_decomp, membership_vec = true_membership_vec)
 par(mar = c(4,4,4,0.5))
 plot_data(dcca_decomp, membership_vec = true_membership_vec, pca = T)
 
+par(mar = c(4,4,4,4), mfrow = c(1,1))
+plot_summary(dcca_decomp)
+
 par(mar = c(4,4,4,0.5))
 plot_scores_heatmap(dcca_decomp, membership_vec = true_membership_vec)
+par(mar = c(4,4,4,0.5))
+plot_scores_heatmap(dcca_decomp, membership_vec = true_membership_vec, scaling_power = 0.5)
+
 par(mar = c(4,4,4,0.5))
 plot_scores(dcca_decomp, membership_vec = true_membership_vec, decomposition = T)
 
@@ -65,11 +71,37 @@ plot_embeddings(dcca_decomp, true_membership_vec, data_1 = T, data_2 = T, main_a
 
 set.seed(10)
 clisi_1 <- clisi_information(dcca_decomp$common_mat_1, dcca_decomp$distinct_mat_1,
-                             dcca_decomp$common_mat_1 + dcca_decomp$distinct_mat_1,
-                             true_membership_vec, p = 2, nn = round(0.75*min(table(true_membership_vec))))
+                             true_membership_vec, rank_c = 2, rank_d = 2, 
+                             nn = round(0.5*min(table(true_membership_vec))),
+                             radius_quantile = 0.9, max_subsample_clisi = min(table(true_membership_vec)),
+                             verbose = F)
 clisi_2 <- clisi_information(dcca_decomp$common_mat_2, dcca_decomp$distinct_mat_2,
-                             dcca_decomp$common_mat_2 + dcca_decomp$distinct_mat_2,
-                             true_membership_vec, p = 2, nn = round(0.75*min(table(true_membership_vec))))
-tmp1 <- lapply(clisi_1, function(x){round(x$membership_info$mean_clisi,2)})
-tmp2 <- lapply(clisi_2, function(x){round(x$membership_info$mean_clisi,2)})
-tmp1; tmp2
+                             true_membership_vec, rank_c = 2, rank_d = 2, 
+                             nn = round(0.5*min(table(true_membership_vec))),
+                             radius_quantile = 0.9, max_subsample_clisi = min(table(true_membership_vec)),
+                             verbose = F)
+plot_clisi(clisi_1, clisi_2)
+plot_clisi_legend(clisi_1)
+
+
+######
+
+for(i in 1:6){
+  dcca_decomp <- res[[i]][[1]]$result$dcca_decomp
+  true_membership_vec <- as.factor(res[[i]][[1]]$result$true_membership_vec)
+  set.seed(10)
+  clisi_1 <- clisi_information(dcca_decomp$common_mat_1, dcca_decomp$distinct_mat_1,
+                               true_membership_vec, rank_c = 2, rank_d = 2, 
+                               nn = round(0.5*min(table(true_membership_vec))),
+                               radius_quantile = 0.9, max_subsample_clisi = min(table(true_membership_vec)),
+                               verbose = F)
+  clisi_2 <- clisi_information(dcca_decomp$common_mat_2, dcca_decomp$distinct_mat_2,
+                               true_membership_vec, rank_c = 2, rank_d = 2, 
+                               nn = round(0.5*min(table(true_membership_vec))),
+                               radius_quantile = 0.9, max_subsample_clisi = min(table(true_membership_vec)),
+                               verbose = F)
+  png(paste0("../../out/simulation/Writeup13/Writeup13_simulation", i, "_clisi.png"), height = 900, width = 1500, units = "px", res = 300)
+  plot_clisi(clisi_1, clisi_2, col_vec = 1:length(levels(true_membership_vec)))
+  graphics.off()
+}
+
