@@ -37,4 +37,4 @@ dat3@Dimnames[[2]] <- colnames(dat)[-1]
 dat_tmp <- dat
 dat <- dat3
 
-save(dat, file = "../../../../data/Pairedtag_mousebrain_RNA-Histone/dat.RData")
+save(dat, file = "../../../../data/Pairedtag_mousebrain_RNA-Histone/preprocessed_RNA.RData")
