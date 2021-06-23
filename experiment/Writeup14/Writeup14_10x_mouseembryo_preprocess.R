@@ -74,7 +74,6 @@ mbrain.jane2 <- readRDS("../../../../data/10x_mouseembryo/tenx_labels.rds")
 mbrain$label_Savercat_coarse <- mbrain.jane2$savercat
 mbrain$label_Seurat_coarse <- mbrain.jane2$seurat
 
-
 # --------------------------------------------------
 # Cluster cells on basis of their scATAC-seq profiles
 # --------------------------------------------------
@@ -99,11 +98,11 @@ mbrain <- Seurat::RunUMAP(mbrain, nn.name = "weighted.nn", reduction.name = "uma
 
 png("../../../../out/figures/Writeup14/Writeup14_10x_mouseembryo_seurat_umap.png", 
     height = 1500, width = 4500, units = "px", res = 300)
-p1 <- Seurat::DimPlot(mbrain, reduction = "umap", group.by = "label_Savercat_coarse", 
+p1 <- Seurat::DimPlot(mbrain, reduction = "umap", group.by = "label_Savercat", 
               label = TRUE, label.size = 2.5, repel = TRUE) + ggplot2::ggtitle("RNA")
-p2 <- Seurat::DimPlot(mbrain, reduction = "umap.atac", group.by = "label_Savercat_coarse", 
+p2 <- Seurat::DimPlot(mbrain, reduction = "umap.atac", group.by = "label_Savercat", 
               label = TRUE, label.size = 2.5, repel = TRUE) + ggplot2::ggtitle("ATAC")
-p3 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn", group.by = "label_Savercat_coarse", 
+p3 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn", group.by = "label_Savercat", 
               label = TRUE, label.size = 2.5, repel = TRUE) + ggplot2::ggtitle("WNN")
 p1 + p2 + p3 & Seurat::NoLegend() & ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
 graphics.off()
@@ -134,12 +133,12 @@ for(i in 1:length(celltype)){
 brain$celltype <- celltype
 
 png("../../../../out/figures/Writeup14/Writeup14_10x_mouseembryo_seurat_umap_celltype_chiyun.png", 
-    height = 1500, width = 3000, units = "px", res = 300)
-p1 <- Seurat::DimPlot(myeloid, reduction = "umap.rna", group.by = "celltype", 
+    height = 1500, width = 4500, units = "px", res = 300)
+p1 <- Seurat::DimPlot(brain, reduction = "umap.rna", group.by = "celltype", 
                       label = TRUE, label.size = 2.5, repel = TRUE) + ggplot2::ggtitle("RNA")
-p2 <- Seurat::DimPlot(myeloid, reduction = "umap.atac", group.by = "celltype", 
+p2 <- Seurat::DimPlot(brain, reduction = "umap.atac", group.by = "celltype", 
                       label = TRUE, label.size = 2.5, repel = TRUE) + ggplot2::ggtitle("ATAC")
-p3 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn", group.by = "label_Savercat_coarse", 
+p3 <- Seurat::DimPlot(brain, reduction = "wnn.umap", group.by = "celltype", 
                       label = TRUE, label.size = 2.5, repel = TRUE) + ggplot2::ggtitle("WNN")
 p1 + p2 + p3 & Seurat::NoLegend() & ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
 graphics.off()
