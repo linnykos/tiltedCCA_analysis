@@ -17,7 +17,8 @@ lap_eig <- function(mat, k_max = 200){
   tmp
 }
 
-compute_lap <- function(g, k_max = 100, normalize = T){
+compute_lap <- function(g, k_max = 100, normalize = T,
+                        rowname_vec, colname_vec){
   n <- nrow(g)
   if(normalize){
     deg_vec <- sparseMatrixStats::rowSums2(g)
@@ -27,13 +28,16 @@ compute_lap <- function(g, k_max = 100, normalize = T){
   
   deg_vec2 <- sparseMatrixStats::rowSums2(g)
   invdeg_mat2 <- Matrix::sparseMatrix(i = 1:n, j = 1:n, x = 1/deg_vec2)
-  lap_mat <- invdeg_mat2 %*% g_norm 
+  lap_mat <- invdeg_mat2 %*% g 
   
-  lap_eig(lap_mat, k_max = k_max)
+  basis <- lap_eig(lap_mat, k_max = k_max)
+  rownames(basis) <- rowname_vec
+  colnames(basis) <- colname_vec
+  
+  basis
 }
 
 compute_smooth_signal <- function(vec, basis){
-  lm_res <- stats::lm(vec ~ basis)
-  
+  lm_res <- stats::lm(vec ~ basis) 
   list(pred_vec = lm_res$fitted.values, r_squared = summary(lm_res)$adj.r.squared)
 }
