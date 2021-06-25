@@ -21,13 +21,19 @@ dim(mat_1); dim(mat_2)
 metadata <- mbrain@meta.data
 
 # zz <- irlba::irlba(mat_1, nv = 50); zz$d; diff(zz$d)/zz$d[-1]
-# zz <- irlba::irlba(mat_2, nv = 50); zz$d; diff(zz$d)/zz$d[-1]
+# center_vec <- sparseMatrixStats::colMeans2(mat_2)
+# zz <- irlba::irlba(mat_2, nv = 50, center = center_vec); zz$d; diff(zz$d)/zz$d[-1]
 
+cell_idx <- which(metadata$label_Savercat %in% c("Oligodendrocyte", "Hindbrain glycinergic", "Midbrain glutamatergic",
+                                                 "Forebrain glutamatergic", "Radial glia", "Forebrain GABAergic", 
+                                                 "Neuroblast", "Cajal-Retzius", "Mixed region GABAergic", 
+                                                 "Glioblast", "Cortical or hippocampal glutamatergic"))
 set.seed(10)
-rank_1 <- 25; rank_2 <- 25
-dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 2:rank_2,
+rank_1 <- 30; rank_2 <- 31
+dcca_res <- multiomicCCA::dcca_factor(mat_1[cell_idx,], mat_2[cell_idx,], 
+                                      dims_1 = 1:rank_1, dims_2 = 2:rank_2,
                                       center_1 = T, center_2 = T,
-                                      meta_clustering = NA, num_neigh = 100, 
+                                      meta_clustering = NA, num_neigh = 15, 
                                       apply_shrinkage = F, fix_distinct_perc = F, 
                                       verbose = T) 
 dcca_res$cca_obj
@@ -43,7 +49,7 @@ class(dcca_res2) <- "dcca_decomp"
 
 ##################
 
-membership_vec <- as.factor(metadata$label_Savercat)
+membership_vec <- as.factor(metadata$label_Savercat[cell_idx])
 png(paste0("../../../../out/figures/Writeup14/Writeup14_10x_mouseembryo_dcca_scores.png"), height = 2000, width = 2400, units = "px", res = 300)
 par(mar = c(4,4,4,0.5))
 multiomicCCA::plot_scores(dcca_res2, membership_vec, decomposition = F)
@@ -66,62 +72,54 @@ graphics.off()
 
 #####################
 
-Seurat::DefaultAssay(mbrain) <- "SCT"
-mbrain[["ATAC"]] <- NULL; mbrain[["wsnn"]] <- NULL;
-mbrain[["pca"]] <- NULL; mbrain[["umap"]] <- NULL; mbrain[["umap.atac"]] <- NULL
-mbrain[["RNA"]] <- NULL; mbrain[["wknn"]] <- NULL; mbrain[["umap.wnn"]] <- NULL
-
-membership_vec <- as.factor(metadata$label_Savercat)
+mbrain2 <- Seurat::CreateSeuratObject(counts = t(mat_1[cell_idx,]))
+mbrain2[["label_Savercat"]] <- metadata$label_Savercat[cell_idx]
+membership_vec <- as.factor(metadata$label_Savercat[cell_idx])
 title_vec <- c("Common view", "Distinct view", "Everything view")
 main_vec <- c("common", "distinct", "everything")
+
 set.seed(10)
-zz <- multiomicCCA::plot_embeddings(dcca_res2, membership_vec, data_1 = T, data_2 = F, 
-                                    add_noise = T, pca = F, only_embedding = T, verbose = T)
+zz1 <- multiomicCCA::plot_embeddings(dcca_res2, membership_vec, data_1 = T, data_2 = F, 
+                                    add_noise = F, pca = F, only_embedding = T, verbose = T)
 
 for(i in 1:3){
-  mbrain[["asdf"]] <- Seurat::CreateDimReducObject(embedding = zz[[i]], key = "UMAP", assay = "SCT")
-  plot1 <- Seurat::DimPlot(mbrain, reduction = "asdf", group.by = "label_Savercat", label = TRUE,
+  mbrain2[["asdf"]] <- Seurat::CreateDimReducObject(embedding = zz1[[i]], key = "UMAP", assay = "RNA")
+  plot1 <- Seurat::DimPlot(mbrain2, reduction = "asdf", group.by = "label_Savercat", label = TRUE,
                            repel = TRUE, label.size = 2.5)
   plot1 <- plot1 + ggplot2::ggtitle("Mouse Embryo (RNA)\n", title_vec[i]) 
   plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
   ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14/Writeup14_10x_mouseembryo_dcca_rna_", main_vec[i], "_umap.png"),
-                  plot1, device = "png", width = 9, height = 5, units = "in")
+                  plot1, device = "png", width = 6, height = 5, units = "in")
 }
 
 ###############
 
-membership_vec <- as.factor(metadata$label_Savercat)
-title_vec <- c("Common view", "Distinct view", "Everything view")
-main_vec <- c("common", "distinct", "everything")
 set.seed(10)
-zz <- multiomicCCA::plot_embeddings(dcca_res2, membership_vec, data_1 = F, data_2 = T, 
-                                    add_noise = T, pca = F, only_embedding = T, verbose = T)
+zz2 <- multiomicCCA::plot_embeddings(dcca_res2, membership_vec, data_1 = F, data_2 = T, 
+                                    add_noise = F, pca = F, only_embedding = T, verbose = T)
 
 for(i in 1:3){
-  mbrain[["asdf"]] <- Seurat::CreateDimReducObject(embedding = zz[[i]], key = "UMAP", assay = "SCT")
-  plot1 <- Seurat::DimPlot(mbrain, reduction = "asdf", group.by = "label_Savercat", label = TRUE,
+  mbrain2[["asdf"]] <- Seurat::CreateDimReducObject(embedding = zz2[[i]], key = "UMAP", assay = "RNA")
+  plot1 <- Seurat::DimPlot(mbrain2, reduction = "asdf", group.by = "label_Savercat", label = TRUE,
                            repel = TRUE, label.size = 2.5)
   plot1 <- plot1 + ggplot2::ggtitle("Mouse Embryo (ATAC)\n", title_vec[i]) 
   plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
   ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14/Writeup14_10x_mouseembryo_dcca_atac_", main_vec[i], "_umap.png"),
-                  plot1, device = "png", width = 9, height = 5, units = "in")
+                  plot1, device = "png", width = 6, height = 5, units = "in")
 }
 
 ###############
 
-membership_vec <- as.factor(metadata$label_Savercat)
-title_vec <- c("Common view", "Distinct view", "Everything view")
-main_vec <- c("common", "distinct", "everything")
 set.seed(10)
-zz <- multiomicCCA::plot_embeddings(dcca_res2, membership_vec, data_1 = T, data_2 = T, 
-                                    add_noise = T, pca = F, only_embedding = T, verbose = T)
+zz3 <- multiomicCCA::plot_embeddings(dcca_res2, membership_vec, data_1 = T, data_2 = T, 
+                                    add_noise = F, pca = F, only_embedding = T, verbose = T)
 
 for(i in 1:3){
-  mbrain[["asdf"]] <- Seurat::CreateDimReducObject(embedding = zz[[i]], key = "UMAP", assay = "SCT")
-  plot1 <- Seurat::DimPlot(mbrain, reduction = "asdf", group.by = "label_Savercat", label = TRUE,
+  mbrain2[["asdf"]] <- Seurat::CreateDimReducObject(embedding = zz3[[i]], key = "UMAP", assay = "RNA")
+  plot1 <- Seurat::DimPlot(mbrain2, reduction = "asdf", group.by = "label_Savercat", label = TRUE,
                            repel = TRUE, label.size = 2.5)
-  plot1 <- plot1 + ggplot2::ggtitle("Mouse Embryo (ATAC)\n", title_vec[i]) 
+  plot1 <- plot1 + ggplot2::ggtitle("Mouse Embryo (Both)\n", title_vec[i]) 
   plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
   ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14/Writeup14_10x_mouseembryo_dcca_both_", main_vec[i], "_umap.png"),
-                  plot1, device = "png", width = 9, height = 5, units = "in")
+                  plot1, device = "png", width = 6, height = 5, units = "in")
 }
