@@ -39,15 +39,15 @@ getPeaksForGenes=function(seurat.obj, gene.names, get.nearby.genes=FALSE,
     peaks.upstream = GenomicRanges::countOverlaps(peaks.gr, upstream.gr)>0
     peaks.downstream = GenomicRanges::countOverlaps(peaks.gr, downstream.gr)>0
     
-    counts1=t(seurat.obj@assays$ATAC@counts[peaks.upstream,,drop=FALSE]) # counts within these peaks.
-    counts2=t(seurat.obj@assays$ATAC@counts[peaks.downstream,,drop=FALSE]) # counts within these peaks.
+    counts1 <- t(as.matrix(seurat.obj@assays$ATAC@counts[peaks.upstream,,drop=F]))# counts within these peaks.
+    counts2 <- t(as.matrix(seurat.obj@assays$ATAC@counts[peaks.downstream,,drop=F])) # counts within these peaks.
     
-    X[[g]]$counts=cbind(counts1,counts2)
-    X[[g]]$peaks.gr=c(peaks.gr[peaks.upstream], peaks.gr[peaks.downstream])
-    TSS.subset=TSS.all[countOverlaps(TSS.all, getRegion(c(2*ext.upstream, 2*ext.downstream), TSS))>0]
-    X[[g]]$genes.near.peaks=getGenesNearPeaks(gr=X[[g]]$peaks.gr, TSS.gr=TSS.subset, exclude.gene=gene.names[g], ext.downstream=ext.downstream, ext.upstream=ext.upstream)
-    X[[g]]$isDownstream=c(rep(FALSE,sum(peaks.upstream)), rep(TRUE, sum(peaks.downstream)))
-    genes.near=c(genes.near, unique(unlist(X[[g]]$genes.near.peaks)))
+    X[[g]]$counts = cbind(counts1,counts2)
+    X[[g]]$peaks.gr = c(peaks.gr[peaks.upstream], peaks.gr[peaks.downstream])
+    TSS.subset = TSS.all[GenomicRanges::countOverlaps(TSS.all, getRegion(c(2*ext.upstream, 2*ext.downstream), TSS))>0]
+    X[[g]]$genes.near.peaks = getGenesNearPeaks(gr=X[[g]]$peaks.gr, TSS.gr=TSS.subset, exclude.gene=gene.names[g], ext.downstream=ext.downstream, ext.upstream=ext.upstream)
+    X[[g]]$isDownstream = c(rep(FALSE,sum(peaks.upstream)), rep(TRUE, sum(peaks.downstream)))
+    genes.near = c(genes.near, unique(unlist(X[[g]]$genes.near.peaks)))
   }
   
   
@@ -56,7 +56,7 @@ getPeaksForGenes=function(seurat.obj, gene.names, get.nearby.genes=FALSE,
   if(get.nearby.genes) Y.near.cell = Seurat::FetchData(seurat.obj, vars=genes.near)
   
   Seurat::DefaultAssay(seurat.obj)="RNA"
-  if(is.null(include.cell.features)){
+  if(all(is.null(include.cell.features))){
     include.cell.features=c("nCount_RNA", "nCount_ATAC")
   }
   features.cell=Seurat::FetchData(seurat.obj, vars=include.cell.features)
@@ -79,11 +79,24 @@ getRegion <- function(vicinity.size, TSS){
     downstream <- GenomicRanges::flank(TSS, width=downstream.size, start=F) # downstream excluding the TSS
   }
   vicinity <- GenomicRanges::punion(upstream, downstream, fill.gap=T)
-  start(vicinity) <- pmax(0, BiocGenerics::start(vicinity))
+  BiocGenerics::start(vicinity) <- pmax(0, BiocGenerics::start(vicinity))
   # end(vicinity) <- pmin(end(vicinity), choromosome.size))
   vicinity$gene_name <- TSS$gene_name
   return(vicinity)
 }
+
+getGenesNearPeaks = function(gr, TSS.gr, exclude.gene=NULL, 
+                             ext.downstream=5e5, ext.upstream=5e5){
+  cat("Getting genes near ", length(gr), " peaks.\n", sep="")
+  BiocGenerics::start(gr)= BiocGenerics::start(gr)-ext.upstream
+  BiocGenerics::end(gr) = BiocGenerics::end(gr)+ext.downstream
+  genes.near.peaks = vector("list", length(gr))
+  for(i in 1:length(gr)){
+    genes.near.peaks[[i]]=setdiff(unique(TSS.gr$gene_name[GenomicRanges::countOverlaps(TSS.gr,gr[i])>0]), exclude.gene)  
+  }
+  genes.near.peaks
+}
+
 
 #####################3
 
@@ -104,12 +117,12 @@ aggregateCells = function(obj, aggregate.over){
     cat(i, " ")
     which.cells=which(group==group.names[i])
     metacell.barcodes[[i]]=cell.barcodes[which.cells]
-    Y.aggr[i,]=apply(obj$Y.cell[which.cells,],2,mean)
-    if(!is.null(obj$Y.near.cell)) Y.near.aggr[i,]=apply(obj$Y.near.cell[which.cells,],2,mean)
+    Y.aggr[i,]=apply(obj$Y.cell[which.cells,,drop=F],2,mean)
+    if(!is.null(obj$Y.near.cell)) Y.near.aggr[i,]=apply(obj$Y.near.cell[which.cells,,drop=F],2,mean)
     
     for(j in 1:length(obj$X.cell)){
       if(length(obj$X.cell[[j]])>0){
-        X.aggr[[j]]$counts[i,]=apply(obj$X.cell[[j]]$counts[which.cells,, drop=FALSE], 2, mean)
+        X.aggr[[j]]$counts[i,]=apply(obj$X.cell[[j]]$counts[which.cells,, drop=F], 2, mean)
       }
     }
   }

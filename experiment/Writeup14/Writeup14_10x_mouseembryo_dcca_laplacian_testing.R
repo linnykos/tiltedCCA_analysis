@@ -6,6 +6,7 @@ library(dplyr); library(ggplot2); library(multiomicCCA)
 
 load("../../../../out/Writeup14/Writeup14_10x_mouseembryo_preprocess.RData")
 source("Writeup14_laplacian_function.R")
+source("Writeup14_peakcalling_function.R")
 date_of_run <- Sys.time(); session_info <- sessionInfo()
 
 # Seurat::DefaultAssay(mbrain) <- "ATAC"
@@ -20,6 +21,34 @@ head(rownames(mat_1)); head(colnames(mat_1))
 head(rownames(mat_2)); head(colnames(mat_2))
 dim(mat_1); dim(mat_2)
 metadata <- mbrain@meta.data
+
+###
+
+# How far to look up and down stream?
+set.seed(10)
+mbrain <- FindMultiModalNeighbors(mbrain, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
+mbrain <- FindClusters(mbrain, graph.name = "wsnn", algorithm = 3, resolution=22,verbose = FALSE)
+ext.upstream=500000
+ext.downstream=500000
+# include some cell features object, to aggregate over.
+include.cell.features=c("nCount_RNA", "nCount_ATAC", "wsnn_res.22")
+gene_vec <- c("Pax6", "Neurog2", "Eomes", "Neurod1", "Neurod2", "Neurod4", "Neurod6", "Tbr1",
+              "Sox5", "Fezf2", "Ikzf1", "Foxg1", "Tle4", "Bcl11b", "Nr2f1", "Tbr1",
+              "Satb2", "Pou3f2", "Pou3f3")
+gene_vec <- gene_vec[gene_vec %in% colnames(mat_1)]
+myobj <- getPeaksForGenes(mbrain, gene.names = gene_vec, 
+                          include.cell.features=include.cell.features,
+                          ext.upstream=ext.upstream, ext.downstream=ext.downstream)
+myobj <- aggregateCells(myobj, aggregate.over="wsnn_res.22")
+myobj <- findLinks(myobj)
+# peaks are in: colnames(myobj$X.aggr[[1]]$counts)
+# pvalues are in: myobj$X.aggr[[1]]$peaks.gr$pval.spearman
+# peaks.all <- collapseLinks(myobj, use.aggregate=TRUE)
+# peaks.all.df <- data.frame(peaks.all)
+# pval.thresh <- 0.05
+# peaks.all.df$pass <- peaks.all.df$pval.spearman<pval.thresh
+
+###
 
 cell_idx <- which(metadata$label_Savercat %in% c("Oligodendrocyte", "Hindbrain glycinergic", "Midbrain glutamatergic",
                                                  "Forebrain glutamatergic", "Radial glia", "Forebrain GABAergic", 
@@ -38,6 +67,7 @@ class(dcca_res2) <- "dcca_decomp"
 
 dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res, verbose = T)
 mat_1_denoised <- dcca_decomp$common_mat_1 + dcca_decomp$distinct_mat_1
+mat_2_denoised <- dcca_decomp$common_mat_2 + dcca_decomp$distinct_mat_2
 
 #####################
 
@@ -92,18 +122,21 @@ ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14/Writeup14_1
 
 ########
 
-gene_idx <- which(colnames(mat_1) == "Neurod2")
-c_res <- compute_smooth_signal(dcca_decomp$common_mat_1[,gene_idx], c_eig)
-d_res <- compute_smooth_signal(dcca_decomp$distinct_mat_1[,gene_idx], d_eig)
-e_res <- compute_smooth_signal(mat_1_denoised[,gene_idx], e_eig)
-var(e_res$pred_vec); var(c_res$pred_vec); var(d_res$pred_vec)
-
-mbrain3 <- mbrain2
-create_plot(mbrain3, var_name = "Neurod2", e_vec = mat_1_denoised[,gene_idx],
-            c_vec = dcca_decomp$common_mat_1[,gene_idx],
-            d_vec = dcca_decomp$distinct_mat_1[,gene_idx],
-            e_res = e_res, c_res = c_res, d_res = d_res, 
-            filename = paste0("../../../../out/figures/Writeup14/Writeup14_10x_mouseembryo_dcca_rna_Neurod2.png"))
+for(gene in gene_vec){
+  gene_idx <- which(colnames(mat_1) == gene)
+  c_res <- compute_smooth_signal(dcca_decomp$common_mat_1[,gene_idx], c_eig)
+  d_res <- compute_smooth_signal(dcca_decomp$distinct_mat_1[,gene_idx], d_eig)
+  e_res <- compute_smooth_signal(mat_1_denoised[,gene_idx], e_eig)
+  var(e_res$pred_vec); var(c_res$pred_vec); var(d_res$pred_vec)
+  
+  mbrain3 <- mbrain2
+  create_plot(mbrain3, var_name = gene, e_vec = mat_1_denoised[,gene_idx],
+              c_vec = dcca_decomp$common_mat_1[,gene_idx],
+              d_vec = dcca_decomp$distinct_mat_1[,gene_idx],
+              e_res = e_res, c_res = c_res, d_res = d_res, 
+              filename = paste0("../../../../out/figures/Writeup14/Writeup14_10x_mouseembryo_dcca_rna_", gene, ".png"))
+  
+}
 
 
 
@@ -166,5 +199,24 @@ plot1 <- Seurat::FeaturePlot(mbrain2, features = paste0("elap_", 1:16), reductio
 ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14/Writeup14_10x_mouseembryo_dcca_atac_everything_basis.png"),
                 plot1, device = "png", width = 16, height = 12, units = "in")
 
-
+for(i in 1:length(gene_vec)){
+  atac_names <- colnames(myobj$X.aggr[[i]]$counts)
+  include_bool <- which(myobj$X.aggr[[i]]$peaks.gr$pval.spearman < 0.05)
+  atac_names <- atac_names[include_bool]
+  atac_idx <- which(colnames(mat_2) %in% atac_names)
+  
+  e_vec = rowSums(mat_2_denoised[,atac_idx,drop=F])
+  c_vec = rowSums(dcca_decomp$common_mat_2[,atac_idx,drop=F])
+  d_vec = rowSums(dcca_decomp$distinct_mat_2[,atac_idx,drop=F])
+  
+  c_res <- compute_smooth_signal(c_vec, c_eig)
+  d_res <- compute_smooth_signal(d_vec, d_eig)
+  e_res <- compute_smooth_signal(e_vec, e_eig)
+  
+  mbrain3 <- mbrain2
+  create_plot(mbrain3, var_name = gene_vec[i], prefix = "ATAC",
+              e_vec = e_vec, c_vec = c_vec, d_vec = d_vec,
+              e_res = e_res, c_res = c_res, d_res = d_res, 
+              filename = paste0("../../../../out/figures/Writeup14/Writeup14_10x_mouseembryo_dcca_atac_", gene_vec[i], ".png"))
+}
 

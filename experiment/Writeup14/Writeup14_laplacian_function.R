@@ -42,7 +42,8 @@ compute_smooth_signal <- function(vec, basis){
   list(pred_vec = lm_res$fitted.values, r_squared = summary(lm_res)$adj.r.squared)
 }
 
-create_plot <- function(seurat_obj, var_name, e_vec, c_vec, d_vec, 
+create_plot <- function(seurat_obj, var_name, prefix = "RNA", 
+                        e_vec, c_vec, d_vec, 
                         e_res, c_res, d_res,
                         filename){
   gene_mat <- cbind(e_vec, c_vec, d_vec, e_res$pred_vec, c_res$pred_vec, d_res$pred_vec)
@@ -56,13 +57,13 @@ create_plot <- function(seurat_obj, var_name, e_vec, c_vec, d_vec,
   d_range <- range(c(d_vec, d_res$pred_vec))
   
   plot1 <- Seurat::FeaturePlot(seurat_obj, features = "gene_1", reduction = "everything")
-  plot1 <- plot1 + ggplot2::labs(title = paste0(var_name, "\nRNA Denoised, Everything"), x = "Everything 1", y = "Everything 2") + 
+  plot1 <- plot1 + ggplot2::labs(title = paste0(var_name, "\n", prefix, " Denoised, Everything"), x = "Everything 1", y = "Everything 2") + 
     ggplot2::scale_color_gradientn(colours = RColorBrewer::brewer.pal(n = 9, name = "Purples"), limits = e_range)
   plot2 <- Seurat::FeaturePlot(seurat_obj, features = "gene_2", reduction = "common")
-  plot2 <- plot2 + ggplot2::labs(title = paste0(var_name, "\nRNA Denoised, Common"), x = "Common 1", y = "Common 2") + 
+  plot2 <- plot2 + ggplot2::labs(title = paste0(var_name, "\n", prefix, " Denoised, Common"), x = "Common 1", y = "Common 2") + 
     ggplot2::scale_color_gradientn(colours = RColorBrewer::brewer.pal(n = 9, name = "Purples"), limits = c_range)
   plot3 <- Seurat::FeaturePlot(seurat_obj, features = "gene_3", reduction = "distinct")
-  plot3 <- plot3 + ggplot2::labs(title = paste0(var_name, "\nRNA Denoised, Distinct"), x = "Distinct 1", y = "Distinct 2") + 
+  plot3 <- plot3 + ggplot2::labs(title = paste0(var_name, "\n", prefix, " Denoised, Distinct"), x = "Distinct 1", y = "Distinct 2") + 
     ggplot2::scale_color_gradientn(colours = RColorBrewer::brewer.pal(n = 9, name = "Purples"), limits = d_range)
 
   plot4 <- Seurat::FeaturePlot(seurat_obj, features = "gene_4", reduction = "everything")
