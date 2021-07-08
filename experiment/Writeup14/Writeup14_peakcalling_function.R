@@ -97,7 +97,6 @@ getGenesNearPeaks = function(gr, TSS.gr, exclude.gene=NULL,
   genes.near.peaks
 }
 
-
 #####################3
 
 aggregateCells = function(obj, aggregate.over){
