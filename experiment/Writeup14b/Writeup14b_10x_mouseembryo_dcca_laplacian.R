@@ -5,7 +5,7 @@ library(BSgenome.Hsapiens.UCSC.hg38); library(GenomeInfoDb)
 library(dplyr); library(ggplot2); library(multiomicCCA)
 
 load("../../../../out/Writeup14/Writeup14_10x_mouseembryo_preprocess.RData")
-source("Writeup14_peakcalling_function.R")
+source("../Writeup14/Writeup14_peakcalling_function.R")
 date_of_run <- Sys.time(); session_info <- sessionInfo()
 
 mat_1 <- t(mbrain[["SCT"]]@scale.data)
@@ -72,27 +72,227 @@ rna_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = 15, membership_vec = mem
                                          bool_matrix = T, include_diag = F, verbose = T)
 
 #compute all the degree vectors
-c_eig <- multiomicCCA::compute_laplacian(rna_frnn$c_g, k_max = 200, rowname_vec = colnames(mbrain2), 
-                                         colname_vec = paste0("clap_", 1:199))
-d_eig <- multiomicCCA::compute_laplacian(rna_frnn$d_g, k_max = 200, rowname_vec = colnames(mbrain2), 
-                                         colname_vec = paste0("dlap_", 1:199))
-e_eig <- multiomicCCA::compute_laplacian(rna_frnn$e_g, k_max = 200, rowname_vec = colnames(mbrain2), 
-                                         colname_vec = paste0("elap_", 1:199))
+k_max <- 50
+c_eig <- multiomicCCA::compute_laplacian(rna_frnn$c_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
+                                         colname_vec = paste0("clap_", 1:(k_max-1)))
+d_eig <- multiomicCCA::compute_laplacian(rna_frnn$d_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
+                                         colname_vec = paste0("dlap_", 1:(k_max-1)))
+e_eig <- multiomicCCA::compute_laplacian(rna_frnn$e_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
+                                         colname_vec = paste0("elap_", 1:(k_max-1)))
 
 ################
 
 set.seed(10)
-zz1 <- multiomicCCA::plot_embeddings(dcca_res, membership_vec, data_1 = T, data_2 = F, 
-                                     add_noise = F, pca = F, only_embedding = T, verbose = T)
+rna_embeddings <- multiomicCCA::plot_embeddings(dcca_res, membership_vec, data_1 = T, data_2 = F, 
+                                            add_noise = F, pca = F, only_embedding = T, verbose = T)
+mbrain2[["common"]] <- Seurat::CreateDimReducObject(embedding = rna_embeddings[[1]], key = "UMAP", assay = "RNA")
+mbrain2[["distinct"]] <- Seurat::CreateDimReducObject(embedding = rna_embeddings[[2]], key = "UMAP", assay = "RNA")
+mbrain2[["everything"]] <- Seurat::CreateDimReducObject(embedding = rna_embeddings[[3]], key = "UMAP", assay = "RNA")
 
-for(i in 1:3){
-  mbrain2[["asdf"]] <- Seurat::CreateDimReducObject(embedding = zz1[[i]], key = "UMAP", assay = "RNA")
-  plot1 <- Seurat::DimPlot(mbrain2, reduction = "asdf", group.by = "label_Savercat", label = TRUE,
-                           repel = TRUE, label.size = 2.5)
-  plot1 <- plot1 + ggplot2::ggtitle("Mouse Embryo (RNA)\n", title_vec[i]) 
-  plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-  ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14/Writeup14b_10x_mouseembryo_dcca_rna_", main_vec[i], "_umap.png"),
-                  plot1, device = "png", width = 6, height = 5, units = "in")
-}
 
 ########################
+
+p1 <- ncol(mat_1); p2 <- ncol(mat_2)
+gene_smoothed <- lapply(1:p1, function(j){
+  if(j %% floor(p1/10) == 0) cat('*')
+  
+  c_res <- compute_smooth_signal(mat_1_denoised[,j], c_eig)
+  d_res <- compute_smooth_signal(mat_1_denoised[,j], d_eig)
+  e_res <- compute_smooth_signal(mat_1_denoised[,j], e_eig)
+  
+  list(c_variance = c_res$variance, c_r2 = c_res$r_squared,
+       d_variance = d_res$variance, d_r2 = d_res$r_squared,
+       e_variance = e_res$variance, e_r2 = e_res$r_squared)
+})
+
+# tmp <- sapply(gene_smoothed, function(x){max(x$c_r2, x$d_r2)})
+# quantile(tmp)
+# tmp <- sapply(gene_smoothed, function(x){x$c_variance})
+# round(quantile(tmp),2)
+# tmp <- sapply(gene_smoothed, function(x){x$d_variance})
+# round(quantile(tmp),2)
+# tmp <- sapply(gene_smoothed, function(x){
+#   max_val <- max(x$c_variance,x$d_variance)
+#   min_val <- min(x$c_variance,x$d_variance)
+#   (max_val - min_val)/min_val
+# })
+# round(quantile(tmp),2)
+# length(which(tmp > 0.5))
+# sort(colnames(mat_1)[which(tmp > 0.5)])
+# idx <- which(colnames(mat_1) %in% gene_vec)
+# tmp[idx]
+
+# plot some of the genes with smallest r2
+idx <- order(sapply(gene_smoothed, function(x){max(x$c_r2, x$d_r2)}), decreasing = F)[1:5]
+for(j in 1:length(idx)){
+  c_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], c_eig)
+  d_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], d_eig)
+  e_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], e_eig)
+  
+  multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_1)[idx[j]], 
+                               prefix = "RNA", e_vec = mat_1_denoised[,idx[j]],
+                               c_vec = dcca_decomp$common_mat_1[,idx[j]],
+                               d_vec = dcca_decomp$distinct_mat_1[,idx[j]],
+                               e_res = e_res, c_res = c_res, d_res = d_res,
+                               filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_lowesetr2_gene", j, ".png"))
+}
+
+# plot some of the genes with highest r2
+idx <- order(sapply(gene_smoothed, function(x){max(x$c_r2, x$d_r2)}), decreasing = T)[1:5]
+for(j in 1:length(idx)){
+  c_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], c_eig)
+  d_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], d_eig)
+  e_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], e_eig)
+  
+  multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_1)[idx[j]], 
+                               prefix = "RNA", e_vec = mat_1_denoised[,idx[j]],
+                               c_vec = dcca_decomp$common_mat_1[,idx[j]],
+                               d_vec = dcca_decomp$distinct_mat_1[,idx[j]],
+                               e_res = e_res, c_res = c_res, d_res = d_res,
+                               filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_highestr2_gene", j, ".png"))
+}
+
+# plot some of the genes with biggest difference
+tmp <- sapply(gene_smoothed, function(x){
+  max_val <- max(x$c_variance,x$d_variance)
+  min_val <- min(x$c_variance,x$d_variance)
+  (max_val - min_val)/min_val
+})
+idx <- order(tmp, decreasing = T)[1:5]
+for(j in 1:length(idx)){
+  c_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], c_eig)
+  d_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], d_eig)
+  e_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], e_eig)
+  
+  multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_1)[idx[j]], 
+                               prefix = "RNA", e_vec = mat_1_denoised[,idx[j]],
+                               c_vec = dcca_decomp$common_mat_1[,idx[j]],
+                               d_vec = dcca_decomp$distinct_mat_1[,idx[j]],
+                               e_res = e_res, c_res = c_res, d_res = d_res,
+                               filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_biggestdiff_gene", j, ".png"))
+}
+
+##########################################
+##########################################
+##########################################
+
+set.seed(10)
+atac_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = 15, membership_vec = membership_vec,
+                                         data_1 = F, data_2 = T,
+                                         bool_matrix = T, include_diag = F, verbose = T)
+
+#compute all the degree vectors
+k_max <- 50
+c_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$c_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
+                                         colname_vec = paste0("clap_", 1:(k_max-1)))
+d_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$d_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
+                                         colname_vec = paste0("dlap_", 1:(k_max-1)))
+e_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$e_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
+                                         colname_vec = paste0("elap_", 1:(k_max-1)))
+
+# atac_smoothed <- lapply(1:p2, function(j){
+#   print(j)
+#   
+#   c_res <- compute_smooth_signal(mat_2_denoised[,j], c_eig2)
+#   d_res <- compute_smooth_signal(mat_2_denoised[,j], d_eig2)
+#   e_res <- compute_smooth_signal(mat_2_denoised[,j], e_eig2)
+#   
+#   list(c_variance = c_res$variance, c_r2 = c_res$r_squared,
+#        d_variance = d_res$variance, d_r2 = d_res$r_squared,
+#        e_variance = e_res$variance, e_r2 = e_res$r_squared)
+# })
+# 
+# save(atac_smoothed, file = "../../../../out/Writeup14b/atac_smoothed.RData")
+load("../../../../out/Writeup14b/atac_smoothed.RData")
+
+set.seed(10)
+atac_embeddings <- multiomicCCA::plot_embeddings(dcca_res, membership_vec, data_1 = F, data_2 = T, 
+                                                add_noise = F, pca = F, only_embedding = T, verbose = T)
+mbrain2 <- Seurat::CreateSeuratObject(counts = t(mat_1_denoised))
+mbrain2[["label_Savercat"]] <- metadata$label_Savercat[cell_idx]
+mbrain2[["common"]] <- Seurat::CreateDimReducObject(embedding = atac_embeddings[[1]], key = "UMAP", assay = "RNA")
+mbrain2[["distinct"]] <- Seurat::CreateDimReducObject(embedding = atac_embeddings[[2]], key = "UMAP", assay = "RNA")
+mbrain2[["everything"]] <- Seurat::CreateDimReducObject(embedding = atac_embeddings[[3]], key = "UMAP", assay = "RNA")
+
+
+# plot some of the genes with smallest r2
+idx <- order(sapply(atac_smoothed, function(x){max(x$c_r2, x$d_r2)}), decreasing = F)[1:5]
+for(j in 1:length(idx)){
+  c_res <- compute_smooth_signal(mat_2_denoised[,idx[j]], c_eig)
+  d_res <- compute_smooth_signal(mat_2_denoised[,idx[j]], d_eig)
+  e_res <- compute_smooth_signal(mat_2_denoised[,idx[j]], e_eig)
+  
+  multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_2)[idx[j]], 
+                               prefix = "ATAC", e_vec = mat_2_denoised[,idx[j]],
+                               c_vec = dcca_decomp$common_mat_2[,idx[j]],
+                               d_vec = dcca_decomp$distinct_mat_2[,idx[j]],
+                               e_res = e_res, c_res = c_res, d_res = d_res,
+                               filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_lowesetr2_atac", j, ".png"))
+}
+
+# plot some of the genes with highest r2
+idx <- order(sapply(atac_smoothed, function(x){max(x$c_r2, x$d_r2)}), decreasing = T)[1:5]
+for(j in 1:length(idx)){
+  c_res <- compute_smooth_signal(mat_2_denoised[,idx[j]], c_eig)
+  d_res <- compute_smooth_signal(mat_2_denoised[,idx[j]], d_eig)
+  e_res <- compute_smooth_signal(mat_2_denoised[,idx[j]], e_eig)
+  
+  multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_2)[idx[j]], 
+                               prefix = "ATAC", e_vec = mat_2_denoised[,idx[j]],
+                               c_vec = dcca_decomp$common_mat_2[,idx[j]],
+                               d_vec = dcca_decomp$distinct_mat_2[,idx[j]],
+                               e_res = e_res, c_res = c_res, d_res = d_res,
+                               filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_highestr2_atac", j, ".png"))
+}
+
+# plot some of the genes with biggest difference
+tmp <- sapply(atac_smoothed, function(x){
+  max_val <- max(x$c_variance,x$d_variance)
+  min_val <- min(x$c_variance,x$d_variance)
+  (max_val - min_val)/min_val
+})
+idx <- order(tmp, decreasing = T)[1:5]
+for(j in 1:length(idx)){
+  c_res <- compute_smooth_signal(mat_2_denoised[,idx[j]], c_eig)
+  d_res <- compute_smooth_signal(mat_2_denoised[,idx[j]], d_eig)
+  e_res <- compute_smooth_signal(mat_2_denoised[,idx[j]], e_eig)
+  
+  multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_2)[idx[j]], 
+                               prefix = "ATAC", e_vec = mat_2_denoised[,idx[j]],
+                               c_vec = dcca_decomp$common_mat_2[,idx[j]],
+                               d_vec = dcca_decomp$distinct_mat_2[,idx[j]],
+                               e_res = e_res, c_res = c_res, d_res = d_res,
+                               filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_biggestdiff_atac", j, ".png"))
+}
+
+
+########################
+
+png(file = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_laplacian_r2.png"),
+    height = 1500, width = 3000, res = 300, units = "px")
+par(mfrow = c(1,2))
+tmp <- sapply(gene_smoothed, function(x){max(x$c_r2, x$d_r2)})
+idx <- which(colnames(mat_1) %in% gene_vec)
+col_vec <- rep(rgb(0.5,0.5,0.5,0.2), ncol(mat_1)); col_vec[idx] <- "red"
+order_idx <- order(tmp, decreasing = F)
+plot(tmp[order_idx], pch = 16, col = col_vec[order_idx], xlab = "Order of genes", ylab = "R2 b/w denoised vector and frNN Laplacian",
+     main = "RNA")
+
+idx <- unlist(lapply(1:length(gene_vec), function(i){
+  atac_names <- colnames(myobj$X.aggr[[i]]$counts)
+  include_bool <- which(myobj$X.aggr[[i]]$peaks.gr$pval.spearman < 0.05)
+  atac_names <- atac_names[include_bool]
+  atac_idx <- which(colnames(mat_2) %in% atac_names)
+  atac_idx
+}))
+tmp <- sapply(atac_smoothed, function(x){max(x$c_r2, x$d_r2)})
+col_vec <- rep(rgb(0.5,0.5,0.5,0.2), ncol(mat_1)); col_vec[idx] <- "red"
+order_idx <- order(tmp, decreasing = F)
+plot(tmp[order_idx], pch = 16, col = col_vec[order_idx], xlab = "Order of peaks", ylab = "R2 b/w denoised vector and frNN Laplacian",
+     main = "ATAC")
+graphics.off()
+
+##################
+
+
+
