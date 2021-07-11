@@ -72,23 +72,49 @@ rna_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = 15, membership_vec = mem
                                          bool_matrix = T, include_diag = F, verbose = T)
 
 #compute all the degree vectors
-k_max <- 50
+k_max <- 200
 c_eig <- multiomicCCA::compute_laplacian(rna_frnn$c_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
-                                         colname_vec = paste0("clap_", 1:(k_max-1)))
+                                         colname_vec = paste0("clap_", 1:k_max))
 d_eig <- multiomicCCA::compute_laplacian(rna_frnn$d_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
-                                         colname_vec = paste0("dlap_", 1:(k_max-1)))
+                                         colname_vec = paste0("dlap_", 1:k_max))
 e_eig <- multiomicCCA::compute_laplacian(rna_frnn$e_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
-                                         colname_vec = paste0("elap_", 1:(k_max-1)))
+                                         colname_vec = paste0("elap_", 1:k_max))
 
 ################
 
 set.seed(10)
-rna_embeddings <- multiomicCCA::plot_embeddings(dcca_res, membership_vec, data_1 = T, data_2 = F, 
-                                            add_noise = F, pca = F, only_embedding = T, verbose = T)
+rna_embeddings <- multiomicCCA::plot_embeddings2(dcca_res, nn = 15, data_1 = T, data_2 = F,
+                                                 c_g = rna_frnn$c_g, d_g = rna_frnn$d_g, 
+                                                 only_embedding = T, verbose = T)
 mbrain2[["common"]] <- Seurat::CreateDimReducObject(embedding = rna_embeddings[[1]], key = "UMAP", assay = "RNA")
 mbrain2[["distinct"]] <- Seurat::CreateDimReducObject(embedding = rna_embeddings[[2]], key = "UMAP", assay = "RNA")
 mbrain2[["everything"]] <- Seurat::CreateDimReducObject(embedding = rna_embeddings[[3]], key = "UMAP", assay = "RNA")
 
+for(i in 1:3){
+  plot1 <- Seurat::DimPlot(mbrain2, reduction = main_vec[i], 
+                           group.by = "label_Savercat", label = TRUE,
+                           repel = TRUE, label.size = 2.5)
+  plot1 <- plot1 + ggplot2::ggtitle("Mouse Embryo (RNA)\n", title_vec[i]) 
+  plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+  ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_rna_", main_vec[i], "_umap.png"),
+                  plot1, device = "png", width = 6, height = 5, units = "in")
+}
+
+mbrain2[["clap"]] <- Seurat::CreateDimReducObject(embedding = c_eig, key = "clap", assay = "RNA")
+plot1 <- Seurat::FeaturePlot(mbrain2, features = paste0("clap_", 1:16), reduction = "common")
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_rna_common_basis.png"),
+                plot1, device = "png", width = 16, height = 12, units = "in")
+
+mbrain2[["dlap"]] <- Seurat::CreateDimReducObject(embedding = d_eig, key = "dlap", assay = "RNA")
+plot1 <- Seurat::FeaturePlot(mbrain2, features = paste0("dlap_", 1:16), 
+                             reduction = "distinct")
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_rna_distinct_basis.png"),
+                plot1, device = "png", width = 16, height = 12, units = "in")
+
+mbrain2[["elap"]] <- Seurat::CreateDimReducObject(embedding = e_eig, key = "elap", assay = "RNA")
+plot1 <- Seurat::FeaturePlot(mbrain2, features = paste0("elap_", 1:16), reduction = "everything")
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_rna_everything_basis.png"),
+                plot1, device = "png", width = 16, height = 12, units = "in")
 
 ########################
 
@@ -104,23 +130,6 @@ gene_smoothed <- lapply(1:p1, function(j){
        d_variance = d_res$variance, d_r2 = d_res$r_squared,
        e_variance = e_res$variance, e_r2 = e_res$r_squared)
 })
-
-# tmp <- sapply(gene_smoothed, function(x){max(x$c_r2, x$d_r2)})
-# quantile(tmp)
-# tmp <- sapply(gene_smoothed, function(x){x$c_variance})
-# round(quantile(tmp),2)
-# tmp <- sapply(gene_smoothed, function(x){x$d_variance})
-# round(quantile(tmp),2)
-# tmp <- sapply(gene_smoothed, function(x){
-#   max_val <- max(x$c_variance,x$d_variance)
-#   min_val <- min(x$c_variance,x$d_variance)
-#   (max_val - min_val)/min_val
-# })
-# round(quantile(tmp),2)
-# length(which(tmp > 0.5))
-# sort(colnames(mat_1)[which(tmp > 0.5)])
-# idx <- which(colnames(mat_1) %in% gene_vec)
-# tmp[idx]
 
 # plot some of the genes with smallest r2
 idx <- order(sapply(gene_smoothed, function(x){max(x$c_r2, x$d_r2)}), decreasing = F)[1:5]
@@ -154,9 +163,7 @@ for(j in 1:length(idx)){
 
 # plot some of the genes with biggest difference
 tmp <- sapply(gene_smoothed, function(x){
-  max_val <- max(x$c_variance,x$d_variance)
-  min_val <- min(x$c_variance,x$d_variance)
-  (max_val - min_val)/min_val
+  (x$d_variance - x$c_variance)/x$e_variance
 })
 idx <- order(tmp, decreasing = T)[1:5]
 for(j in 1:length(idx)){
@@ -182,13 +189,52 @@ atac_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = 15, membership_vec = me
                                          bool_matrix = T, include_diag = F, verbose = T)
 
 #compute all the degree vectors
-k_max <- 50
+k_max <- 200
 c_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$c_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
-                                         colname_vec = paste0("clap_", 1:(k_max-1)))
+                                         colname_vec = paste0("clap_", 1:k_max))
 d_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$d_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
-                                         colname_vec = paste0("dlap_", 1:(k_max-1)))
+                                         colname_vec = paste0("dlap_", 1:k_max))
 e_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$e_g, k_max = k_max, rowname_vec = colnames(mbrain2), 
-                                         colname_vec = paste0("elap_", 1:(k_max-1)))
+                                         colname_vec = paste0("elap_", 1:k_max))
+
+################
+
+set.seed(10)
+atac_embeddings <- multiomicCCA::plot_embeddings2(dcca_res, nn = 15, data_1 = F, data_2 = T,
+                                                 c_g = atac_frnn$c_g, d_g = atac_frnn$d_g, 
+                                                 only_embedding = T, verbose = T)
+mbrain2 <- Seurat::CreateSeuratObject(counts = t(mat_1_denoised))
+mbrain2[["label_Savercat"]] <- metadata$label_Savercat[cell_idx]
+mbrain2[["common"]] <- Seurat::CreateDimReducObject(embedding = atac_embeddings[[1]], key = "UMAP", assay = "RNA")
+mbrain2[["distinct"]] <- Seurat::CreateDimReducObject(embedding = atac_embeddings[[2]], key = "UMAP", assay = "RNA")
+mbrain2[["everything"]] <- Seurat::CreateDimReducObject(embedding = atac_embeddings[[3]], key = "UMAP", assay = "RNA")
+
+for(i in 1:3){
+  plot1 <- Seurat::DimPlot(mbrain2, reduction = main_vec[i], 
+                           group.by = "label_Savercat", label = TRUE,
+                           repel = TRUE, label.size = 2.5)
+  plot1 <- plot1 + ggplot2::ggtitle("Mouse Embryo (ATAC)\n", title_vec[i]) 
+  plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+  ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_atac_", main_vec[i], "_umap.png"),
+                  plot1, device = "png", width = 6, height = 5, units = "in")
+}
+
+mbrain2[["clap"]] <- Seurat::CreateDimReducObject(embedding = c_eig2, key = "clap", assay = "RNA")
+plot1 <- Seurat::FeaturePlot(mbrain2, features = paste0("clap_", 1:16), reduction = "common")
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_atac_common_basis.png"),
+                plot1, device = "png", width = 16, height = 12, units = "in")
+
+mbrain2[["dlap"]] <- Seurat::CreateDimReducObject(embedding = d_eig2, key = "dlap", assay = "RNA")
+plot1 <- Seurat::FeaturePlot(mbrain2, features = paste0("dlap_", 1:16), 
+                             reduction = "distinct")
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_atac_distinct_basis.png"),
+                plot1, device = "png", width = 16, height = 12, units = "in")
+
+mbrain2[["elap"]] <- Seurat::CreateDimReducObject(embedding = e_eig2, key = "elap", assay = "RNA")
+plot1 <- Seurat::FeaturePlot(mbrain2, features = paste0("elap_", 1:16), reduction = "everything")
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_atac_everything_basis.png"),
+                plot1, device = "png", width = 16, height = 12, units = "in")
+
 
 # atac_smoothed <- lapply(1:p2, function(j){
 #   print(j)

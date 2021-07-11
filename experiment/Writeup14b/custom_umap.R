@@ -2,7 +2,7 @@
 custom_umap <- function(object, assay = NULL,
                         umap.method = 'umap-learn',
                         n.components = 2L,
-                        metric = 'correlation',
+                        metric = 'euclidean',
                         n.epochs = 0L,
                         learning.rate = 1,
                         min.dist = 0.3,
@@ -13,6 +13,7 @@ custom_umap <- function(object, assay = NULL,
                         b = NULL,
                         uwot.sgd = FALSE,
                         seed.use = 42L,
+                        init = "spectral",
                         metric.kwds = NULL,
                         verbose = TRUE,
                         reduction.key = 'UMAP_'){
@@ -37,8 +38,14 @@ custom_umap <- function(object, assay = NULL,
   }
   stopifnot(inherits(object, "dgCMatrix"))
   
-  tmp <- RSpectra::svds(object, k = 2)
-  init_mat <- multiomicCCA:::.mult_mat_vec(tmp$u, tmp$d)
+  if(init == "custom"){
+    tmp <- RSpectra::svds(object, k = 2)
+    init <- multiomicCCA:::.mult_mat_vec(tmp$u, tmp$d)
+  } else {
+    stopifnot(init == "spectral")
+  }
+ 
+  column_vec <- colnames(object)
   
   np <- reticulate::import("numpy", delay_load = TRUE)
   sp <- reticulate::import("scipy", delay_load = TRUE)
@@ -64,7 +71,7 @@ custom_umap <- function(object, assay = NULL,
     negative_sample_rate = negative.sample.rate,
     n_epochs = as.integer(x = n.epochs),
     random_state = random.state,
-    init = init_mat,
+    init = init,
     metric = metric,
     metric_kwds = metric.kwds,
     verbose = verbose
@@ -83,7 +90,7 @@ custom_umap <- function(object, assay = NULL,
   }
   
   embeddings <- scale(x = embeddings, scale = FALSE)
-  rownames(x = embeddings) <- colnames(x = object)
+  rownames(x = embeddings) <- column_vec
   colnames(x = embeddings) <- paste0("UMAP_", 1:n.components)
   
   embeddings
