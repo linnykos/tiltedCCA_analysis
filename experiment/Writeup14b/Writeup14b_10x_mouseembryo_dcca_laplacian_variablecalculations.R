@@ -16,6 +16,9 @@ head(rownames(mat_2)); head(colnames(mat_2))
 dim(mat_1); dim(mat_2)
 metadata <- mbrain@meta.data
 
+rm(list = c("mbrain"))
+gc()
+
 #########
 
 cell_idx <- which(metadata$label_Savercat %in% c("Oligodendrocyte", "Hindbrain glycinergic", "Midbrain glutamatergic",
@@ -35,6 +38,9 @@ dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res, verbose = T)
 mat_1_denoised <- dcca_decomp$common_mat_1 + dcca_decomp$distinct_mat_1
 mat_2_denoised <- dcca_decomp$common_mat_2 + dcca_decomp$distinct_mat_2
 membership_vec <- as.factor(metadata$label_Savercat[cell_idx])
+
+rm(list = c("mat_2"))
+gc()
 
 save(date_of_run, session_info, dcca_res, membership_vec,
      file = "../../../../out/Writeup14b/Writeup14b_10x_mouseembryo_dcca_laplacian_variablecalculations.RData")
@@ -81,14 +87,14 @@ atac_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = 15, membership_vec = me
                                           bool_matrix = T, include_diag = F, verbose = T)
 
 k_max <- 200
-c_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$c_g, k_max = k_max, rowname_vec = rownames(mat_2), 
+c_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$c_g, k_max = k_max, rowname_vec = rownames(mat_1), 
                                           colname_vec = paste0("clap_", 1:k_max))
-d_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$d_g, k_max = k_max, rowname_vec = rownames(mat_2), 
+d_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$d_g, k_max = k_max, rowname_vec = rownames(mat_1), 
                                           colname_vec = paste0("dlap_", 1:k_max))
-e_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$e_g, k_max = k_max, rowname_vec = rownames(mat_2), 
+e_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$e_g, k_max = k_max, rowname_vec = rownames(mat_1), 
                                           colname_vec = paste0("elap_", 1:k_max))
 
-p2 <- ncol(mat_2)
+p2 <- ncol(mat_2_denoised)
 atac_smoothed <- lapply(1:p2, function(j){
   print(p2)
   
