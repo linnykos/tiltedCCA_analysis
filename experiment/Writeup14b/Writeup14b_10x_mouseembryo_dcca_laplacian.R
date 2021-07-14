@@ -183,6 +183,13 @@ for(j in 1:length(idx)){
                                filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_biggestdiff_gene", j, ".png"))
 }
 
+# make a ggplot
+vec1 <- sapply(gene_smoothed, function(x){
+  (x$d_variance - x$c_variance)/x$e_variance
+})
+vec2 <- sapply(gene_smoothed, function(x){x$d_variance - x$c_variance})
+
+
 ##########################################
 ##########################################
 ##########################################

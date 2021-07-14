@@ -51,7 +51,8 @@ save(date_of_run, session_info, dcca_res, membership_vec,
 set.seed(10)
 rna_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = 15, membership_vec = membership_vec,
                                          data_1 = T, data_2 = F,
-                                         bool_matrix = T, include_diag = F, verbose = T)
+                                         radius_quantile = 0.5,
+                                         bool_matrix = T, verbose = T)
 
 #compute all the degree vectors
 k_max <- 200
@@ -84,7 +85,8 @@ save(date_of_run, session_info, dcca_res, membership_vec,
 set.seed(10)
 atac_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = 15, membership_vec = membership_vec,
                                           data_1 = F, data_2 = T,
-                                          bool_matrix = T, include_diag = F, verbose = T)
+                                          radius_quantile = 0.5,
+                                          bool_matrix = T, verbose = T)
 
 k_max <- 200
 c_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$c_g, k_max = k_max, rowname_vec = rownames(mat_1), 
