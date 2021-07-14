@@ -26,7 +26,7 @@ cell_idx <- which(metadata$label_Savercat %in% c("Oligodendrocyte", "Hindbrain g
                                                  "Neuroblast", "Cajal-Retzius", "Mixed region GABAergic", 
                                                  "Glioblast", "Cortical or hippocampal glutamatergic"))
 set.seed(10)
-rank_1 <- 30; rank_2 <- 31
+rank_1 <- 30; rank_2 <- 50
 mat_1 <- mat_1[cell_idx,]; mat_2 <- mat_2[cell_idx,]
 dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 2:rank_2,
                                       center_1 = T, center_2 = T,
@@ -96,7 +96,7 @@ e_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$e_g, k_max = k_max, rowname_
 
 p2 <- ncol(mat_2_denoised)
 atac_smoothed <- lapply(1:p2, function(j){
-  print(p2)
+  print(j)
   
   c_res <- compute_smooth_signal(mat_2_denoised[,j], c_eig)
   d_res <- compute_smooth_signal(mat_2_denoised[,j], d_eig)
