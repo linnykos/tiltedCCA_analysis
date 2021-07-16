@@ -13,6 +13,7 @@ df <- df[200:1,]
 # see https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html
 # see https://stackoverflow.com/questions/15624656/label-points-in-geom-point
 # see https://mran.microsoft.com/snapshot/2017-08-20/web/packages/ggrepel/vignettes/ggrepel.html
+# see https://ggrepel.slowkow.com/articles/examples.html for defaults
 p1 <- ggplot2::ggplot(df, ggplot2::aes(x = idx, y = val)) 
 p1 <- p1 + ggplot2::geom_point(ggplot2::aes(color = labeling))
 # p1 <- p1 + ggplot2::geom_point(data = subset(df, labeling == 1), ggplot2::aes(color = labeling))
