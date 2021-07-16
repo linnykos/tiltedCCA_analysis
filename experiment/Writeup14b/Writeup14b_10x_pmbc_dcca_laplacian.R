@@ -167,7 +167,7 @@ ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b
 plot1 <- Seurat::FeaturePlot(pbmc2, features = paste0("clap_", 1:16), reduction = "combined")
 ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_pbmc_dcca_rna_common_basis.png"),
                 plot1, device = "png", width = 16, height = 12, units = "in")
-
+ 
 plot1 <- Seurat::FeaturePlot(pbmc2, features = paste0("dlap_", 1:16), reduction = "distinct")
 ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_pbmc_dcca_rna_distinct_basis.png"),
                 plot1, device = "png", width = 16, height = 12, units = "in")
