@@ -32,7 +32,7 @@ mat_1_denoised <- dcca_decomp$common_mat_1 + dcca_decomp$distinct_mat_1
 mat_2_denoised <- dcca_decomp$common_mat_2 + dcca_decomp$distinct_mat_2
 membership_vec <- as.factor(metadata$predicted.id)
 
-rm(list = c("mat_1", "mat_2")); gc(T)
+rm(list = c("mat_1", "mat_2", "dcca_decomp")); gc(T)
 
 save(date_of_run, session_info, dcca_res, membership_vec,
      file = "../../../../out/Writeup14b/Writeup14b_10x_pbmc_dcca_laplacian_variablecalculations.RData")
