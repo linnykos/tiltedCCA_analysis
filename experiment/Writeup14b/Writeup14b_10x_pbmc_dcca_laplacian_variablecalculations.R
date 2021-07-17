@@ -48,14 +48,14 @@ rna_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = nn, membership_vec = mem
 
 #compute all the degree vectors
 k_max <- 200
-c_eig <- multiomicCCA::compute_laplacian(rna_frnn$c_g, k_max = k_max, rowname_vec = rownames(mat_1), 
+c_eig <- multiomicCCA::compute_laplacian(rna_frnn$c_g, k_max = k_max, rowname_vec = rownames(mat_1_denoised), 
                                          colname_vec = paste0("clap_", 1:k_max))
-d_eig <- multiomicCCA::compute_laplacian(rna_frnn$d_g, k_max = k_max, rowname_vec = rownames(mat_1), 
+d_eig <- multiomicCCA::compute_laplacian(rna_frnn$d_g, k_max = k_max, rowname_vec = rownames(mat_1_denoised), 
                                          colname_vec = paste0("dlap_", 1:k_max))
-e_eig <- multiomicCCA::compute_laplacian(rna_frnn$e_g, k_max = k_max, rowname_vec = rownames(mat_1), 
+e_eig <- multiomicCCA::compute_laplacian(rna_frnn$e_g, k_max = k_max, rowname_vec = rownames(mat_1_denoised), 
                                          colname_vec = paste0("elap_", 1:k_max))
 
-p1 <- ncol(mat_1)
+p1 <- ncol(mat_1_denoised)
 gene_smoothed <- lapply(1:p1, function(j){
   if(j %% floor(p1/10) == 0) cat('*')
   
@@ -81,11 +81,11 @@ atac_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = nn, membership_vec = me
                                           bool_matrix = T, verbose = T)
 
 k_max <- 200
-c_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$c_g, k_max = k_max, rowname_vec = rownames(mat_1), 
+c_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$c_g, k_max = k_max, rowname_vec = rownames(mat_1_denoised), 
                                           colname_vec = paste0("clap_", 1:k_max))
-d_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$d_g, k_max = k_max, rowname_vec = rownames(mat_1), 
+d_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$d_g, k_max = k_max, rowname_vec = rownames(mat_1_denoised), 
                                           colname_vec = paste0("dlap_", 1:k_max))
-e_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$e_g, k_max = k_max, rowname_vec = rownames(mat_1), 
+e_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$e_g, k_max = k_max, rowname_vec = rownames(mat_1_denoised), 
                                           colname_vec = paste0("elap_", 1:k_max))
 
 p2 <- ncol(mat_2_denoised)
