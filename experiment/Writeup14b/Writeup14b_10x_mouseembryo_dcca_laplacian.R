@@ -19,22 +19,22 @@ metadata <- mbrain@meta.data
 
 #######
 
-set.seed(10)
-mbrain <- FindMultiModalNeighbors(mbrain, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
-mbrain <- FindClusters(mbrain, graph.name = "wsnn", algorithm = 3, resolution=22,verbose = FALSE)
-ext.upstream=500000
-ext.downstream=500000
-# include some cell features object, to aggregate over.
-include.cell.features=c("nCount_RNA", "nCount_ATAC", "wsnn_res.22")
-gene_vec <- c("Pax6", "Neurog2", "Eomes", "Neurod1", "Neurod2", "Neurod4", "Neurod6", "Tbr1",
-              "Sox5", "Fezf2", "Ikzf1", "Foxg1", "Tle4", "Bcl11b", "Nr2f1", "Tbr1",
-              "Satb2", "Pou3f2", "Pou3f3")
-gene_vec <- gene_vec[gene_vec %in% colnames(mat_1)]
-myobj <- getPeaksForGenes(mbrain, gene.names = gene_vec, 
-                          include.cell.features=include.cell.features,
-                          ext.upstream=ext.upstream, ext.downstream=ext.downstream)
-myobj <- aggregateCells(myobj, aggregate.over="wsnn_res.22")
-myobj <- findLinks(myobj)
+# set.seed(10)
+# mbrain <- FindMultiModalNeighbors(mbrain, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
+# mbrain <- FindClusters(mbrain, graph.name = "wsnn", algorithm = 3, resolution=22,verbose = FALSE)
+# ext.upstream=500000
+# ext.downstream=500000
+# # include some cell features object, to aggregate over.
+# include.cell.features=c("nCount_RNA", "nCount_ATAC", "wsnn_res.22")
+# gene_vec <- c("Pax6", "Neurog2", "Eomes", "Neurod1", "Neurod2", "Neurod4", "Neurod6", "Tbr1",
+#               "Sox5", "Fezf2", "Ikzf1", "Foxg1", "Tle4", "Bcl11b", "Nr2f1", "Tbr1",
+#               "Satb2", "Pou3f2", "Pou3f3")
+# gene_vec <- gene_vec[gene_vec %in% colnames(mat_1)]
+# myobj <- getPeaksForGenes(mbrain, gene.names = gene_vec, 
+#                           include.cell.features=include.cell.features,
+#                           ext.upstream=ext.upstream, ext.downstream=ext.downstream)
+# myobj <- aggregateCells(myobj, aggregate.over="wsnn_res.22")
+# myobj <- findLinks(myobj)
 
 #######
 
@@ -211,132 +211,196 @@ plot1 <- Seurat::FeaturePlot(mbrain2, features = paste0("elap2_", 1:16), reducti
 ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_atac_everything_basis.png"),
                 plot1, device = "png", width = 16, height = 12, units = "in")
 
-########################
-########################
-########################
+##################
 
-p1 <- ncol(mat_1); p2 <- ncol(mat_2)
-gene_smoothed <- lapply(1:p1, function(j){
-  if(j %% floor(p1/10) == 0) cat('*')
-  
-  c_res <- compute_smooth_signal(mat_1_denoised[,j], c_eig)
-  d_res <- compute_smooth_signal(mat_1_denoised[,j], d_eig)
-  e_res <- compute_smooth_signal(mat_1_denoised[,j], e_eig)
-  
-  list(c_variance = c_res$variance, c_r2 = c_res$r_squared,
-       d_variance = d_res$variance, d_r2 = d_res$r_squared,
-       e_variance = e_res$variance, e_r2 = e_res$r_squared)
-})
+# compute local enrichment
+set.seed(10)
+rna_local <- multiomicCCA::clisi_information(rna_frnn$c_g, rna_frnn$d_g, rna_frnn$e_g, 
+                                             membership_vec = membership_vec)
+rna_local$common_clisi$membership_info
+rna_local$distinct_clisi$membership_info
 
-# plot some of the genes with smallest r2
-idx <- order(sapply(gene_smoothed, function(x){max(x$c_r2, x$d_r2)}), decreasing = F)[1:5]
-for(j in 1:length(idx)){
-  c_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], c_eig)
-  d_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], d_eig)
-  e_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], e_eig)
-  
-  multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_1)[idx[j]], 
-                               prefix = "RNA", e_vec = mat_1_denoised[,idx[j]],
-                               c_vec = dcca_decomp$common_mat_1[,idx[j]],
-                               d_vec = dcca_decomp$distinct_mat_1[,idx[j]],
-                               e_res = e_res, c_res = c_res, d_res = d_res,
-                               filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_lowesetr2_gene", j, ".png"))
-}
+set.seed(10)
+atac_local <- multiomicCCA::clisi_information(atac_frnn$c_g, atac_frnn$d_g, atac_frnn$e_g, 
+                                             membership_vec = membership_vec)
+atac_local$common_clisi$membership_info
+atac_local$distinct_clisi$membership_info
 
-# plot some of the genes with highest r2
-idx <- order(sapply(gene_smoothed, function(x){max(x$c_r2, x$d_r2)}), decreasing = T)[1:5]
-for(j in 1:length(idx)){
-  c_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], c_eig)
-  d_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], d_eig)
-  e_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], e_eig)
-  
-  multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_1)[idx[j]], 
-                               prefix = "RNA", e_vec = mat_1_denoised[,idx[j]],
-                               c_vec = dcca_decomp$common_mat_1[,idx[j]],
-                               d_vec = dcca_decomp$distinct_mat_1[,idx[j]],
-                               e_res = e_res, c_res = c_res, d_res = d_res,
-                               filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_highestr2_gene", j, ".png"))
-}
+n <- nrow(rna_local$common_clisi$cell_info)
+k <- nrow(rna_local$common_clisi$membership_info)
+df <- data.frame(celltype = as.factor(c(paste0(as.character(rna_local$common_clisi$cell_info$celltype), "0"), 
+                                        as.character(rna_local$common_clisi$membership_info$celltype))), 
+                 common = c(rna_local$common_clisi$cell_info$clisi_score, rna_local$common_clisi$membership_info$mean_clisi),
+                 distinct = c(rna_local$distinct_clisi$cell_info$clisi_score, rna_local$distinct_clisi$membership_info$mean_clisi),
+                 category = as.factor(c(rep(0, n), rep(1, k))))
+col_vec <- scales::hue_pal()(k)
+bg_col_vec <- multiomicCCA:::.adjust_colors(col_vec, l_bg = 75, c_bg = 50, alpha_bg = 0.5)
+all_col_vec <- c(col_vec, bg_col_vec)
+tmp <- rna_local$common_clisi$membership_info$celltype
+names(all_col_vec) <- c(tmp, paste0(tmp, "0"))
+custom_colors <- ggplot2::scale_colour_manual(values = all_col_vec)
 
-# plot some of the genes with biggest difference
-tmp <- sapply(gene_smoothed, function(x){
-  (x$d_variance - x$c_variance)/x$e_variance
-})
-idx <- order(tmp, decreasing = T)[1:5]
-for(j in 1:length(idx)){
-  c_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], c_eig)
-  d_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], d_eig)
-  e_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], e_eig)
-  
-  multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_1)[idx[j]], 
-                               prefix = "RNA", e_vec = mat_1_denoised[,idx[j]],
-                               c_vec = dcca_decomp$common_mat_1[,idx[j]],
-                               d_vec = dcca_decomp$distinct_mat_1[,idx[j]],
-                               e_res = e_res, c_res = c_res, d_res = d_res,
-                               filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_biggestdiff_gene", j, ".png"))
-}
-
-# make a ggplot of the distinct-commmon
-vec1 <- sapply(gene_smoothed, function(x){
-  (x$d_variance - x$c_variance)/x$e_variance
-})
-vec2 <- sapply(gene_smoothed, function(x){x$d_variance - x$c_variance})
-gene_factor <- rep(0, p1); gene_factor[order(vec2, decreasing = T)[1:100]] <- 1
-gene_factor[which(colnames(mat_1_denoised) %in% gene_vec)] <- 2
-size_vec <- rep(1, p1); size_vec[which(colnames(mat_1_denoised) %in% gene_vec)] <- 2
-df <- data.frame(val1 = vec1, val2 = vec2,
-                 idx = rank(vec1), 
-                 gene_factor = gene_factor,
-                 size_vec = size_vec,
-                 text = colnames(mat_1_denoised))
-# reshuffle
-df <- df[order(df$gene_factor, decreasing = F),]
-df$gene_factor <- as.factor(df$gene_factor)
-plot1 <- ggplot2::ggplot(df, ggplot2::aes(x = idx, y = val1)) 
-plot1 <- plot1 + ggplot2::geom_point(ggplot2::aes(color = gene_factor, size = size_vec))
-plot1 <- plot1 + ggplot2::scale_size_continuous(range = c(1, 2))
-plot1 <- plot1 + ggplot2::scale_colour_manual(values=c("black", "green", "red"))
-plot1 <- plot1 + ggrepel::geom_text_repel(data = subset(df, gene_factor == 2), ggplot2::aes(label = text, color = gene_factor),
-                                    box.padding = ggplot2::unit(0.5, 'lines'),
-                                    point.padding = ggplot2::unit(1.6, 'lines'),
-                                    nudge_y = 0.25, size = 2)
-plot1 <- plot1 + ggplot2::geom_hline(yintercept = 0, linetype="dashed", 
-                color = "orange")
-plot1 <- plot1 + ggplot2::xlab("Order of genes")
-plot1 <- plot1 + ggplot2::ylab("Distinct variance - common variance")
-plot1 <- plot1 + ggplot2::ggtitle("Gene-level decomposition")
+plot1 <- ggplot2::ggplot(data = subset(df, category == 0), ggplot2::aes(x = distinct, y = common, color = celltype))
+plot1 <- plot1 + ggplot2::geom_point()
+plot1 <- plot1 + ggplot2::xlim(1, 0) + ggplot2::ylim(0, 1)
+plot1 <- plot1 + ggplot2::geom_point(data = subset(df, category == 1), 
+                                     ggplot2::aes(x = distinct, y = common), 
+                                     size = 3, color = "black")
+plot1 <- plot1 + ggplot2::geom_point(data = subset(df, category == 1), 
+                                     ggplot2::aes(x = distinct, y = common), 
+                                     size = 2.5, color = "white")
+plot1 <- plot1 + ggplot2::geom_point(data = subset(df, category == 1), 
+                                     ggplot2::aes(x = distinct, y = common,
+                                                  color = celltype), 
+                                     size = 2)
+plot1 <- plot1 + custom_colors
+plot1 <- plot1 + ggrepel::geom_text_repel(data = subset(df, category == 1), ggplot2::aes(label = celltype),
+                                          color = "black",
+                                          segment.color = "grey50",
+                                          size = 2)
+# see directions at https://ggrepel.slowkow.com/articles/examples.html
+plot1 <- plot1 + ggplot2::xlab("Distinct enrichment")
+plot1 <- plot1 + ggplot2::ylab("Common enrichment")
+plot1 <- plot1 + ggplot2::ggtitle("RNA")
 plot1 <- plot1 + Seurat::NoLegend()
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_rna_gene_decomposition.png"),
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_rna_enrichment.png"),
                 plot1, device = "png", width = 4, height = 4, units = "in")
 
-# make a ggplot of the r2
-vec1 <- sapply(gene_smoothed, function(x){min(abs(x$c_r2), abs(x$d_r2))})
-vec2 <- sapply(gene_smoothed, function(x){x$d_variance - x$c_variance})
-gene_factor <- rep(0, p1); gene_factor[order(vec2, decreasing = T)[1:100]] <- 1
-gene_factor[which(colnames(mat_1_denoised) %in% gene_vec)] <- 2
-size_vec <- rep(1, p1); size_vec[which(colnames(mat_1_denoised) %in% gene_vec)] <- 2
-df <- data.frame(val1 = vec1, val2 = vec2,
-                 idx = rank(vec1), 
-                 gene_factor = gene_factor,
-                 size_vec = size_vec,
-                 text = colnames(mat_1_denoised))
-# reshuffle
-df <- df[order(df$gene_factor, decreasing = F),]
-df$gene_factor <- as.factor(df$gene_factor)
-plot1 <- ggplot2::ggplot(df, ggplot2::aes(x = idx, y = val1)) 
-plot1 <- plot1 + ggplot2::geom_point(ggplot2::aes(color = gene_factor, size = size_vec))
+
 plot1 <- plot1 + ggplot2::scale_size_continuous(range = c(1, 2))
 plot1 <- plot1 + ggplot2::scale_colour_manual(values=c("black", "green", "red"))
-plot1 <- plot1 + ggrepel::geom_text_repel(data = subset(df, gene_factor == 2), ggplot2::aes(label = text, color = gene_factor),
-                                          box.padding = ggplot2::unit(0.5, 'lines'),
-                                          point.padding = ggplot2::unit(1.6, 'lines'),
-                                          nudge_y = -0.25, size = 2)
-plot1 <- plot1 + ggplot2::xlab("Order of genes")
-plot1 <- plot1 + ggplot2::ylab("Minimum R2 of conformity to graph structure")
-plot1 <- plot1 + ggplot2::ggtitle("Gene-level decomposition")
-plot1 <- plot1 + Seurat::NoLegend()
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_rna_gene_conformity.png"),
-                plot1, device = "png", width = 4, height = 4, units = "in")
+plot1 <- plot1 + ggplot2::geom_hline(yintercept = 0, linetype="dashed",
+               color = "orange")
+
+
+
+
+########################
+########################
+########################
+
+# p1 <- ncol(mat_1); p2 <- ncol(mat_2)
+# gene_smoothed <- lapply(1:p1, function(j){
+#   if(j %% floor(p1/10) == 0) cat('*')
+#   
+#   c_res <- compute_smooth_signal(mat_1_denoised[,j], c_eig)
+#   d_res <- compute_smooth_signal(mat_1_denoised[,j], d_eig)
+#   e_res <- compute_smooth_signal(mat_1_denoised[,j], e_eig)
+#   
+#   list(c_variance = c_res$variance, c_r2 = c_res$r_squared,
+#        d_variance = d_res$variance, d_r2 = d_res$r_squared,
+#        e_variance = e_res$variance, e_r2 = e_res$r_squared)
+# })
+# 
+# # plot some of the genes with smallest r2
+# idx <- order(sapply(gene_smoothed, function(x){max(x$c_r2, x$d_r2)}), decreasing = F)[1:5]
+# for(j in 1:length(idx)){
+#   c_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], c_eig)
+#   d_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], d_eig)
+#   e_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], e_eig)
+#   
+#   multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_1)[idx[j]], 
+#                                prefix = "RNA", e_vec = mat_1_denoised[,idx[j]],
+#                                c_vec = dcca_decomp$common_mat_1[,idx[j]],
+#                                d_vec = dcca_decomp$distinct_mat_1[,idx[j]],
+#                                e_res = e_res, c_res = c_res, d_res = d_res,
+#                                filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_lowesetr2_gene", j, ".png"))
+# }
+# 
+# # plot some of the genes with highest r2
+# idx <- order(sapply(gene_smoothed, function(x){max(x$c_r2, x$d_r2)}), decreasing = T)[1:5]
+# for(j in 1:length(idx)){
+#   c_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], c_eig)
+#   d_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], d_eig)
+#   e_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], e_eig)
+#   
+#   multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_1)[idx[j]], 
+#                                prefix = "RNA", e_vec = mat_1_denoised[,idx[j]],
+#                                c_vec = dcca_decomp$common_mat_1[,idx[j]],
+#                                d_vec = dcca_decomp$distinct_mat_1[,idx[j]],
+#                                e_res = e_res, c_res = c_res, d_res = d_res,
+#                                filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_highestr2_gene", j, ".png"))
+# }
+
+# # plot some of the genes with biggest difference
+# tmp <- sapply(gene_smoothed, function(x){
+#   (x$d_variance - x$c_variance)/x$e_variance
+# })
+# idx <- order(tmp, decreasing = T)[1:5]
+# for(j in 1:length(idx)){
+#   c_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], c_eig)
+#   d_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], d_eig)
+#   e_res <- compute_smooth_signal(mat_1_denoised[,idx[j]], e_eig)
+#   
+#   multiomicCCA::plot_laplacian(mbrain2, var_name = colnames(mat_1)[idx[j]], 
+#                                prefix = "RNA", e_vec = mat_1_denoised[,idx[j]],
+#                                c_vec = dcca_decomp$common_mat_1[,idx[j]],
+#                                d_vec = dcca_decomp$distinct_mat_1[,idx[j]],
+#                                e_res = e_res, c_res = c_res, d_res = d_res,
+#                                filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_biggestdiff_gene", j, ".png"))
+# }
+
+# # make a ggplot of the distinct-commmon
+# vec1 <- sapply(gene_smoothed, function(x){
+#   (x$d_variance - x$c_variance)/x$e_variance
+# })
+# vec2 <- sapply(gene_smoothed, function(x){x$d_variance - x$c_variance})
+# gene_factor <- rep(0, p1); gene_factor[order(vec2, decreasing = T)[1:100]] <- 1
+# gene_factor[which(colnames(mat_1_denoised) %in% gene_vec)] <- 2
+# size_vec <- rep(1, p1); size_vec[which(colnames(mat_1_denoised) %in% gene_vec)] <- 2
+# df <- data.frame(val1 = vec1, val2 = vec2,
+#                  idx = rank(vec1), 
+#                  gene_factor = gene_factor,
+#                  size_vec = size_vec,
+#                  text = colnames(mat_1_denoised))
+# # reshuffle
+# df <- df[order(df$gene_factor, decreasing = F),]
+# df$gene_factor <- as.factor(df$gene_factor)
+# plot1 <- ggplot2::ggplot(df, ggplot2::aes(x = idx, y = val1)) 
+# plot1 <- plot1 + ggplot2::geom_point(ggplot2::aes(color = gene_factor, size = size_vec))
+# plot1 <- plot1 + ggplot2::scale_size_continuous(range = c(1, 2))
+# plot1 <- plot1 + ggplot2::scale_colour_manual(values=c("black", "green", "red"))
+# plot1 <- plot1 + ggrepel::geom_text_repel(data = subset(df, gene_factor == 2), ggplot2::aes(label = text, color = gene_factor),
+#                                     box.padding = ggplot2::unit(0.5, 'lines'),
+#                                     point.padding = ggplot2::unit(1.6, 'lines'),
+#                                     nudge_y = 0.25, size = 2)
+# plot1 <- plot1 + ggplot2::geom_hline(yintercept = 0, linetype="dashed", 
+#                 color = "orange")
+# plot1 <- plot1 + ggplot2::xlab("Order of genes")
+# plot1 <- plot1 + ggplot2::ylab("Distinct variance - common variance")
+# plot1 <- plot1 + ggplot2::ggtitle("Gene-level decomposition")
+# plot1 <- plot1 + Seurat::NoLegend()
+# ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_rna_gene_decomposition.png"),
+#                 plot1, device = "png", width = 4, height = 4, units = "in")
+
+# # make a ggplot of the r2
+# vec1 <- sapply(gene_smoothed, function(x){min(abs(x$c_r2), abs(x$d_r2))})
+# vec2 <- sapply(gene_smoothed, function(x){x$d_variance - x$c_variance})
+# gene_factor <- rep(0, p1); gene_factor[order(vec2, decreasing = T)[1:100]] <- 1
+# gene_factor[which(colnames(mat_1_denoised) %in% gene_vec)] <- 2
+# size_vec <- rep(1, p1); size_vec[which(colnames(mat_1_denoised) %in% gene_vec)] <- 2
+# df <- data.frame(val1 = vec1, val2 = vec2,
+#                  idx = rank(vec1), 
+#                  gene_factor = gene_factor,
+#                  size_vec = size_vec,
+#                  text = colnames(mat_1_denoised))
+# # reshuffle
+# df <- df[order(df$gene_factor, decreasing = F),]
+# df$gene_factor <- as.factor(df$gene_factor)
+# plot1 <- ggplot2::ggplot(df, ggplot2::aes(x = idx, y = val1)) 
+# plot1 <- plot1 + ggplot2::geom_point(ggplot2::aes(color = gene_factor, size = size_vec))
+# plot1 <- plot1 + ggplot2::scale_size_continuous(range = c(1, 2))
+# plot1 <- plot1 + ggplot2::scale_colour_manual(values=c("black", "green", "red"))
+# plot1 <- plot1 + ggrepel::geom_text_repel(data = subset(df, gene_factor == 2), ggplot2::aes(label = text, color = gene_factor),
+#                                           box.padding = ggplot2::unit(0.5, 'lines'),
+#                                           point.padding = ggplot2::unit(1.6, 'lines'),
+#                                           nudge_y = -0.25, size = 2)
+# plot1 <- plot1 + ggplot2::xlab("Order of genes")
+# plot1 <- plot1 + ggplot2::ylab("Minimum R2 of conformity to graph structure")
+# plot1 <- plot1 + ggplot2::ggtitle("Gene-level decomposition")
+# plot1 <- plot1 + Seurat::NoLegend()
+# ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_dcca_rna_gene_conformity.png"),
+#                 plot1, device = "png", width = 4, height = 4, units = "in")
 
 
 ##########################################

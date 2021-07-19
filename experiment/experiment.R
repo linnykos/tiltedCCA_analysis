@@ -1,60 +1,50 @@
-rm(list=ls()); set.seed(10)
-
-library(Seurat); library(Signac); library(EnsDb.Hsapiens.v86); 
-library(BSgenome.Hsapiens.UCSC.hg38); library(GenomeInfoDb)
-library(dplyr); library(ggplot2); library(multiomicCCA)
-
-load("../../../../out/Writeup14/Writeup14_10x_mouseembryo_preprocess.RData")
-source("../Writeup14/Writeup14_peakcalling_function.R")
-date_of_run <- Sys.time(); session_info <- sessionInfo()
-
-mat_1 <- t(mbrain[["SCT"]]@scale.data)
-Seurat::DefaultAssay(mbrain) <- "ATAC"
-mat_2 <- Matrix::t(mbrain[["ATAC"]]@data[Seurat::VariableFeatures(object = mbrain),])
-
-head(rownames(mat_1)); head(colnames(mat_1))
-head(rownames(mat_2)); head(colnames(mat_2))
-dim(mat_1); dim(mat_2)
-metadata <- mbrain@meta.data
-
-#############
-
-
-cell_idx <- which(metadata$label_Savercat %in% c("Oligodendrocyte", "Hindbrain glycinergic", "Midbrain glutamatergic",
-                                                 "Forebrain glutamatergic", "Radial glia", "Forebrain GABAergic", 
-                                                 "Neuroblast", "Cajal-Retzius", "Mixed region GABAergic", 
-                                                 "Glioblast", "Cortical or hippocampal glutamatergic"))
 set.seed(10)
-rank_1 <- 30; rank_2 <- 50
-mat_1 <- mat_1[cell_idx,]; mat_2 <- mat_2[cell_idx,]
-dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 2:rank_2,
-                                      center_1 = T, center_2 = T,
-                                      meta_clustering = NA, num_neigh = 15, 
-                                      apply_shrinkage = F, fix_distinct_perc = F, 
-                                      verbose = T) 
-
-##################
-
-membership_vec <- as.factor(metadata$label_Savercat[cell_idx])
+n_clust <- 100
+B_mat <- matrix(c(0.9, 0.2, 0.1, 
+                  0.2, 0.9, 0.1,
+                  0.1, 0.1, 0.5), 3, 3, byrow = T)
+K <- ncol(B_mat); rho <- 1
+membership_vec <- c(rep(1, n_clust), rep(2, n_clust), rep(3, n_clust))
+n <- length(membership_vec); true_membership_vec <- membership_vec
+svd_u_1 <- generate_sbm_orthogonal(rho*B_mat, membership_vec, centered = T)
+svd_u_2 <- generate_sbm_orthogonal(rho*B_mat, membership_vec, centered = T)
 
 set.seed(10)
-rna_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = 15, membership_vec = membership_vec,
-                                         data_1 = T, data_2 = F,
-                                         radius_quantile = 0.5,
-                                         bool_matrix = T, verbose = T)
+p_1 <- 20; p_2 <- 40
+svd_d_1 <- sqrt(n*p_1)*c(1.5,1); svd_d_2 <- sqrt(n*p_2)*c(1.5,1)
+svd_v_1 <- generate_random_orthogonal(p_1, K-1)
+svd_v_2 <- generate_random_orthogonal(p_2, K-1)
 
 set.seed(10)
-atac_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = 15, membership_vec = membership_vec,
-                                          data_1 = F, data_2 = T,
-                                          radius_quantile = 0.5,
-                                          bool_matrix = T, verbose = T)
+dat <- generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2)
+dcca_obj <- dcca_factor(dat$mat_1, dat$mat_2, dims_1 = 1:(K-1), dims_2 = 1:(K-1), 
+                        verbose = F)
+membership_vec <- as.factor(membership_vec)
+list_g <- construct_frnn(dcca_obj, nn = 5, membership_vec = membership_vec, 
+                         verbose = F, bool_matrix = T)
 
-g <- atac_frnn$c_g
-zz <- sapply(1:nrow(g), function(x){length(multiomicCCA:::.nonzero_col(g, x, bool_value = F))})
-quantile(zz)
-g2 <- Matrix::t(g)
-zz <- sapply(1:nrow(g2), function(x){length(multiomicCCA:::.nonzero_col(g2, x, bool_value = F))})
-quantile(zz)
-g <- multiomicCCA:::.symmetrize_sparse(g, set_ones = F)
-zz <- sapply(1:nrow(g), function(x){length(multiomicCCA:::.nonzero_col(g, x, bool_value = F))})
-quantile(zz)
+set.seed(10)
+# res <- plot_embeddings2(dcca_obj, nn = 5, data_1 = T, data_2 = F, 
+#                         c_g = list_g[[1]], d_g = list_g[[2]], 
+#                         only_embedding = T, verbose = F)
+
+###########
+sampling_type = "adaptive_gaussian"
+keep_nn = T
+nn = 5
+c_g = list_g[[1]]
+d_g = list_g[[2]]
+list_g <- list(c_g = c_g, d_g = d_g)
+n <- nrow(c_g)
+list_output <- vector("list", 3)
+
+i = 1
+mat <- .symmetrize_sparse(list_g[[i]], set_ones = F)
+tmp <- .matrix_to_nnlist(mat)
+
+# remove edges randomly
+tmp <- .embedding_resampling(tmp$idx, tmp$dist, nn = nn, 
+                             sampling_type = sampling_type, keep_nn = keep_nn)
+rann_obj <- list(id = tmp$id, dist = tmp$dist)
+mat <- .nnlist_to_matrix(rann_obj)
+
