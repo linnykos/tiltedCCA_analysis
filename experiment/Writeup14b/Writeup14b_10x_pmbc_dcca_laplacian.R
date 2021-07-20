@@ -20,12 +20,13 @@ metadata <- pbmc@meta.data[cell_idx,]
 table(metadata$predicted.id)
 rm(list = "pbmc"); gc(T)
 
-set.seed(10)
-rank_1 <- 30; rank_2 <- 50; nn <- 30
-dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 2:rank_2,
-                                      meta_clustering = NA, num_neigh = nn, 
-                                      apply_shrinkage = F, fix_distinct_perc = F, 
-                                      verbose = T) 
+# set.seed(10)
+# rank_1 <- 30; rank_2 <- 50; nn <- 30
+# dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 2:rank_2,
+#                                       meta_clustering = NA, num_neigh = nn, 
+#                                       apply_shrinkage = F, fix_distinct_perc = F, 
+#                                       verbose = T) 
+load("../../../../out/Writeup14b/Writeup14b_10x_pbmc_dcca_laplacian_variablecalculations.RData"); nn <- 30
 
 dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res, verbose = T)
 mat_1_denoised <- dcca_decomp$common_mat_1 + dcca_decomp$distinct_mat_1
@@ -45,7 +46,7 @@ main_vec <- c("common", "distinct", "everything")
 set.seed(10)
 rna_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = nn, membership_vec = membership_vec,
                                          data_1 = T, data_2 = F,
-                                         radius_quantile = 0.5,
+                                         radius_quantile = 0.5, symmetrize = F, 
                                          bool_matrix = T, verbose = T)
 
 #compute all rna basis vectors
@@ -77,7 +78,7 @@ set.seed(10)
 atac_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = nn, membership_vec = membership_vec,
                                           data_1 = F, data_2 = T,
                                           radius_quantile = 0.5,
-                                          bool_matrix = T, verbose = T)
+                                          bool_matrix = T, symmetrize = F, verbose = T)
 
 #compute all the degree vectors
 k_max <- 200
@@ -189,6 +190,28 @@ plot1 <- Seurat::FeaturePlot(pbmc2, features = paste0("elap2_", 1:16), reduction
 ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_pbmc_dcca_atac_everything_basis.png"),
                 plot1, device = "png", width = 16, height = 12, units = "in")
 
+########################
+
+
+# compute local enrichment
+set.seed(10)
+rna_local <- multiomicCCA::clisi_information(rna_frnn$c_g, rna_frnn$d_g, rna_frnn$e_g, 
+                                             membership_vec = membership_vec)
+# rna_local$common_clisi$membership_info
+# rna_local$distinct_clisi$membership_info
+
+set.seed(10)
+atac_local <- multiomicCCA::clisi_information(atac_frnn$c_g, atac_frnn$d_g, atac_frnn$e_g, 
+                                              membership_vec = membership_vec)
+# atac_local$common_clisi$membership_info
+# atac_local$distinct_clisi$membership_info
+
+tmp <- multiomicCCA::plot_clisi(rna_local, atac_local, main1 = "RNA", main2 = "ATAC")
+tmp2 <- cowplot::plot_grid(tmp[[1]], tmp[[2]])
+cowplot::save_plot(filename = "../../../../out/figures/Writeup14b/Writeup14b_10x_pbmc_enrichment.png", 
+                   tmp2, ncol = 1, nrow = 2, base_height = 1.75, base_asp = 4, device = "png")
+
+#######################
 
 
 

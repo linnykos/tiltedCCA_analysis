@@ -217,100 +217,19 @@ ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b
 set.seed(10)
 rna_local <- multiomicCCA::clisi_information(rna_frnn$c_g, rna_frnn$d_g, rna_frnn$e_g, 
                                              membership_vec = membership_vec)
-rna_local$common_clisi$membership_info
-rna_local$distinct_clisi$membership_info
+# rna_local$common_clisi$membership_info
+# rna_local$distinct_clisi$membership_info
 
 set.seed(10)
 atac_local <- multiomicCCA::clisi_information(atac_frnn$c_g, atac_frnn$d_g, atac_frnn$e_g, 
                                              membership_vec = membership_vec)
-atac_local$common_clisi$membership_info
-atac_local$distinct_clisi$membership_info
+# atac_local$common_clisi$membership_info
+# atac_local$distinct_clisi$membership_info
 
-n <- nrow(rna_local$common_clisi$cell_info)
-k <- nrow(rna_local$common_clisi$membership_info)
-df <- data.frame(celltype = as.factor(c(paste0(as.character(rna_local$common_clisi$cell_info$celltype), "0"), 
-                                        as.character(rna_local$common_clisi$membership_info$celltype))), 
-                 common = c(rna_local$common_clisi$cell_info$clisi_score, rna_local$common_clisi$membership_info$mean_clisi),
-                 distinct = c(rna_local$distinct_clisi$cell_info$clisi_score, rna_local$distinct_clisi$membership_info$mean_clisi),
-                 category = as.factor(c(rep(0, n), rep(1, k))))
-col_vec <- scales::hue_pal()(k)
-bg_col_vec <- multiomicCCA:::.adjust_colors(col_vec, l_bg = 75, c_bg = 50, alpha_bg = 0.5)
-all_col_vec <- c(col_vec, bg_col_vec)
-tmp <- rna_local$common_clisi$membership_info$celltype
-names(all_col_vec) <- c(tmp, paste0(tmp, "0"))
-custom_colors <- ggplot2::scale_colour_manual(values = all_col_vec)
-
-category = celltype = common = distinct = NULL
-plot1 <- ggplot2::ggplot(data = subset(df, category == 0), ggplot2::aes(x = distinct, y = common, color = celltype))
-plot1 <- plot1 + ggplot2::geom_point()
-plot1 <- plot1 + ggplot2::xlim(1, 0) + ggplot2::ylim(0, 1)
-plot1 <- plot1 + ggplot2::geom_abline(intercept = 1, slope = 1, color = "red", linetype = "dashed")
-plot1 <- plot1 + ggplot2::geom_point(data = subset(df, category == 1), 
-                                     ggplot2::aes(x = distinct, y = common), 
-                                     size = 3, color = "black")
-plot1 <- plot1 + ggplot2::geom_point(data = subset(df, category == 1), 
-                                     ggplot2::aes(x = distinct, y = common), 
-                                     size = 2.5, color = "white")
-plot1 <- plot1 + ggplot2::geom_point(data = subset(df, category == 1), 
-                                     ggplot2::aes(x = distinct, y = common,
-                                                  color = celltype), 
-                                     size = 2)
-plot1 <- plot1 + custom_colors
-plot1 <- plot1 + ggrepel::geom_text_repel(data = subset(df, category == 1), ggplot2::aes(label = celltype),
-                                          color = "black",
-                                          segment.color = "grey50",
-                                          size = 2)
-# see directions at https://ggrepel.slowkow.com/articles/examples.html
-plot1 <- plot1 + ggplot2::xlab("Distinct enrichment")
-plot1 <- plot1 + ggplot2::ylab("Common enrichment")
-plot1 <- plot1 + ggplot2::ggtitle("RNA")
-plot1 <- plot1 + Seurat::NoLegend()
-# ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_rna_enrichment.png"),
-#                 plot1, device = "png", width = 4, height = 4, units = "in")
-
-n <- nrow(atac_local$common_clisi$cell_info)
-k <- nrow(atac_local$common_clisi$membership_info)
-df <- data.frame(celltype = as.factor(c(paste0(as.character(atac_local$common_clisi$cell_info$celltype), "0"), 
-                                        as.character(atac_local$common_clisi$membership_info$celltype))), 
-                 common = c(atac_local$common_clisi$cell_info$clisi_score, atac_local$common_clisi$membership_info$mean_clisi),
-                 distinct = c(atac_local$distinct_clisi$cell_info$clisi_score, atac_local$distinct_clisi$membership_info$mean_clisi),
-                 category = as.factor(c(rep(0, n), rep(1, k))))
-col_vec <- scales::hue_pal()(k)
-bg_col_vec <- multiomicCCA:::.adjust_colors(col_vec, l_bg = 75, c_bg = 50, alpha_bg = 0.5)
-all_col_vec <- c(col_vec, bg_col_vec)
-tmp <- atac_local$common_clisi$membership_info$celltype
-names(all_col_vec) <- c(tmp, paste0(tmp, "0"))
-custom_colors <- ggplot2::scale_colour_manual(values = all_col_vec)
-
-plot2 <- ggplot2::ggplot(data = subset(df, category == 0), ggplot2::aes(x = distinct, y = common, color = celltype))
-plot2 <- plot2 + ggplot2::geom_point()
-plot2 <- plot2 + ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1)
-plot2 <- plot2 + ggplot2::geom_abline(intercept = 1, slope = -1, color = "red", linetype = "dashed")
-plot2 <- plot2 + ggplot2::geom_point(data = subset(df, category == 1), 
-                                     ggplot2::aes(x = distinct, y = common), 
-                                     size = 3, color = "black")
-plot2 <- plot2 + ggplot2::geom_point(data = subset(df, category == 1), 
-                                     ggplot2::aes(x = distinct, y = common), 
-                                     size = 2.5, color = "white")
-plot2 <- plot2 + ggplot2::geom_point(data = subset(df, category == 1), 
-                                     ggplot2::aes(x = distinct, y = common,
-                                                  color = celltype), 
-                                     size = 2)
-plot2 <- plot2 + custom_colors
-plot2 <- plot2 + ggrepel::geom_text_repel(data = subset(df, category == 1), ggplot2::aes(label = celltype),
-                                          color = "black",
-                                          segment.color = "grey50",
-                                          size = 2)
-plot2 <- plot2 + ggplot2::xlab("Distinct enrichment")
-plot2 <- plot2 + ggplot2::ylab("Common enrichment")
-plot2 <- plot2 + ggplot2::ggtitle("ATAC")
-plot2 <- plot2 + Seurat::NoLegend()
-
-arrange <- ggpubr::ggarrange(plot1, plot2, ncol = 2, nrow = 1)
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_enrichment.png"),
-                arrange, device = "png", width = 8, height = 4, units = "in")
-
-
+tmp <- multiomicCCA::plot_clisi(rna_local, atac_local)
+tmp2 <- cowplot::plot_grid(tmp[[1]], tmp[[2]])
+cowplot::save_plot(filename = "../../../../out/figures/Writeup14b/Writeup14b_10x_mouseembryo_enrichment.png", 
+                   tmp2, ncol = 1, nrow = 2, base_height = 1.75, base_asp = 4, device = "png")
 
 
 ########################
