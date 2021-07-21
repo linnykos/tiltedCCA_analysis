@@ -1,5 +1,5 @@
 rm(list=ls())
-load("../../../../out/Writeup11/Writeup11_citeseq_bm25_preprocessed.RData")
+load("../../../../out/Writeup11/Writeup11_citeseq_pbmc228_preprocessed2.RData")
 
 library(Seurat)
 library(multiomicCCA)
@@ -8,15 +8,16 @@ set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
-mat_1 <- t(bm[["RNA"]]@scale.data)
-mat_2 <- t(bm[["ADT"]]@scale.data)
-
-range(table(bm@meta.data$celltype.l2))
+mat_1 <- t(pbmc[["SCT"]]@scale.data)
+mat_2 <- t(pbmc[["ADT"]]@scale.data)
+dim(mat_1); dim(mat_2)
+metadata <- pbmc@meta.data
+rm(list = "pbmc"); gc(T)
 
 set.seed(10)
-rank_1 <- 30; rank_2 <- 18; nn <- 30
+rank_1 <- 40; rank_2 <- 50; nn <- 30
 dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 1:rank_2,
-                                      meta_clustering = NA, num_neigh = nn,
+                                      meta_clustering = NA, num_neigh = nn, cell_max = 15000,
                                       apply_shrinkage = F, fix_distinct_perc = F, 
                                       verbose = T) 
 
@@ -26,14 +27,13 @@ mat_1_denoised <- dcca_decomp$common_mat_1 + dcca_decomp$distinct_mat_1
 mat_2_denoised <- dcca_decomp$common_mat_2 + dcca_decomp$distinct_mat_2
 
 save(date_of_run, session_info, dcca_res,
-     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc25_dcca.RData")
+     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca.RData")
 
-###############
+##################
 
 pbmc2 <- Seurat::CreateSeuratObject(counts = t(mat_1_denoised))
-pbmc2[["celltype"]] <- bm@meta.data$celltype.l2
-membership_vec <- as.factor(bm@meta.data$celltype.l2)
-rm(list = "bm"); gc()
+pbmc2[["celltype"]] <- metadata$celltype.l2
+membership_vec <- as.factor(metadata$celltype.l2)
 
 title_vec <- c("Common view", "Distinct view", "Everything view")
 main_vec <- c("common", "distinct", "everything")
@@ -68,15 +68,15 @@ pbmc2[["distinct"]] <- Seurat::CreateDimReducObject(embedding = rna_embeddings[[
 pbmc2[["everything"]] <- Seurat::CreateDimReducObject(embedding = rna_embeddings[[3]], key = "UMAP", assay = "RNA")
 
 save(date_of_run, session_info, dcca_res, pbmc2, rna_frnn,
-     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc25_dcca.RData")
+     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca.RData")
 
 ################
 
 set.seed(10)
 protein_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = nn, membership_vec = membership_vec,
-                                          data_1 = F, data_2 = T,
-                                          radius_quantile = 0.5,
-                                          bool_matrix = T, symmetrize = F, verbose = T)
+                                             data_1 = F, data_2 = T,
+                                             radius_quantile = 0.5,
+                                             bool_matrix = T, symmetrize = F, verbose = T)
 
 #compute all the degree vectors
 k_max <- 200
@@ -93,16 +93,16 @@ pbmc2[["elap2"]] <- Seurat::CreateDimReducObject(embedding = e_eig2, key = "elap
 
 set.seed(10)
 protein_embeddings <- multiomicCCA::plot_embeddings2(dcca_res, nn = nn, data_1 = F, data_2 = T,
-                                                  c_g = protein_frnn$c_g, d_g = protein_frnn$d_g, 
-                                                  only_embedding = T, verbose = T, 
-                                                  sampling_type = "adaptive_gaussian",
-                                                  keep_nn = T)
+                                                     c_g = protein_frnn$c_g, d_g = protein_frnn$d_g, 
+                                                     only_embedding = T, verbose = T, 
+                                                     sampling_type = "adaptive_gaussian",
+                                                     keep_nn = T)
 pbmc2[["common2"]] <- Seurat::CreateDimReducObject(embedding = protein_embeddings[[1]], key = "UMAP", assay = "RNA")
 pbmc2[["distinct2"]] <- Seurat::CreateDimReducObject(embedding = protein_embeddings[[2]], key = "UMAP", assay = "RNA")
 pbmc2[["everything2"]] <- Seurat::CreateDimReducObject(embedding = protein_embeddings[[3]], key = "UMAP", assay = "RNA")
 
 save(date_of_run, session_info, dcca_res, pbmc2, rna_frnn, protein_frnn,
-     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc25_dcca.RData")
+     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca.RData")
 
 ##########################
 
@@ -125,7 +125,7 @@ both_embeddings <- multiomicCCA::plot_embeddings(dcca_res, membership_vec = memb
 pbmc2[["both"]] <- Seurat::CreateDimReducObject(embedding = both_embeddings$everything, key = "UMAP", assay = "RNA")
 
 save(date_of_run, session_info, dcca_res, pbmc2,
-     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc25_dcca.RData")
+     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca.RData")
 
 #####################################
 
@@ -157,8 +157,6 @@ protein_smoothed <- lapply(1:p2, function(j){
 
 save(date_of_run, session_info, dcca_res, pbmc2, 
      gene_smoothed, protein_smoothed,
-     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc25_dcca.RData")
+     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca.RData")
 
-
-# ##########################################3
 
