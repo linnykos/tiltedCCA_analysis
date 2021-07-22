@@ -35,6 +35,9 @@ rna_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = nn, membership_vec = mem
                                          radius_quantile = 0.5, symmetrize = F, 
                                          bool_matrix = T, verbose = T)
 
+save(date_of_run, session_info, rna_frnn, 
+     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca2.RData")
+
 #compute all rna basis vectors
 k_max <- 50
 c_eig <- multiomicCCA::compute_laplacian(rna_frnn$c_g, k_max = k_max, rowname_vec = colnames(pbmc2), 
