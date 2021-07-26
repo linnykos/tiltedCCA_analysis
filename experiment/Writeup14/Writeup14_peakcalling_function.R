@@ -15,7 +15,7 @@ getPeaksForGenes=function(seurat.obj, gene.names, get.nearby.genes=FALSE,
   genes.near <- rep("",0)
   
   TSS.all <- ifelse(BiocGenerics::strand(annotations)=="+", BiocGenerics::start(annotations), BiocGenerics::end(annotations))
-  TSS.all <- GenomicRanges::GRanges(seqnames = seqnames(annotations), 
+  TSS.all <- GenomicRanges::GRanges(seqnames = GenomeInfoDb::seqnames(annotations), 
                                     ranges = IRanges::IRanges(start=TSS.all, width=1), 
                                     strand = BiocGenerics::strand(annotations), 
                                     gene_name = annotations$gene_name)

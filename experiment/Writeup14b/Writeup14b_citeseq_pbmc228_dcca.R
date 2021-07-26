@@ -13,6 +13,12 @@ mat_2 <- t(pbmc[["ADT"]]@scale.data)
 dim(mat_1); dim(mat_2)
 metadata <- pbmc@meta.data
 rm(list = "pbmc"); gc(T)
+membership_vec <- as.factor(metadata$celltype.l2)
+
+set.seed(10)
+idx <- multiomicCCA::construct_celltype_subsample(membership_vec, min_subsample_cell = 3000)
+membership_vec <- membership_vec[idx]
+mat_1 <- mat_1[idx,]; mat_2 <- mat_2[idx,]
 
 set.seed(10)
 rank_1 <- 40; rank_2 <- 50; nn <- 30
@@ -26,8 +32,6 @@ save(date_of_run, session_info, dcca_res,
 
 rm(list = c("mat_1", "mat_2")); gc(T)
 ##################
-
-membership_vec <- as.factor(metadata$celltype.l2)
 
 set.seed(10)
 rna_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = nn, membership_vec = membership_vec,
@@ -46,6 +50,8 @@ d_eig <- multiomicCCA::compute_laplacian(rna_frnn$d_g, k_max = k_max, rowname_ve
                                          colname_vec = paste0("dlap_", 1:k_max), verbose = F)
 e_eig <- multiomicCCA::compute_laplacian(rna_frnn$e_g, k_max = k_max, rowname_vec = colnames(pbmc2), 
                                          colname_vec = paste0("elap_", 1:k_max), verbose = F)
+
+print("Finished eigenbasis")
 
 set.seed(10)
 rna_embeddings <- multiomicCCA::plot_embeddings2(dcca_res, nn = nn, data_1 = T, data_2 = F,
