@@ -26,6 +26,7 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 
                                       meta_clustering = NA, num_neigh = nn, cell_max = 15000,
                                       apply_shrinkage = F, fix_distinct_perc = F, 
                                       verbose = T) 
+cell_name <- rownames(mat_1)
 
 save(date_of_run, session_info, dcca_res,
      file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca1.RData")
@@ -44,11 +45,11 @@ save(date_of_run, session_info, rna_frnn,
 
 #compute all rna basis vectors
 k_max <- 50
-c_eig <- multiomicCCA::compute_laplacian(rna_frnn$c_g, k_max = k_max, rowname_vec = colnames(pbmc2), 
+c_eig <- multiomicCCA::compute_laplacian(rna_frnn$c_g, k_max = k_max, rowname_vec = cell_name, 
                                          colname_vec = paste0("clap_", 1:k_max), verbose = F)
-d_eig <- multiomicCCA::compute_laplacian(rna_frnn$d_g, k_max = k_max, rowname_vec = colnames(pbmc2), 
+d_eig <- multiomicCCA::compute_laplacian(rna_frnn$d_g, k_max = k_max, rowname_vec = cell_name, 
                                          colname_vec = paste0("dlap_", 1:k_max), verbose = F)
-e_eig <- multiomicCCA::compute_laplacian(rna_frnn$e_g, k_max = k_max, rowname_vec = colnames(pbmc2), 
+e_eig <- multiomicCCA::compute_laplacian(rna_frnn$e_g, k_max = k_max, rowname_vec = cell_name, 
                                          colname_vec = paste0("elap_", 1:k_max), verbose = F)
 
 print("Finished eigenbasis")
@@ -75,11 +76,11 @@ protein_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = nn, membership_vec =
 
 #compute all the degree vectors
 k_max <- 50
-c_eig2 <- multiomicCCA::compute_laplacian(protein_frnn$c_g, k_max = k_max, rowname_vec = colnames(pbmc2), 
+c_eig2 <- multiomicCCA::compute_laplacian(protein_frnn$c_g, k_max = k_max, rowname_vec = cell_name, 
                                           colname_vec = paste0("clap_", 1:k_max), verbose = F)
-d_eig2 <- multiomicCCA::compute_laplacian(protein_frnn$d_g, k_max = k_max, rowname_vec = colnames(pbmc2), 
+d_eig2 <- multiomicCCA::compute_laplacian(protein_frnn$d_g, k_max = k_max, rowname_vec = cell_name, 
                                           colname_vec = paste0("dlap_", 1:k_max), verbose = F)
-e_eig2 <- multiomicCCA::compute_laplacian(protein_frnn$e_g, k_max = k_max, rowname_vec = colnames(pbmc2), 
+e_eig2 <- multiomicCCA::compute_laplacian(protein_frnn$e_g, k_max = k_max, rowname_vec = cell_name, 
                                           colname_vec = paste0("elap_", 1:k_max), verbose = F)
 
 set.seed(10)
@@ -105,7 +106,7 @@ set.seed(10)
 combined_common_umap <- Seurat::RunUMAP(combined_g, assay = "RNA")@cell.embeddings
 
 save(date_of_run, session_info, combined_common_umap,
-     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc25_dcca4.RData")
+     file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca4.RData")
 
 rm(list = c("rna_frnn", "protein_frnn", "combined_g")); gc(T)
 
