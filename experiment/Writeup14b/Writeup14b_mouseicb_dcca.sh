@@ -2,6 +2,6 @@
 #$ -N mouseicb_dcca
 #$ -j y
 #$ -o ../../../../out/Writeup14b/qsub/
-#$ -l m_mem_free=200G
+#$ -l m_mem_free=150G
 
 Rscript --no-save Writeup14b_mouseicb_dcca.R
