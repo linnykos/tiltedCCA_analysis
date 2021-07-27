@@ -8,14 +8,20 @@ set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
+membership_vec <- as.character(myeloid@meta.data$sample)
+membership_vec <- sapply(membership_vec, function(x){
+        paste0(strsplit(x, split = "_")[[1]][1:2], collapse = "_")
+})
+names(membership_vec) <- NULL
+membership_vec <- as.factor(membership_vec)
+table(membership_vec)
+range(table(membership_vec))
+
 mat_1 <- t(myeloid[["SCT"]]@scale.data)
 
 Seurat::DefaultAssay(myeloid) <- "ATAC"
 myeloid <- Seurat::ScaleData(myeloid)
 mat_2 <- t(myeloid[["ATAC"]]@scale.data)
-
-membership_vec <- as.factor(myeloid@meta.data$sample)
-range(table(membership_vec))
 
 set.seed(10)
 rank_1 <- 50; rank_2 <- 50; nn <- 30
@@ -120,7 +126,7 @@ set.seed(10)
 combined_common_umap <- Seurat::RunUMAP(combined_g, assay = "RNA")@cell.embeddings
 myeloid2[["combined"]] <- Seurat::CreateDimReducObject(embedding = combined_common_umap, key = "UMAP", assay = "RNA")
 
-save(date_of_run, session_info, dcca_res, myeloid2,
+save(date_of_run, session_info, dcca_res, myeloid2, rna_frnn, atac_frnn,
      file = "../../../../out/Writeup14b/Writeup14b_mouseicb_dcca.RData")
 
 set.seed(10)
@@ -129,6 +135,37 @@ both_embeddings <- multiomicCCA::plot_embeddings(dcca_res, membership_vec = memb
                                                  only_embedding = T)
 myeloid2[["both"]] <- Seurat::CreateDimReducObject(embedding = both_embeddings$everything, key = "UMAP", assay = "RNA")
 
-save(date_of_run, session_info, dcca_res, myeloid2,
+save(date_of_run, session_info, dcca_res, myeloid2, rna_frnn, atac_frnn,
      file = "../../../../out/Writeup14b/Writeup14b_mouseicb_dcca.RData")
 
+#################
+
+p1 <- ncol(mat_1_denoised)
+gene_smoothed <- lapply(1:p1, function(j){
+        print(j)
+        
+        c_res <- compute_smooth_signal(mat_1_denoised[,j], c_eig)
+        d_res <- compute_smooth_signal(mat_1_denoised[,j], d_eig)
+        e_res <- compute_smooth_signal(mat_1_denoised[,j], e_eig)
+        
+        list(c_variance = c_res$variance, c_r2 = c_res$r_squared,
+             d_variance = d_res$variance, d_r2 = d_res$r_squared,
+             e_variance = e_res$variance, e_r2 = e_res$r_squared)
+})
+
+p2 <- ncol(mat_2_denoised)
+atac_smoothed <- lapply(1:p2, function(j){
+        print(j)
+        
+        c_res <- compute_smooth_signal(mat_2_denoised[,j], c_eig2)
+        d_res <- compute_smooth_signal(mat_2_denoised[,j], d_eig2)
+        e_res <- compute_smooth_signal(mat_2_denoised[,j], e_eig2)
+        
+        list(c_variance = c_res$variance, c_r2 = c_res$r_squared,
+             d_variance = d_res$variance, d_r2 = d_res$r_squared,
+             e_variance = e_res$variance, e_r2 = e_res$r_squared)
+})
+
+save(date_of_run, session_info, dcca_res, pbmc2, rna_frnn, atac_frnn,
+     gene_smoothed, atac_smoothed,
+     file = "../../../../out/Writeup14b/Writeup14b_mouseicb_dcca.RData")

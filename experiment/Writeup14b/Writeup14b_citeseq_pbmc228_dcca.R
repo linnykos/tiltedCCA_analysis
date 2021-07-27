@@ -28,7 +28,7 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 
                                       verbose = T) 
 cell_name <- rownames(mat_1)
 
-save(date_of_run, session_info, dcca_res,
+save(date_of_run, session_info, dcca_res, membership_vec, 
      file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca1.RData")
 
 rm(list = c("mat_1", "mat_2")); gc(T)
@@ -40,7 +40,7 @@ rna_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = nn, membership_vec = mem
                                          radius_quantile = 0.5, symmetrize = F, 
                                          bool_matrix = T, verbose = T)
 
-save(date_of_run, session_info, rna_frnn, 
+save(date_of_run, session_info, rna_frnn,
      file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca2.RData")
 
 #compute all rna basis vectors
@@ -118,7 +118,8 @@ both_embeddings <- multiomicCCA::plot_embeddings(dcca_res, membership_vec = memb
 save(date_of_run, session_info, both_embeddings,
      file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc228_dcca5.RData")
 
-rm(list = c("dcca_res", "both_embeddings")); gc(T)
+rm(list = "both_embeddings"); gc(T)
+
 #####################################
 
 dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res, rank_c = min(rank_1, rank_2), 

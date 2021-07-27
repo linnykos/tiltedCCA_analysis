@@ -115,7 +115,7 @@ set.seed(10)
 combined_common_umap <- Seurat::RunUMAP(combined_g, assay = "RNA")@cell.embeddings
 pbmc2[["combined"]] <- Seurat::CreateDimReducObject(embedding = combined_common_umap, key = "UMAP", assay = "RNA")
 
-save(date_of_run, session_info, dcca_res, pbmc2,
+save(date_of_run, session_info, dcca_res, pbmc2, rna_frnn, protein_frnn,
      file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc25_dcca.RData")
 
 set.seed(10)
@@ -124,7 +124,7 @@ both_embeddings <- multiomicCCA::plot_embeddings(dcca_res, membership_vec = memb
                                                  only_embedding = T)
 pbmc2[["both"]] <- Seurat::CreateDimReducObject(embedding = both_embeddings$everything, key = "UMAP", assay = "RNA")
 
-save(date_of_run, session_info, dcca_res, pbmc2,
+save(date_of_run, session_info, dcca_res, pbmc2, rna_frnn, protein_frnn,
      file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc25_dcca.RData")
 
 #####################################
@@ -156,7 +156,7 @@ protein_smoothed <- lapply(1:p2, function(j){
 })
 
 save(date_of_run, session_info, dcca_res, pbmc2, 
-     gene_smoothed, protein_smoothed,
+     gene_smoothed, protein_smoothed, rna_frnn, protein_frnn,
      file = "../../../../out/Writeup14b/Writeup14b_citeseq_pbmc25_dcca.RData")
 
 
