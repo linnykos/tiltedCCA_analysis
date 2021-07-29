@@ -76,7 +76,7 @@ ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14b/Writeup14b
 
 ##################
 
-membership_vec <- as.factor(myeloid2[["celltype"]][,1]); nn <- 30
+membership_vec <- as.factor(myeloid2@meta.data$celltype); nn <- 30
 
 # compute local enrichment
 set.seed(10)
