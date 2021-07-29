@@ -9,69 +9,53 @@ combined_g <- multiomicCCA::combine_frnn(dcca_res, g_1 = rna_frnn$c_g,
 
 tmp <- myeloid2[["distinct"]]@cell.embeddings
 # idx1 <- which(myeloid2@meta.data$celltype == "B16_dICB")
-idx1 <- which(tmp[,1] <= -3.5)
+idx1 <- which(tmp[,1] <= -4)
 idx2 <- which(tmp[,2] >= -2.5)
-idx3 <- which(tmp[,2] <= -1)
+idx3 <- which(tmp[,2] <= -1.5)
 start_idx <- intersect(idx1, intersect(idx2, idx3))
 table(myeloid2@meta.data$celltype[start_idx])
 
-.clisi_cell <- function(g, idx, tol = 1e-3){
-  target_bg <- length(idx)/nrow(g)
-  
-  vec <- sapply(idx, function(i){
-    neigh <- multiomicCCA:::.nonzero_col(g, i, bool_value = F)
-    len <- length(neigh)
-    if(len == 0){
-      return(0)
-    }
-    in_len <- length(which(neigh %in% idx))
-    
-    max((in_len/len - target_bg + tol)/(1-target_bg+tol), 0)
-  })
-  
-  median(vec)
+multiomicCCA::compute_enrichment_scores(combined_g, rna_frnn$d_g, atac_frnn$d_g, start_idx)
+
+set.seed(10)
+res <- multiomicCCA::detect_rare_cell(combined_g, rna_frnn$d_g, atac_frnn$d_g, start_idx,
+                                      common_enrich = F, distinct_enrich_1 = T, 
+                                      distinct_enrich_2 = F, verbose = T)
+
+multiomicCCA::compute_enrichment_scores(combined_g, rna_frnn$d_g, atac_frnn$d_g, res$idx)
+table(myeloid2@meta.data$celltype[res$idx])
+
+####################
+
+.plot_umap <- function(layout, full_col_vec, idx, main){
+  tmp_col_vec <- full_col_vec; tmp_col_vec[-idx] <- "gray"
+  size_vec <- rep(0.5, n); size_vec[idx] <- 2
+  plot(layout[-idx,1], layout[-idx,2], 
+       xlim = range(layout[,1]), ylim = range(layout[,2]),
+       asp = T, col = tmp_col_vec[-idx], 
+       cex = size_vec[-idx], pch = 16, xlab = "UMAP 1", ylab = "UMAP 2",
+       main = main)
+  points(layout[idx,1], layout[idx,2],
+         col = tmp_col_vec[idx], cex = size_vec[idx])
+  invisible()
 }
 
-common_score <- .clisi_cell(combined_g, start_idx)
-distinct_score1 <- .clisi_cell(rna_frnn$d_g, start_idx)
-distinct_score2 <- .clisi_cell(atac_frnn$d_g, start_idx)
-base_vec <- c(common_score, distinct_score1, distinct_score2)
-tol <- 0.02
-base_vec
+full_col_vec <- scales::hue_pal()(4)[as.numeric(as.factor(myeloid2@meta.data$celltype))]
+n <- length(full_col_vec)
 
-iter <- 1
-tries <- 10
-idx <- start_idx
-while(TRUE){
-  print(paste0("Iteration ", iter, ": Length of ", length(idx)))
-  neigh_list <- unlist(lapply(idx, function(i){
-    multiomicCCA:::.nonzero_col(combined_g, i, bool_value = F)
-  }))
-  neigh_list <- setdiff(neigh_list, idx)
-  if(length(neigh_list) == 0) break()
-  candidates <- sort(table(neigh_list), decreasing = T)
-  try_idx <- 1
-  
-  while(try_idx <= tries){
-    bool_continue <- FALSE
-    tmp_idx <- c(idx, as.numeric(names(candidates[try_idx])))
-    common_score <- .clisi_cell(combined_g, tmp_idx)
-    distinct_score1 <- .clisi_cell(rna_frnn$d_g, tmp_idx)
-    distinct_score2 <- .clisi_cell(atac_frnn$d_g, tmp_idx)
-    
-    bool1 <- common_score <= base_vec[1]+tol
-    bool2 <- distinct_score1 >= 2/3 #base_vec[2]-tol
-    bool3 <- distinct_score2 <= base_vec[3]+tol
-    
-    if(bool1 & bool2 & bool3){
-      idx <- unique(tmp_idx); bool_continue <- TRUE; break()
-    } else {
-      try_idx <- try_idx + 1
-    }
-  }
-  
-  if(!bool_continue) break()
-  
-  print(round(c(common_score, distinct_score1, distinct_score2), 2))
-  iter <- iter + 1
-}
+png("../../../../out/figures/Writeup14b/Writeup14b_mouseicb_distinct1.png", 
+    width = 3000, height = 2000, units = "px", res = 300)
+par(mfcol = c(2,3), mar = c(4,4,4,0.1))
+layout <- myeloid2[["combined"]]@cell.embeddings
+.plot_umap(layout, full_col_vec, start_idx, "Common combined,\nInitial")
+.plot_umap(layout, full_col_vec, res$idx, "Common combined,\nFinal")
+
+layout <- myeloid2[["distinct"]]@cell.embeddings
+.plot_umap(layout, full_col_vec, start_idx, "RNA distinct,\nInitial")
+.plot_umap(layout, full_col_vec, res$idx, "RNA distinct,\nFinal")
+
+layout <- myeloid2[["distinct2"]]@cell.embeddings
+.plot_umap(layout, full_col_vec, start_idx, "ATAC distinct,\nInitial")
+.plot_umap(layout, full_col_vec, res$idx, "ATAC distinct,\nFinal")
+graphics.off()
+
