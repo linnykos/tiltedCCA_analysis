@@ -144,23 +144,27 @@ p1 <- ncol(mat_1_denoised)
 gene_smoothed <- lapply(1:p1, function(j){
         print(j)
         
-        c_res <- compute_smooth_signal(mat_1_denoised[,j], c_eig)
-        d_res <- compute_smooth_signal(mat_1_denoised[,j], d_eig)
-        e_res <- compute_smooth_signal(mat_1_denoised[,j], e_eig)
+        c_res <- multiomicCCA::compute_smooth_signal(mat_1_denoised[,j], c_eig)
+        d_res <- multiomicCCA::compute_smooth_signal(mat_1_denoised[,j], d_eig)
+        e_res <- multiomicCCA::compute_smooth_signal(mat_1_denoised[,j], e_eig)
         
         list(c_variance = c_res$variance, c_r2 = c_res$r_squared,
              d_variance = d_res$variance, d_r2 = d_res$r_squared,
              e_variance = e_res$variance, e_r2 = e_res$r_squared)
 })
 
+save(date_of_run, session_info, dcca_res, myeloid2, rna_frnn, atac_frnn, combined_g,
+     gene_smoothed, 
+     file = "../../../../out/Writeup14b/Writeup14b_mouseicb_dcca.RData")
+
 print("Starting ATAC smooth")
 p2 <- ncol(mat_2_denoised)
 atac_smoothed <- lapply(1:p2, function(j){
         print(j)
         
-        c_res <- compute_smooth_signal(mat_2_denoised[,j], c_eig2)
-        d_res <- compute_smooth_signal(mat_2_denoised[,j], d_eig2)
-        e_res <- compute_smooth_signal(mat_2_denoised[,j], e_eig2)
+        c_res <- multiomicCCA::compute_smooth_signal(mat_2_denoised[,j], c_eig2)
+        d_res <- multiomicCCA::compute_smooth_signal(mat_2_denoised[,j], d_eig2)
+        e_res <- multiomicCCA::compute_smooth_signal(mat_2_denoised[,j], e_eig2)
         
         list(c_variance = c_res$variance, c_r2 = c_res$r_squared,
              d_variance = d_res$variance, d_r2 = d_res$r_squared,

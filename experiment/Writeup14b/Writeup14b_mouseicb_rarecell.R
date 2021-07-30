@@ -1,5 +1,5 @@
 rm(list=ls())
-load("../../../../out/Writeup14b/Writeup14b_mouseicb_dcca.RData")
+load("../../../../out/Writeup14b/Writeup14b_mouseicb_dcca_tmp.RData")
 source("custom_plotting.R")
 
 # nn <- 30
@@ -121,4 +121,42 @@ png("../../../../out/figures/Writeup14b/Writeup14b_mouseicb_distinct3b.png",
 .custom_plot2(myeloid2, full_col_vec, res)
 graphics.off()
 
+#######################
+
+
+tmp <- myeloid2[["combined"]]@cell.embeddings
+idx1 <- which(tmp[,1] <= -3)
+idx2 <- which(tmp[,1] >= -3.5)
+idx3 <- which(tmp[,2] >= 0)
+idx4 <- which(tmp[,2] <= 0.5)
+idx5 <- which(myeloid2@meta.data$celltype == "R499_dICB")
+start_idx <- Reduce(intersect, list(idx1, idx2, idx3, idx4, idx5))
+table(myeloid2@meta.data$celltype[start_idx])
+
+multiomicCCA::compute_enrichment_scores(combined_g, rna_frnn$d_g, atac_frnn$d_g, start_idx)
+
+set.seed(10)
+res <- multiomicCCA::detect_rare_cell(combined_g, rna_frnn$d_g, atac_frnn$d_g, start_idx,
+                                      common_enrich = T, distinct_enrich_1 = F, 
+                                      distinct_enrich_2 = F, 
+                                      custom_threshold = c(0.2, 0.1, 0.05),
+                                      deg_threshold = 0, max_size = 250,
+                                      verbose = T)
+table(myeloid2@meta.data$celltype[res$idx])
+length(res$idx)/length(res$baseline_idx)
+
+
+full_col_vec <- scales::hue_pal()(4)[as.numeric(as.factor(myeloid2@meta.data$celltype))]
+n <- length(full_col_vec)
+
+png("../../../../out/figures/Writeup14b/Writeup14b_mouseicb_common1.png", 
+    width = 3000, height = 2000, units = "px", res = 300)
+.custom_plot1(myeloid2, full_col_vec, res)
+graphics.off()
+
+
+png("../../../../out/figures/Writeup14b/Writeup14b_mouseicb_common1b.png", 
+    width = 3000, height = 2000, units = "px", res = 300)
+.custom_plot2(myeloid2, full_col_vec, res)
+graphics.off()
 
