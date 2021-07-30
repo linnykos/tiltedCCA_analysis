@@ -11,7 +11,7 @@
   invisible()
 }
 
-.custom_plot1 <- function(myeloid2, full_col_vec, start_idx, res){
+.custom_plot1 <- function(myeloid2, full_col_vec, res){
   par(mfcol = c(2,3), mar = c(4,4,4,0.1))
   layout <- myeloid2[["combined"]]@cell.embeddings
   .plot_umap(layout, full_col_vec, res$baseline_idx, 

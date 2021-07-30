@@ -140,6 +140,7 @@ save(date_of_run, session_info, dcca_res, myeloid2, rna_frnn, atac_frnn, combine
 
 #################
 
+print("Starting RNA smooth")
 p1 <- ncol(mat_1_denoised)
 gene_smoothed <- lapply(1:p1, function(j){
         print(j)
@@ -153,6 +154,7 @@ gene_smoothed <- lapply(1:p1, function(j){
              e_variance = e_res$variance, e_r2 = e_res$r_squared)
 })
 
+print("Starting ATAC smooth")
 p2 <- ncol(mat_2_denoised)
 atac_smoothed <- lapply(1:p2, function(j){
         print(j)
@@ -166,6 +168,6 @@ atac_smoothed <- lapply(1:p2, function(j){
              e_variance = e_res$variance, e_r2 = e_res$r_squared)
 })
 
-save(date_of_run, session_info, dcca_res, pbmc2, rna_frnn, atac_frnn, combined_g,
+save(date_of_run, session_info, dcca_res, myeloid2, rna_frnn, atac_frnn, combined_g,
      gene_smoothed, atac_smoothed,
      file = "../../../../out/Writeup14b/Writeup14b_mouseicb_dcca.RData")
