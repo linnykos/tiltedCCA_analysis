@@ -27,8 +27,7 @@ set.seed(10)
 rank_1 <- 50; rank_2 <- 50; nn <- 30
 dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 2:rank_2,
                                       meta_clustering = NA, num_neigh = nn,
-                                      apply_shrinkage = F, fix_distinct_perc = F, 
-                                      verbose = T) 
+                                      fix_distinct_perc = F, verbose = T) 
 
 rm(list = c("myeloid", "mat_1", "mat_2")); gc()
 
