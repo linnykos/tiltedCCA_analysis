@@ -45,7 +45,7 @@ peak_order <- order(sd_vec, decreasing = T)
 num_breaks <- 100
 atac_smoothed <- vector("list", p2)
 break_vec <- round(seq(1, p2+1, length.out = num_breaks+1))
-idx_list <- lapply(1:(length(break_vec)-1), function(x){
+for(x in 1:(length(break_vec)-1)){
   print(paste0("On subset ", x))
   tmp_idx <- peak_order[break_vec[x]:(break_vec[x+1]-1)]
   
@@ -64,7 +64,7 @@ idx_list <- lapply(1:(length(break_vec)-1), function(x){
   save(date_of_run, session_info, dcca_res, myeloid2, rna_frnn, atac_frnn, combined_g,
        gene_smoothed, atac_smoothed,
        file = "../../../../out/Writeup14b/Writeup14b_mouseicb_dcca.RData")
-})
+}
 
 
 save(date_of_run, session_info, dcca_res, myeloid2, rna_frnn, atac_frnn, combined_g,
