@@ -20,7 +20,7 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 
                                       meta_clustering = NA, num_neigh = nn,
                                       center_1 = F, center_2 = F,
                                       scale_1 = F, scale_2 = F,
-                                      apply_shrinkage = F, fix_distinct_perc = F, 
+                                      fix_distinct_perc = F, 
                                       verbose = T) 
 
 save(date_of_run, session_info, dcca_res,
