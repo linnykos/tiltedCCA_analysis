@@ -28,7 +28,7 @@ save(date_of_run, session_info, dcca_res,
 
 ###############################
 
-pairedtag2 <- Seurat::CreateSeuratObject(counts = t(mat_1[,1:10]))
+pairedtag2 <- Seurat::CreateSeuratObject(counts = Matrix::t(mat_1[,1:10]))
 pairedtag2[["celltype"]] <- pairedtag@meta.data$celltype
 membership_vec <- as.factor(pairedtag@meta.data$celltype)
 rm(list = c("pairedtag", "mat_1", "mat_2")); gc()

@@ -246,6 +246,8 @@ set.seed(10)
 pairedtag <- Seurat::RunUMAP(pairedtag, reduction="lsi", dims=1:50,reduction.name="umap.dna", 
                              reduction.key="dnaUMAP_")
 
+save(pairedtag, file = "../../../../data/Pairedtag_mousebrain_RNA-Histone/seurat_H3K9me3.RData")
+
 #############
 
 Seurat::DefaultAssay(pairedtag) <- "SCT"
