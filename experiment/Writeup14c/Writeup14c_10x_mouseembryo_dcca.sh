@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -N dcca_mouse
+#$ -N dcca_mouseembryo
 #$ -j y
 #$ -o ../../../../out/Writeup14c/qsub/
 #$ -l m_mem_free=50G

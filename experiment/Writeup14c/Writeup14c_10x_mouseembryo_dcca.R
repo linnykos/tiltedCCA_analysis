@@ -23,11 +23,10 @@ mat_1 <- mat_1[cell_idx,]; mat_2 <- mat_2[cell_idx,]
 dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, dims_1 = 1:rank_1, dims_2 = 2:rank_2,
                                       center_1 = T, center_2 = T,
                                       meta_clustering = NA, num_neigh = nn, 
-                                      apply_shrinkage = F, fix_distinct_perc = F, 
-                                      verbose = T) 
+                                      fix_distinct_perc = F, verbose = T) 
 
 save(date_of_run, session_info, dcca_res,
-     file = "../../../../out/Writeup14c/Writeup14c_pairedtag_H3K4me1_dcca.RData")
+     file = "../../../../out/Writeup14c/10x_mouseembryo_dcca.RData")
 print("Finished Tilted-CCA")
 
 ###############################
