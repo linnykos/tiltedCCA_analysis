@@ -109,7 +109,7 @@ print("Finished ATAC embedings")
 set.seed(10)
 combined_g <- multiomicCCA::combine_frnn(dcca_res, g_1 = rna_frnn$c_g,
                                          g_2 = atac_frnn$c_g, nn = nn, 
-                                         verbose = 2)
+                                         verbose = 1)
 combined_g <- SeuratObject::as.Graph(combined_g)
 set.seed(10)
 combined_common_umap <- Seurat::RunUMAP(combined_g, assay = "RNA")@cell.embeddings
