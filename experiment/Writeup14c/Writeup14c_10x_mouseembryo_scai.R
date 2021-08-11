@@ -16,14 +16,18 @@ df <- data.frame(celltype = mbrain@meta.data$label_Savercat[cell_idx])
 
 rm(list = c("mbrain"))
 
+print("Prepping ScAI")
 scAI_outs <- scAI::create_scAIobject(raw.data = X, do.sparse = T)
 rm(list = c("X"))
 scAI_outs <- scAI::preprocessing(scAI_outs, assay = NULL)
 scAI_outs <- scAI::addpData(scAI_outs, pdata = df, pdata.name = "Cell types")
 
+print("Running ScAI")
 set.seed(10)
-scAI_outs <- scAI::run_scAI(scAI_outs, K = 30, nrun = 1, do.fast = T)
+scAI_outs <- scAI::run_scAI(scAI_outs, K = 30, nrun = 1, do.fast = F)
+save.image(file = "../../../../out/Writeup14c/10x_mouseembryo_scai.RData")
 
+print("ScAI dimension reduction")
 set.seed(10)
 scAI_outs <- scAI::reducedDims(scAI_outs, method = "umap")
 
