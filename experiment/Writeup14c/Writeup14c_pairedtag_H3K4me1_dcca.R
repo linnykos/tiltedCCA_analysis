@@ -149,14 +149,14 @@ gene_smoothed <- lapply(1:p1, function(j){
        e_variance = e_res$variance, e_r2 = e_res$r_squared)
 })
 
-save(date_of_run, session_info, dcca_res, pairedtag2, rna_frnn, atac_frnn,
+save(date_of_run, session_info, dcca_res, pairedtag2, rna_frnn, histone_frnn,
      gene_smoothed, file = "../../../../out/Writeup14c/Writeup14c_pairedtag_H3K4me1_dcca.RData")
 print("Finished RNA variables")
 
 ###############################3
 
 p2 <- ncol(mat_2_denoised)
-atac_smoothed <- lapply(1:p2, function(j){
+histone_smoothed <- lapply(1:p2, function(j){
   if(j %% 10 == 0) print(j)
   
   c_res <- compute_smooth_signal(mat_2_denoised[,j], c_eig)
@@ -168,8 +168,8 @@ atac_smoothed <- lapply(1:p2, function(j){
        e_variance = e_res$variance, e_r2 = e_res$r_squared)
 })
 
-save(date_of_run, session_info, dcca_res, pairedtag2, rna_frnn, atac_frnn,
-     gene_smoothed, atac_smoothed,
+save(date_of_run, session_info, dcca_res, pairedtag2, rna_frnn, histone_frnn,
+     gene_smoothed, histone_smoothed,
      file = "../../../../out/Writeup14c/Writeup14c_pairedtag_H3K4me1_dcca.RData")
 print("Finished ATAC variables")
 
