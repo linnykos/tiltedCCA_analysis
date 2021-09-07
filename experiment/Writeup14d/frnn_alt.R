@@ -4,19 +4,39 @@ construct_frnn_alt <- function(obj,
                                data_1 = T, 
                                data_2 = F,
                                max_subsample_frnn = nrow(obj$common_score),
+                               frnn_approx = 0, 
                                radius_quantile = 0.5,
                                bool_matrix = T, 
                                center = T,
                                renormalize = F, 
                                symmetrize = F,
-                               verbose = T){
+                               verbose = T,
+                               normalization_type = "none"){
   stopifnot(frnn_approx >= 0, frnn_approx <= 1,
             length(membership_vec) == nrow(obj$common_score),
             is.factor(membership_vec))
   
-  embedding <- multiomicCCA:::.prepare_embeddings(obj, data_1 = data_1, data_2 = data_2, 
-                                                 add_noise = F, center = center, 
-                                                 renormalize = renormalize)
+  embedding <- multiomicCCA:::.prepare_embeddings(obj, 
+                                                  data_1 = data_1, 
+                                                  data_2 = data_2, 
+                                                  add_noise = F, 
+                                                  center = center, 
+                                                  renormalize = F)
+  
+  if(normalization_type == "everything"){
+    l2_vec <- apply(embedding[["everything"]], 1, multiomicCCA:::.l2norm)
+    for(i in 1:3){
+      embedding[[i]] <- multiomicCCA:::.mult_vec_mat(1/l2_vec, embedding[[i]])
+    }
+  } else if(normalization_type == "itself"){
+    for(i in 1:3){
+      l2_vec <- apply(embedding[[i]], 1, multiomicCCA:::.l2norm)
+      embedding[[i]] <- multiomicCCA:::.mult_vec_mat(1/l2_vec, embedding[[i]])
+    }
+  } else if(normalization_type == "none") {
+    # do nothing
+  }
+  
   n <- nrow(embedding[[1]])
   
   # construct subsamples
@@ -33,7 +53,7 @@ construct_frnn_alt <- function(obj,
   vec_print <- c("common", "distinct", "everything")
   vec_rad <- sapply(1:3, function(i){
     if(verbose) print(paste0(Sys.time(),": cLISI: Computing radius -- ", vec_print[i]))
-    .compute_radius_alt(embedding[[i]], nn, radius_quantile)
+    multiomicCCA:::.compute_radius(embedding[[i]], nn, radius_quantile)
   })
   vec_rad_org <- vec_rad
   names(vec_rad_org) <- c("common", "distinct", "everything")
@@ -42,8 +62,11 @@ construct_frnn_alt <- function(obj,
   # construct frnn
   list_g <- lapply(1:3, function(i){
     if(verbose) print(paste0(Sys.time(),": cLISI: Construct graph -- ", vec_print[i]))
-    .construct_frnn_alt(embedding[[i]], radius = vec_rad[i], nn = nn, 
-                    frnn_approx = frnn_approx, verbose = verbose)
+    multiomicCCA:::.construct_frnn(embedding[[i]], 
+                                   radius = vec_rad[i], 
+                                   nn = nn, 
+                                   frnn_approx = frnn_approx, 
+                                   verbose = verbose)
   }) 
   
   for(i in 1:3){
@@ -72,79 +95,23 @@ construct_frnn_alt <- function(obj,
 
 #######################
 
-.compute_radius_alt <- function(mat, 
-                                nn, 
-                                radius_quantile, 
-                                metric){
-  if(metric == "euclidean"){
-    rcppannoy_obj <- new(RcppAnnoy::AnnoyEuclidean, ncol(mat))
-  } else if(metric == "cosine"){
-    rcppannoy_obj <- new(RcppAnnoy::AnnoyAngular, ncol(mat))
-  } else {
-    stop("Incorrect metric")
-  }
-  
-  n <- nrow(mat)
-  for(i in 1:n){
-    rcppannoy_obj$addItem(i-1, mat[i,])
-  }
-  
-  rcppannoy_obj$build(500)
-  
-  furtherest_vec <- sapply(1:n, function(i){
-    rcppannoy_obj$getNNsByItemList(i-1, 
-                                   n = nn+1, 
-                                   search_k = -1,
-                                   include_distances = T)$distance[nn+1]
-  })
-  
-  radius <- as.numeric(stats::quantile(furtherest_vec, probs = radius_quantile))
-  
-  list(radius = radius, obj = rcppannoy_obj)
-}
-
-.construct_frnn_alt <- function(mat, 
-                                radius, 
-                                nn,
-                                rcppannoy_obj, 
-                                verbose = F){
-  if(verbose) print(paste0(Sys.time(),": cLISI: Computing frNN"))
-  
-  res <- lapply(1:n, function(i){
-    rcppannoy_obj$getNNsByItemList(i-1, 
-                                   n = 20*nn+1, 
-                                   search_k = -1,
-                                   include_distances = T)
-  })
-  
-  for(i in 1:n){
-    names(res[[i]]) <- c("id", "dist")
-    res[[i]]$id <- c(res[[i]]$id+1)[-1]
-    res[[i]]$dist <- res[[i]]$dist[-1]
-    
-    if(all(res[[i]]$dist <= radius)) next()
-    if(any(res[[i]]$dist > radius)) {
-      idx <- which(res[[i]]$dist > radius)
-      res[[i]]$id <- res[[i]]$id[-idx]
-      res[[i]]$dist <- res[[i]]$dist[-idx]
-    }
-  }
-  
-  res
-}
-
-combine_frnn_alt <- function(dcca_obj, g_1, g_2, nn, 
-                         common_1 = T, common_2 = T, keep_nn = T,
-                         sampling_type = "adaptive_gaussian",
-                         center = T, renormalize = F,
-                         verbose = 0){
+combine_frnn_alt <- function(dcca_obj, 
+                             g_1, g_2, 
+                             nn, 
+                             common_1 = T, 
+                             common_2 = T, 
+                             keep_nn = T,
+                             sampling_type = "adaptive_gaussian",
+                             center = T, 
+                             renormalize = F,
+                             verbose = 0){
   stopifnot(all(dim(g_1) == dim(g_2)))
   
   # extract the relevant embeddings from dcca_obj
   if(verbose > 0) print(paste0(Sys.time(),": Preparing first embedding"))
   embedding_1 <- multiomicCCA:::.prepare_embeddings(dcca_obj, data_1 = T, data_2 = F, 
-                                     add_noise = F, center = center, 
-                                     renormalize = renormalize)
+                                                    add_noise = F, center = center, 
+                                                    renormalize = renormalize)
   if(common_1){
     embedding_1 <- embedding_1$common
   } else {
@@ -238,6 +205,7 @@ combine_frnn_alt <- function(dcca_obj, g_1, g_2, nn,
   res
 }
 
+# based on the fact that sqrt(d_1^2(x,y) + d_2^2(x,y)) is a distance metric itself
 .compute_distance_from_idx_alt <- function(embedding_1, embedding_2, 
                                        nn_idx_1_vec, nn_idx_2_vec,
                                        nn_dist_1_vec, nn_dist_2_vec,
@@ -247,19 +215,20 @@ combine_frnn_alt <- function(dcca_obj, g_1, g_2, nn,
   res <- sapply(end_idx_vec, function(j){
     tmp <- 0
     z1 <- which(nn_idx_1_vec == j)
-    
     if(length(z1) == 1) {
-      tmp <- tmp + nn_dist_1_vec[z1]
+      tmp <- tmp + nn_dist_1_vec[z1]^2
     } else {
-      tmp <- tmp + .l2norm(embedding_1[start_idx,] - embedding_1[j,])
+      tmp <- tmp + multiomicCCA:::.l2norm(embedding_1[start_idx,] - embedding_1[j,])^2
     }
     
     z2 <- which(nn_idx_2_vec == j)
     if(length(z2) == 1) {
-      tmp <- tmp + nn_dist_2_vec[z2]
+      tmp <- tmp + nn_dist_2_vec[z2]^2
     } else {
-      tmp <- tmp + .l2norm(embedding_2[start_idx,] - embedding_2[j,])
+      tmp <- tmp + multiomicCCA:::.l2norm(embedding_2[start_idx,] - embedding_2[j,])^2
     }
+    
+    sqrt(tmp)
   })
   
   res

@@ -46,31 +46,32 @@ print("Finished Tilted-CCA")
 nn = 30
 radius_quantile = 0.5
 verbose = T
-embedding <- multiomicCCA:::.prepare_embeddings(dcca_res, data_1 = T, data_2 = F, 
-                                               add_noise = F, center = T, 
-                                               renormalize = F)
+frnn_approx = 0
+embedding <- multiomicCCA:::.prepare_embeddings(dcca_res, 
+                                                data_1 = T, 
+                                                data_2 = F, 
+                                                add_noise = F, 
+                                                center = T, 
+                                                renormalize = F)
 n <- nrow(embedding[[1]])
 
 vec_print <- c("common", "distinct", "everything")
-list_rad <- lapply(1:3, function(i){
+vec_rad <- sapply(1:3, function(i){
   if(verbose) print(paste0(Sys.time(),": cLISI: Computing radius -- ", vec_print[i]))
-  .compute_radius_alt(embedding[[i]], 
-                      nn, 
-                      radius_quantile, 
-                      metric = "cosine")
+  multiomicCCA:::.compute_radius(embedding[[i]], nn, radius_quantile)
 })
-vec_rad <- sapply(list_rad, function(x){x$radius})
-names(vec_rad) <- c("common", "distinct", "everything")
+vec_rad_org <- vec_rad
+names(vec_rad_org) <- c("common", "distinct", "everything")
 vec_rad[1:2] <- max(vec_rad[1:2])
 
 # construct frnn
 list_g <- lapply(1:3, function(i){
   if(verbose) print(paste0(Sys.time(),": cLISI: Construct graph -- ", vec_print[i]))
-  .construct_frnn_alt(embedding[[i]], 
-                      radius = vec_rad[i],
-                      nn = nn, 
-                      rcppannoy_obj = list_rad[[i]]$obj, 
-                      verbose = verbose)
+  multiomicCCA:::.construct_frnn(embedding[[i]], 
+                                 radius = vec_rad[i], 
+                                 nn = nn, 
+                                 frnn_approx = frnn_approx, 
+                                 verbose = verbose)
 }) 
 
 for(i in 1:3){
