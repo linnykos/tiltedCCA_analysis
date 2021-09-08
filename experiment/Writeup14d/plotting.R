@@ -3,11 +3,12 @@ make_all_embedding_plots <- function(seurat_obj,
                                      title_vec, 
                                      main_vec, 
                                      file_prefix,
-                                     file_suffix){
+                                     file_suffix,
+                                     group.by = "celltype"){
   # plot RNA embedding
   for(i in 1:3){
     plot1 <- Seurat::DimPlot(seurat_obj, reduction = main_vec[i], 
-                             group.by = "celltype", label = TRUE,
+                             group.by = group.by, label = TRUE,
                              repel = TRUE, label.size = 2.5)
     plot1 <- plot1 + ggplot2::ggtitle(paste0(title_all, " (RNA)\n", title_vec[i]))
     plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
@@ -18,7 +19,7 @@ make_all_embedding_plots <- function(seurat_obj,
   # plot ATAC embeddings
   for(i in 1:3){
     plot1 <- Seurat::DimPlot(seurat_obj, reduction = paste0(main_vec[i], "2"), 
-                             group.by = "celltype", label = TRUE,
+                             group.by = group.by, label = TRUE,
                              repel = TRUE, label.size = 2.5)
     plot1 <- plot1 + ggplot2::ggtitle(paste0(title_all, " (ATAC)\n", title_vec[i])) 
     plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
@@ -28,7 +29,7 @@ make_all_embedding_plots <- function(seurat_obj,
   
   # plot the combined view
   plot1 <- Seurat::DimPlot(seurat_obj, reduction = "combined", 
-                           group.by = "celltype", label = TRUE,
+                           group.by = group.by, label = TRUE,
                            repel = TRUE, label.size = 2.5)
   plot1 <- plot1 + ggplot2::ggtitle(title_all, "\nBoth Common") 
   plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
@@ -37,7 +38,7 @@ make_all_embedding_plots <- function(seurat_obj,
   
   # plot the everything combined for both
   plot1 <- Seurat::DimPlot(seurat_obj, reduction = "both", 
-                           group.by = "celltype", label = TRUE,
+                           group.by = group.by, label = TRUE,
                            repel = TRUE, label.size = 2.5)
   plot1 <- plot1 + ggplot2::ggtitle(title_all, "\nBoth Everything") 
   plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))

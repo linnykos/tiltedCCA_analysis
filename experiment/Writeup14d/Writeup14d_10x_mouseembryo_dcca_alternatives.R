@@ -2,13 +2,13 @@ rm(list=ls()); set.seed(10)
 
 library(Seurat); library(Signac); library(multiomicCCA)
 
-load("../../../../out/Writeup14/Writeup14_10x_mouseembryo_preprocess.RData")
+load("../../../../out/Writeup14d/Writeup14d_10x_mouseembryo_seurat.RData")
 date_of_run <- Sys.time(); session_info <- sessionInfo()
 
 source("frnn_alt.R")
 source("plotting.R")
 
-plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.atac", 
+plot1 <- Seurat::DimPlot(mbrain2, reduction = "umap.atac", 
                          group.by = "label_Savercat", label = TRUE,
                          repel = TRUE, label.size = 2.5)
 plot1 <- plot1 + ggplot2::ggtitle("Mouse Embryo (ATAC)\nSeurat baseline")
@@ -16,30 +16,27 @@ plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = "../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_seurat_atac_umap.png",
                 plot1, device = "png", width = 9, height = 5, units = "in")
 
-Seurat::DefaultAssay(mbrain) <- "SCT"
-mat_1 <- Matrix::t(mbrain[["SCT"]]@data[Seurat::VariableFeatures(object = mbrain),])
-Seurat::DefaultAssay(mbrain) <- "ATAC"
-mat_2 <- Matrix::t(mbrain[["ATAC"]]@data[Seurat::VariableFeatures(object = mbrain),])
+Seurat::DefaultAssay(mbrain2) <- "SCT"
+mat_1 <- Matrix::t(mbrain2[["SCT"]]@data[Seurat::VariableFeatures(object = mbrain2),])
+Seurat::DefaultAssay(mbrain2) <- "ATAC"
+mat_2 <- Matrix::t(mbrain2[["ATAC"]]@data[Seurat::VariableFeatures(object = mbrain2),])
 
 head(rownames(mat_1)); head(colnames(mat_1))
 head(rownames(mat_2)); head(colnames(mat_2))
 dim(mat_1); dim(mat_2)
-metadata <- mbrain@meta.data
+metadata <- mbrain2@meta.data
 
-cell_idx <- which(metadata$label_Savercat %in% c("Oligodendrocyte", "Radial glia", 
-                                                 "Forebrain GABAergic", "Neuroblast", 
-                                                 "Glioblast", "Cortical or hippocampal glutamatergic"))
-####################
+#########################
 
 # modification 1: setting the sum of each row to be the same
-mat_1b <- mat_1[cell_idx,]
+mat_1b <- mat_1
 mean_val_1 <- mean(mat_1b@x)
 row_vec_1 <- sparseMatrixStats::rowSums2(mat_1b)
 tmp <- Matrix::Diagonal(nrow(mat_1b), 1/row_vec_1)
 mat_1b <- tmp %*% mat_1b 
 mat_1b <- mat_1b * mean_val_1 / mean(mat_1b@x)
 
-mat_2b <- mat_2[cell_idx,]
+mat_2b <- mat_2
 mean_val_2 <- mean(mat_2b@x)
 row_vec_2 <- sparseMatrixStats::rowSums2(mat_2b)
 tmp <- Matrix::Diagonal(nrow(mat_2b), 1/row_vec_2)
@@ -54,10 +51,8 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, dims_1 = 1:rank_1, dims_2 
                                       fix_distinct_perc = F, verbose = T) 
 print("Finished Tilted-CCA")
 
-mbrain2 <- Seurat::CreateSeuratObject(counts = Matrix::t(mat_1b[,1:10]))
-mbrain2[["celltype"]] <- metadata$label_Savercat[cell_idx]
-membership_vec <- as.factor(metadata$label_Savercat[cell_idx])
-rm(list = c("mbrain", "mat_1", "mat_2")); gc()
+mbrain2[["celltype"]] <- metadata$label_Savercat
+membership_vec <- as.factor(metadata$label_Savercat)
 
 set.seed(10)
 rna_frnn <- multiomicCCA::construct_frnn(dcca_res, nn = nn, membership_vec = membership_vec,
@@ -121,13 +116,13 @@ make_all_embedding_plots(mbrain2,
 ###############################
 
 # modification 2: removing both mean and standard deviation
-mat_1b <- mat_1[cell_idx,]
+mat_1b <- mat_1
 sd_vec <- sparseMatrixStats::colSds(mat_1b)
 if(any(sd_vec <= 1e-6)){
   mat_1b <- mat_1b[,-which(sd_vec <= 1e-6)]
 }
 
-mat_2b <- mat_2[cell_idx,]
+mat_2b <- mat_2
 sd_vec <- sparseMatrixStats::colSds(mat_2b)
 if(any(sd_vec <= 1e-6)){
   mat_2b <- mat_2b[,-which(sd_vec <= 1e-6)]
@@ -141,10 +136,8 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, dims_1 = 1:rank_1, dims_2 
                                       fix_distinct_perc = F, verbose = T) 
 print("Finished Tilted-CCA")
 
-mbrain2 <- Seurat::CreateSeuratObject(counts = Matrix::t(mat_1b[,1:10]))
-mbrain2[["celltype"]] <- metadata$label_Savercat[cell_idx]
-membership_vec <- as.factor(metadata$label_Savercat[cell_idx])
-rm(list = c("mbrain", "mat_1", "mat_2")); gc()
+mbrain2[["celltype"]] <- metadata$label_Savercat
+membership_vec <- as.factor(metadata$label_Savercat)
 
 set.seed(10)
 rna_frnn <- construct_frnn_alt(dcca_res, 
@@ -236,13 +229,13 @@ make_all_embedding_plots(mbrain2,
 
 # modification 3: visualize the ATAC embedding slightly differently as-if Signac
 
-mat_1b <- mat_1[cell_idx,]
+mat_1b <- mat_1
 sd_vec <- sparseMatrixStats::colSds(mat_1b)
 if(any(sd_vec <= 1e-6)){
   mat_1b <- mat_1b[,-which(sd_vec <= 1e-6)]
 }
 
-mat_2b <- mat_2[cell_idx,]
+mat_2b <- mat_2
 sd_vec <- sparseMatrixStats::colSds(mat_2b)
 if(any(sd_vec <= 1e-6)){
   mat_2b <- mat_2b[,-which(sd_vec <= 1e-6)]
@@ -257,10 +250,8 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, dims_1 = 1:rank_1, dims_2 
                                       fix_distinct_perc = F, verbose = T) 
 print("Finished Tilted-CCA")
 
-mbrain2 <- Seurat::CreateSeuratObject(counts = Matrix::t(mat_1b[,1:10]))
-mbrain2[["celltype"]] <- metadata$label_Savercat[cell_idx]
-membership_vec <- as.factor(metadata$label_Savercat[cell_idx])
-rm(list = c("mbrain", "mat_1", "mat_2")); gc()
+mbrain2[["celltype"]] <- metadata$label_Savercat
+membership_vec <- as.factor(metadata$label_Savercat)
 
 set.seed(10)
 rna_frnn <- construct_frnn_alt(dcca_res, 
@@ -352,13 +343,13 @@ make_all_embedding_plots(mbrain2,
 
 # modification 4: using the signac application on each embedding individually
 
-mat_1b <- mat_1[cell_idx,]
+mat_1b <- mat_1
 sd_vec <- sparseMatrixStats::colSds(mat_1b)
 if(any(sd_vec <= 1e-6)){
   mat_1b <- mat_1b[,-which(sd_vec <= 1e-6)]
 }
 
-mat_2b <- mat_2[cell_idx,]
+mat_2b <- mat_2
 sd_vec <- sparseMatrixStats::colSds(mat_2b)
 if(any(sd_vec <= 1e-6)){
   mat_2b <- mat_2b[,-which(sd_vec <= 1e-6)]
@@ -373,10 +364,8 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, dims_1 = 1:rank_1, dims_2 
                                       fix_distinct_perc = F, verbose = T) 
 print("Finished Tilted-CCA")
 
-mbrain2 <- Seurat::CreateSeuratObject(counts = Matrix::t(mat_1b[,1:10]))
-mbrain2[["celltype"]] <- metadata$label_Savercat[cell_idx]
-membership_vec <- as.factor(metadata$label_Savercat[cell_idx])
-rm(list = c("mbrain", "mat_1", "mat_2")); gc()
+mbrain2[["celltype"]] <- metadata$label_Savercat
+membership_vec <- as.factor(metadata$label_Savercat)
 
 set.seed(10)
 rna_frnn <- construct_frnn_alt(dcca_res, 
@@ -462,3 +451,13 @@ make_all_embedding_plots(mbrain2,
                          main_vec = main_vec, 
                          file_prefix = "../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_dcca",
                          file_suffix = "_signac2")
+
+make_all_embedding_plots(mbrain2, 
+                         title_all = "Mouse Embryo (Signac-like)",
+                         title_vec = title_vec, 
+                         main_vec = main_vec, 
+                         file_prefix = "../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_dcca",
+                         file_suffix = "_signac2_clustering",
+                         group.by = "wsnn_res.2")
+
+save(mbrain2, file = "../../../../out/Writeup14d/Writeup14d_10x_mouseembryo_dcca.RData")
