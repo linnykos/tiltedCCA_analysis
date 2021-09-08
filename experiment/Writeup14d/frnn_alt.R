@@ -33,6 +33,28 @@ construct_frnn_alt <- function(obj,
       l2_vec <- apply(embedding[[i]], 1, multiomicCCA:::.l2norm)
       embedding[[i]] <- multiomicCCA:::.mult_vec_mat(1/l2_vec, embedding[[i]])
     }
+  } else if(normalization_type == "signac"){
+    center_vec <- matrixStats::colMeans2(embedding[["everything"]])
+    sd_vec <- matrixStats::colSds(embedding[["everything"]])
+    
+    for(i in 1:3){
+      for(j in 1:ncol(embedding[[i]])){
+        embedding[[i]][,j] <- (embedding[[i]][,j]-center_vec[j])/sd_vec[j]
+      }
+      l2_vec <- apply(embedding[[i]], 1, multiomicCCA:::.l2norm)
+      embedding[[i]] <- multiomicCCA:::.mult_vec_mat(1/l2_vec, embedding[[i]])
+    }
+  } else if(normalization_type == "signac2"){
+    for(i in 1:3){
+      center_vec <- matrixStats::colMeans2(embedding[[i]])
+      sd_vec <- matrixStats::colSds(embedding[[i]])
+      
+      for(j in 1:ncol(embedding[[i]])){
+        embedding[[i]][,j] <- (embedding[[i]][,j]-center_vec[j])/sd_vec[j]
+      }
+      l2_vec <- apply(embedding[[i]], 1, multiomicCCA:::.l2norm)
+      embedding[[i]] <- multiomicCCA:::.mult_vec_mat(1/l2_vec, embedding[[i]])
+    }
   } else if(normalization_type == "none") {
     # do nothing
   }
