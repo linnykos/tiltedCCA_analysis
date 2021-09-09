@@ -153,3 +153,64 @@ plot_graph_meta <- function(embedding,
   
   invisible()
 }
+
+plot_gene_ordering <- function(obj, 
+                               gene_vec,
+                               prin_df,
+                               par_mfrow,
+                               ...){
+  stopifnot(prod(par_mfrow) >= length(gene_vec))
+  
+  if(is.list(obj)){
+    # step 1: reconstruct the smoothed gene expression values
+    mat <- tcrossprod(multiomicCCA:::.mult_mat_vec(obj$svd_1$u, obj$svd_1$d), obj$svd_1$v)
+    rownames(mat) <- rownames(obj$svd_1$u)
+    colnames(mat) <- rownames(obj$svd_1$v)
+  } else {
+    stopifnot(is.matrix(obj))
+    mat <- obj
+  }
+  gene_idx <- which(colnames(mat) %in% gene_vec)
+  prin_df <- prin_df[order(prin_df$ord, decreasing = F),]
+  cell_ord <- sapply(prin_df$cell, function(cell_name){
+    which(rownames(mat) == cell_name)
+  })
+  mat <- mat[cell_ord,gene_idx,drop = F]
+  
+  par(mfrow = par_mfrow)
+  for(j in 1:ncol(mat)){
+    plot(mat[,j], main = colnames(mat)[j], ...)
+  }
+}
+
+plot_gene_de <- function(common_changepoint,
+                         distinct_changepoint,
+                         p, 
+                         main1 = "DE in common space",
+                         main2 = "DE in distinct space",
+                         ...){
+  par(mfrow = c(1,2))
+  vec1 <- rep(0, p)
+  for(i in 1:length(common_changepoint)){
+    tmp <- vec1[common_changepoint[[i]]$start:common_changepoint[[i]]$end]
+    vec1[common_changepoint[[i]]$start:common_changepoint[[i]]$end] <- tmp + 1
+  }
+  vec2 <- rep(0, p)
+  for(i in 1:length(distinct_changepoint)){
+    tmp <- vec2[distinct_changepoint[[i]]$start:distinct_changepoint[[i]]$end]
+    vec2[distinct_changepoint[[i]]$start:distinct_changepoint[[i]]$end] <- tmp + 1
+  }
+  
+  plot(x = seq(0, 1, length.out = p),
+       y = vec1, 
+       main = main1,
+       ylim = range(c(0, vec1, vec2)),
+       ...)
+  plot(x = seq(0, 1, length.out = p),
+       y = vec2, 
+       main = main2,
+       ylim = range(c(0, vec1, vec2)),
+       ...)
+  
+  invisible()
+}
