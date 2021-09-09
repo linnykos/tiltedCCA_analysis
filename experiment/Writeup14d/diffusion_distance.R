@@ -7,7 +7,7 @@ form_snn_graph <- function(obj, cell_idx,
                                                   data_1 = data_1, 
                                                   data_2 = data_2, 
                                                   add_noise = F, 
-                                                  center = T, 
+                                                  center = F, 
                                                   renormalize = F)
   
   # tweak said embedding
@@ -20,7 +20,7 @@ form_snn_graph <- function(obj, cell_idx,
   # convert to angular distances
   nn_res$nn.idx <- nn_res$nn.idx[,-1]
   nn_res$nn.dist <- nn_res$nn.dist[,-1]
-  # nn_res$nn.dist <- 2*acos(1-(nn_res$nn.dist^2)/2)/pi
+  nn_res$nn.dist <- 2*acos(1-(nn_res$nn.dist^2)/2)/pi
   
   # compute MST
   # construct graph
@@ -162,6 +162,20 @@ diffusion_distance <- function(eigenvalues,
 }
 
 ###################################
+
+form_metacell_matrix <- function(dat, clustering, func = median){
+  stopifnot(is.character(clustering), length(clustering) == nrow(dat))
+  
+  uniq_clust <- sort(unique(clustering))
+  clust_mat <- t(sapply(uniq_clust, function(clust){
+    idx <- which(clustering == clust)
+    apply(dat[idx,,drop = F], 2, func)
+  }))
+  rownames(clust_mat) <- uniq_clust
+  
+  clust_mat
+}
+
 
 .form_snn_from_edgelists <- function(mst_edge_mat, 
                                      nn_idx,

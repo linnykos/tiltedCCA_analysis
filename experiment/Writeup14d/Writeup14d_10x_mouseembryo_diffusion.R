@@ -5,9 +5,15 @@ source("diffusion_distance.R")
 
 cell_idx <- which(as.character(mbrain2@meta.data$wsnn_res.2) %in% c("17", "16", "0", "4", "2", "1", "5", "7", "12", "20"))
 cell_idx <- cell_idx[-which(!mbrain2@meta.data$label_Savercat[cell_idx] %in% c("Radial glia", "Neuroblast", "Cortical or hippocampal glutamatergic"))]
+cell_idx <- cell_idx[-intersect(which(mbrain2[["both"]]@cell.embeddings[cell_idx,1] >= 0),
+                                which(mbrain2[["both"]]@cell.embeddings[cell_idx,2] <= -5))]
+cell_idx <- cell_idx[-intersect(which(mbrain2[["both"]]@cell.embeddings[cell_idx,1] >= -1),
+                                which(mbrain2[["both"]]@cell.embeddings[cell_idx,2] >= 6))]
+cell_idx <- cell_idx[-which(mbrain2[["both"]]@cell.embeddings[cell_idx,1] >= 1)]
+
 
 set.seed(10)
-res <- form_snn_graph(dcca_res, k = 5, cell_idx = cell_idx)
+res <- form_snn_graph(dcca_res, k = 30, cell_idx = cell_idx)
 P <- form_transition(res$snn,
                      lazy_param = 0.85,
                      teleport_param = 0.99)
@@ -15,7 +21,7 @@ diffusion_res <- extract_eigen(P, dims = 1:100, check = T)
 n <- nrow(P)
 dist_mat <- diffusion_distance(diffusion_res$eigenvalues, 
                                diffusion_res$right_vector,
-                               time_vec = seq(1,1000,by=25))
+                               time_vec = seq(1,40,by=1))
 rownames(dist_mat) <- rownames(P)
 colnames(dist_mat) <- colnames(P)
 
@@ -42,6 +48,7 @@ radial_idx <- intersect(which(mbrain2@meta.data$celltype == "Radial glia"),
 radial_idx2 <- which(rownames(res$adj_mat) %in% rownames(mbrain2@meta.data[radial_idx,]))
 cortical_idx <- intersect(which(mbrain2@meta.data$celltype == "Cortical or hippocampal glutamatergic"),
                           which(as.character(mbrain2@meta.data$wsnn_res.2) == "20"))
+cortical_idx <- cortical_idx[which(mbrain2[["both"]]@cell.embeddings[cortical_idx,2] >= 0)]
 cortical_idx2 <- which(rownames(res$adj_mat) %in% rownames(mbrain2@meta.data[cortical_idx,]))
 
 starting_radial <- radial_idx2[which.max(apply(dist_mat[radial_idx2,cortical_idx2], 1, median))]
