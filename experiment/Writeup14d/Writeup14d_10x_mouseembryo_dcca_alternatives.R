@@ -450,14 +450,15 @@ make_all_embedding_plots(mbrain2,
                          title_vec = title_vec, 
                          main_vec = main_vec, 
                          file_prefix = "../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_dcca",
-                         file_suffix = "_signac2")
+                         file_suffix = "_signac2b")
 
 make_all_embedding_plots(mbrain2, 
                          title_all = "Mouse Embryo (Signac-like)",
                          title_vec = title_vec, 
                          main_vec = main_vec, 
                          file_prefix = "../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_dcca",
-                         file_suffix = "_signac2_clustering",
+                         file_suffix = "_signac2b_clustering",
                          group.by = "wsnn_res.2")
 
-save(mbrain2, file = "../../../../out/Writeup14d/Writeup14d_10x_mouseembryo_dcca.RData")
+save(mbrain2, dcca_res, date_of_run, session_info,
+     file = "../../../../out/Writeup14d/Writeup14d_10x_mouseembryo_dcca.RData")

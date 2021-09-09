@@ -47,3 +47,58 @@ make_all_embedding_plots <- function(seurat_obj,
 
   invisible()
 }
+
+
+
+plot_graph <- function(embedding, 
+                       cell_idx,
+                       adj_mat,
+                       feature_vec = NA,
+                       zlim = range(feature_vec),
+                       base_color = grDevices::rgb(0.803, 0.156, 0.211),
+                       missing_color = "gray70",
+                       col_vec = scales::hue_pal()(nrow(adj_mat)),
+                       asp = T,
+                       bins = 100,
+                       ...){
+  stopifnot(length(cell_idx) == nrow(adj_mat),
+            all(cell_idx > 0), all(cell_idx <= nrow(embedding)),
+            ncol(embedding) == 2,
+            length(col_vec) == length(cell_idx))
+  if(!all(is.na(feature_vec))) stopifnot(length(feature_vec) == length(cell_idx))
+  
+  if(all(!is.na(feature_vec))){
+    stopifnot(length(feature_vec) == nrow(adj_mat))
+    col_ramp <- grDevices::colorRampPalette(c("white", base_color))(bins)
+    val_vec <- seq(zlim[1], zlim[2], length = bins)
+    col_idx <- sapply(feature_vec, function(x){
+      which.min(abs(x - val_vec))
+    })
+    col_vec <- col_ramp[col_idx]
+  } 
+  n <- nrow(embedding)
+  full_col_vec <- rep(missing_color, n)
+  full_col_vec[cell_idx] <- col_vec
+  
+  graphics::plot(NA, 
+                 xlim = range(embedding[,1]),
+                 ylim = range(embedding[,2]),
+                 asp = asp,
+                 ...)
+  
+  for(j in 1:nrow(adj_mat)){
+    idx <- which(adj_mat[j,] != 0)
+    for(j2 in idx){
+      lines(embedding[cell_idx[c(j,j2)],])
+    }
+  }
+  
+  for(k in 1:nrow(embedding)){
+    points(embedding[k,1], embedding[k,2], 
+           pch = 16, 
+           cex = 2, 
+           col = full_col_vec[k])
+  }
+  
+  invisible()
+}
