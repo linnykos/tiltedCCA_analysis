@@ -27,7 +27,7 @@ colnames(dist_mat) <- colnames(P)
 
 col_palette <- scales::hue_pal()(length(unique(clustering)))
 col_vec <- sapply(rownames(res$adj_mat), function(x){
-  col_palette[which(sort(unique(clustering)) == x)]
+  col_palette[which(sort(as.numeric(unique(clustering))) == as.numeric(x))]
 })
 
 png("../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_snn_both.png",
