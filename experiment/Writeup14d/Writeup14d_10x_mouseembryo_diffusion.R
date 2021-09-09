@@ -1,4 +1,5 @@
 rm(list=ls())
+library(Seurat); library(Signac)
 load("../../../../out/Writeup14d/Writeup14d_10x_mouseembryo_dcca.RData")
 
 source("diffusion_distance.R")
@@ -23,6 +24,23 @@ dist_mat <- diffusion_distance(diffusion_res$eigenvalues,
 rownames(dist_mat) <- rownames(P)
 colnames(dist_mat) <- colnames(P)
 
+radial_start <- which(rownames(res$adj_mat) == "17")
+cortical_end <- which.max(dist_mat[radial_start,])
+
+# compute janky pseudotime
+forward_rank <- rank(dist_mat[radial_start,])
+backward_rank <- nrow(res$adj_mat) - rank(dist_mat[cortical_end,])
+avg_rank <- apply(cbind(forward_rank, backward_rank), 1, mean)
+avg_rank <- rank(avg_rank, ties.method = "first")
+
+selected_clusters <- colnames(dist_mat)
+selected_clusters_ordering <- avg_rank
+
+prin_df <- compute_principal_ordering(dcca_res,
+                                      clustering = clustering, 
+                                      selected_clusters = selected_clusters,
+                                      selected_clusters_ordering = selected_clusters_ordering)
+
 ############
 
 col_palette <- scales::hue_pal()(length(unique(clustering)))
@@ -32,7 +50,7 @@ col_vec <- sapply(rownames(res$adj_mat), function(x){
 
 png("../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_snn_both.png",
     height = 1500, width = 1500, units = "px", res = 300)
-plot_graph(mbrain2[["both"]]@cell.embeddings,
+plot_graph_meta(mbrain2[["both"]]@cell.embeddings,
            clustering = clustering,
            adj_mat = res$adj_mat,
            col_vec = col_vec,
@@ -43,18 +61,9 @@ plot_graph(mbrain2[["both"]]@cell.embeddings,
            main = "SNN graph")
 graphics.off()
 
-radial_start <- which(rownames(res$adj_mat) == "17")
-cortical_end <- which.max(dist_mat[radial_start,])
-
-# compute janky pseudotime
-forward_rank <- rank(dist_mat[radial_start,])
-backward_rank <- nrow(res$adj_mat) - rank(dist_mat[cortical_end,])
-avg_rank <- apply(cbind(forward_rank, backward_rank), 1, mean)
-avg_rank <- rank(avg_rank)
-
 png("../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_snn_both_diffusion_radial.png",
     height = 1500, width = 1500, units = "px", res = 300)
-plot_graph(mbrain2[["both"]]@cell.embeddings,
+plot_graph_meta(mbrain2[["both"]]@cell.embeddings,
            clustering = clustering,
            adj_mat = res$adj_mat,
            feature_vec = dist_mat[radial_start,],
@@ -69,7 +78,7 @@ graphics.off()
 
 png("../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_snn_both_diffusion_cortical.png",
     height = 1500, width = 1500, units = "px", res = 300)
-plot_graph(mbrain2[["both"]]@cell.embeddings,
+plot_graph_meta(mbrain2[["both"]]@cell.embeddings,
            clustering = clustering,
            adj_mat = res$adj_mat,
            feature_vec = dist_mat[cortical_end,],
@@ -94,4 +103,11 @@ plot_graph(mbrain2[["both"]]@cell.embeddings,
            ylab = "both_2",
            main = "SNN graph")
 graphics.off()
+
+plot1 <- plot_feature(mbrain2, 
+                      cell_names = prin_df$cell,
+                      feature_vec = prin_df$ord,
+                      title = "Estimated pseudotime ordering")
+ggplot2::ggsave(filename = "../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_snn_full_pseudotime.png",
+                plot1, device = "png", width = 6, height = 5, units = "in")
 

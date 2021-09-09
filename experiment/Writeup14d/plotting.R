@@ -49,8 +49,34 @@ make_all_embedding_plots <- function(seurat_obj,
 }
 
 
+plot_feature <- function(seurat_obj, 
+                         cell_names,
+                         feature_vec,
+                         title = "",
+                         xlab = "both_1",
+                         ylab = "both_2",
+                         reduction = "both"){
+  stopifnot(length(cell_names) == length(feature_vec),
+            all(cell_names %in% rownames(seurat_obj@meta.data)))
+  
+  tmp <- matrix(NA, nrow = nrow(seurat_obj@meta.data), ncol = 1)
+  colnames(tmp) <- "tmp_1"
+  rownames(tmp) <- rownames(seurat_obj@meta.data)
+  for(i in 1:length(cell_names)){
+    tmp[which(rownames(tmp) == cell_names[i])] <- feature_vec[i]
+  }
+  
+  seurat_obj[["tmp"]] <- Seurat::CreateDimReducObject(embedding = tmp, 
+                                                       key = "tmp_", assay = "RNA")
 
-plot_graph <- function(embedding, 
+  plot1 <- Seurat::FeaturePlot(seurat_obj, features = "tmp_1", reduction = reduction)
+  plot1 <- plot1 + ggplot2::labs(title = title, x = xlab, y = ylab) + 
+    ggplot2::scale_color_gradientn(colours = RColorBrewer::brewer.pal(n = 9, name = "Purples"), 
+                                   limits = range(feature_vec))
+  plot1
+}
+
+plot_graph_meta <- function(embedding, 
                        clustering,
                        adj_mat,
                        feature_vec = NA,
