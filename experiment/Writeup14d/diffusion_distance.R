@@ -20,7 +20,7 @@ form_snn_graph <- function(obj, cell_idx,
   # convert to angular distances
   nn_res$nn.idx <- nn_res$nn.idx[,-1]
   nn_res$nn.dist <- nn_res$nn.dist[,-1]
-  nn_res$nn.dist <- 2*acos(1-(nn_res$nn.dist^2)/2)/pi
+  # nn_res$nn.dist <- 2*acos(1-(nn_res$nn.dist^2)/2)/pi
   
   # compute MST
   # construct graph
@@ -166,7 +166,8 @@ diffusion_distance <- function(eigenvalues,
 .form_snn_from_edgelists <- function(mst_edge_mat, 
                                      nn_idx,
                                      k,
-                                     rowname_vec){
+                                     rowname_vec,
+                                     max_edges = 3*k){
   stopifnot(k <= ncol(nn_idx))
   
   n <- length(rowname_vec)
@@ -180,6 +181,14 @@ diffusion_distance <- function(eigenvalues,
     adj_mat1[idx2, idx1] <- 1
   }
   diag(adj_mat1) <- 0
+  print("Degree distribution from MST")
+  print(quantile(colSums(adj_mat1)))
+  
+  idx <- which(colSums(adj_mat1) > max_edges)
+  if(length(idx) > 0){
+    adj_mat1[idx,] <- 0
+    adj_mat1[,idx] <- 0
+  }
 
   adj_mat2 <- matrix(0, n, n)
   for(i in 1:nrow(nn_idx)){
@@ -187,6 +196,8 @@ diffusion_distance <- function(eigenvalues,
   }
   diag(adj_mat2) <- 0
   adj_mat2 <- adj_mat2*t(adj_mat2)
+  print("Degree distribution from SNN")
+  print(quantile(colSums(adj_mat2)))
 
   adj_mat <- adj_mat1 + adj_mat2
   adj_mat[adj_mat > 0] <- 1

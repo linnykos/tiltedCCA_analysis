@@ -55,11 +55,13 @@ plot_graph <- function(embedding,
                        adj_mat,
                        feature_vec = NA,
                        zlim = range(feature_vec),
-                       base_color = grDevices::rgb(0.803, 0.156, 0.211),
+                       base_color = grDevices::rgb(0.49, 0, 0.81),
                        missing_color = "gray70",
                        col_vec = scales::hue_pal()(nrow(adj_mat)),
                        asp = T,
                        bins = 100,
+                       cex_missing = 0.5,
+                       cex_normal = 1,
                        ...){
   stopifnot(length(cell_idx) == nrow(adj_mat),
             all(cell_idx > 0), all(cell_idx <= nrow(embedding)),
@@ -86,6 +88,18 @@ plot_graph <- function(embedding,
                  asp = asp,
                  ...)
   
+  if(any(missing_color %in% full_col_vec)){
+    idx <- which(full_col_vec == missing_color)
+    
+    for(k in idx){
+      points(embedding[k,1], embedding[k,2], 
+             pch = 16, 
+             col = full_col_vec[k],
+             cex = cex_missing)
+    }
+    
+  } 
+  
   for(j in 1:nrow(adj_mat)){
     idx <- which(adj_mat[j,] != 0)
     for(j2 in idx){
@@ -93,11 +107,11 @@ plot_graph <- function(embedding,
     }
   }
   
-  for(k in 1:nrow(embedding)){
+  for(k in cell_idx){
     points(embedding[k,1], embedding[k,2], 
            pch = 16, 
-           cex = 2, 
-           col = full_col_vec[k])
+           col = full_col_vec[k],
+           cex = cex_normal)
   }
   
   invisible()
