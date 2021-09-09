@@ -51,7 +51,7 @@ make_all_embedding_plots <- function(seurat_obj,
 
 
 plot_graph <- function(embedding, 
-                       cell_idx,
+                       clustering,
                        adj_mat,
                        feature_vec = NA,
                        zlim = range(feature_vec),
@@ -63,11 +63,12 @@ plot_graph <- function(embedding,
                        cex_missing = 0.5,
                        cex_normal = 1,
                        ...){
-  stopifnot(length(cell_idx) == nrow(adj_mat),
-            all(cell_idx > 0), all(cell_idx <= nrow(embedding)),
-            ncol(embedding) == 2,
-            length(col_vec) == length(cell_idx))
-  if(!all(is.na(feature_vec))) stopifnot(length(feature_vec) == length(cell_idx))
+  selected_clusters <- rownames(adj_mat)
+  stopifnot(ncol(embedding) == 2,
+            length(col_vec) == length(selected_clusters))
+  if(!all(is.na(feature_vec))) stopifnot(length(feature_vec) == length(selected_clusters))
+  
+  mat <- .form_metacell_matrix(embedding, clustering)
   
   if(all(!is.na(feature_vec))){
     stopifnot(length(feature_vec) == nrow(adj_mat))
@@ -78,13 +79,19 @@ plot_graph <- function(embedding,
     })
     col_vec <- col_ramp[col_idx]
   } 
-  n <- nrow(embedding)
-  full_col_vec <- rep(missing_color, n)
-  full_col_vec[cell_idx] <- col_vec
   
+  n <- nrow(mat)
+  full_col_vec <- rep(missing_color, n)
+  for(i in 1:length(selected_clusters)){
+    full_col_vec[which(rownames(mat) == selected_clusters[i])] <- col_vec[i]
+  }
+  cluster_mapping <- sapply(selected_clusters, function(x){
+    which(rownames(mat) == x)
+  })
+ 
   graphics::plot(NA, 
-                 xlim = range(embedding[,1]),
-                 ylim = range(embedding[,2]),
+                 xlim = range(mat[,1]),
+                 ylim = range(mat[,2]),
                  asp = asp,
                  ...)
   
@@ -92,7 +99,7 @@ plot_graph <- function(embedding,
     idx <- which(full_col_vec == missing_color)
     
     for(k in idx){
-      points(embedding[k,1], embedding[k,2], 
+      points(mat[k,1], mat[k,2], 
              pch = 16, 
              col = full_col_vec[k],
              cex = cex_missing)
@@ -103,12 +110,16 @@ plot_graph <- function(embedding,
   for(j in 1:nrow(adj_mat)){
     idx <- which(adj_mat[j,] != 0)
     for(j2 in idx){
-      lines(embedding[cell_idx[c(j,j2)],])
+      lines(mat[cluster_mapping[c(j,j2)],])
     }
   }
   
-  for(k in cell_idx){
-    points(embedding[k,1], embedding[k,2], 
+  for(k in cluster_mapping){
+    points(mat[k,1], mat[k,2], 
+           pch = 16, 
+           col = "black",
+           cex = cex_normal+1)
+    points(mat[k,1], mat[k,2], 
            pch = 16, 
            col = full_col_vec[k],
            cex = cex_normal)

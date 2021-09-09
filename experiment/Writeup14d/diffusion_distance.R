@@ -1,35 +1,45 @@
-form_snn_graph <- function(obj, cell_idx, 
-                           k = 30,
-                           data_1 = T,
-                           data_2 = F){
+form_snn_graph <- function(obj, 
+                           clustering, 
+                           selected_clusters,
+                           k = 5){
   # extract relevant embeddings, both for RNA and ATAC
-  embedding <- multiomicCCA:::.prepare_embeddings(obj, 
-                                                  data_1 = data_1, 
-                                                  data_2 = data_2, 
-                                                  add_noise = F, 
-                                                  center = F, 
-                                                  renormalize = F)
+  tmp <- multiomicCCA:::.prepare_embeddings(obj, 
+                                            data_1 = T, 
+                                            data_2 = F, 
+                                            add_noise = F, 
+                                            center = F, 
+                                            renormalize = F)
+  rna_embedding <- tmp[["everything"]]
+  rna_embedding <-.form_metacell_matrix(rna_embedding, clustering)
+  l2_vec <- apply(rna_embedding, 1, multiomicCCA:::.l2norm)
+  rna_embedding <- multiomicCCA:::.mult_vec_mat(1/l2_vec, rna_embedding)
+  rna_embedding <- rna_embedding[rownames(rna_embedding) %in% selected_clusters,]
   
-  # tweak said embedding
-  mat <- embedding[["everything"]][cell_idx,]
-  l2_vec <- apply(mat, 1, multiomicCCA:::.l2norm)
-  mat <- multiomicCCA:::.mult_vec_mat(1/l2_vec, mat)
+  tmp <- multiomicCCA:::.prepare_embeddings(obj, 
+                                            data_1 = F, 
+                                            data_2 = T, 
+                                            add_noise = F, 
+                                            center = F, 
+                                            renormalize = F)
+  atac_embedding <- tmp[["everything"]]
+  atac_embedding <-.form_metacell_matrix(atac_embedding, clustering)
+  center_vec <- matrixStats::colMeans2(atac_embedding)
+  sd_vec <- matrixStats::colSds(atac_embedding)
+  for(j in 1:ncol(atac_embedding)){
+    atac_embedding[,j] <- (atac_embedding[,j]-center_vec[j])/sd_vec[j]
+  }
+  l2_vec <- apply(atac_embedding, 1, multiomicCCA:::.l2norm)
+  atac_embedding <- multiomicCCA:::.mult_vec_mat(1/l2_vec, atac_embedding)
+  atac_embedding <- atac_embedding[rownames(atac_embedding) %in% selected_clusters,]
   
   # compute cosine distances among the k
-  nn_res <- RANN::nn2(mat, k = k+1)
-  # convert to angular distances
-  nn_res$nn.idx <- nn_res$nn.idx[,-1]
-  nn_res$nn.dist <- nn_res$nn.dist[,-1]
-  nn_res$nn.dist <- 2*acos(1-(nn_res$nn.dist^2)/2)/pi
-  
-  # compute MST
-  # construct graph
-  n <- nrow(mat)
-  dist_mat <- matrix(0, n, n)
-  for(i in 1:n){
-    dist_mat[i, nn_res$nn.idx] <- nn_res$nn.dist
-  }
-  g <- igraph::graph_from_adjacency_matrix(dist_mat,
+  rna_dist <- acos(lsa::cosine(t(rna_embedding)))/pi
+  atac_dist <- acos(lsa::cosine(t(rna_embedding)))/pi
+  dist_mat <- sqrt(rna_dist^2 + atac_dist^2)
+  dist_mat2 <- dist_mat
+  rownames(dist_mat2) <- NULL
+  colnames(dist_mat2) <- NULL
+  g <- igraph::graph_from_adjacency_matrix(dist_mat2,
                                            mode = "undirected",
                                            weighted = T)
   g2 <- igraph::mst(g, algorithm = "prim")
@@ -38,29 +48,19 @@ form_snn_graph <- function(obj, cell_idx,
   
   # while loop
   adj_mat <- .form_snn_from_edgelists(mst_edge_mat, 
-                                      nn_res$nn.idx,
+                                      dist_mat,
                                       k = k,
-                                      rowname_vec = rownames(obj$common_score)[cell_idx])
+                                      rowname_vec = rownames(dist_mat))
   
+  n <- nrow(adj_mat)
   snn <- adj_mat
   for(i in 1:n){
     idx <- which(adj_mat[i,] != 0)
     snn[i,idx] <- dist_mat[i,idx]
   }
   
-  while(TRUE){
-    print("Removing singletons")
-    deg_vec <- matrixStats::colSums2(adj_mat)
-    if(all(deg_vec > 1)) break()
-    cell_idx <- cell_idx[which(deg_vec > 1)]
-    adj_mat <- adj_mat[which(deg_vec > 1), which(deg_vec > 1)]
-    snn <- snn[which(deg_vec > 1), which(deg_vec > 1)]
-  }
-  
-  stopifnot(all(sort(rownames(obj$common_score)[cell_idx]) == sort(rownames(adj_mat))))
-
   # output both snn and adj_mat
-  list(snn = snn, adj_mat = adj_mat, cell_idx = cell_idx)
+  list(snn = snn, adj_mat = adj_mat, dist_mat = dist_mat)
 }
 
 form_transition <- function(snn, 
@@ -127,8 +127,8 @@ extract_eigen <- function(P, dims = 1:ncol(P), check = F){
 
 # [[for debugging only]]
 diffusion_distance_singleton <- function(eigenvalues, right_vector, 
-                               idx1, idx2, 
-                               time_vec = 1:min(40, length(eigenvalues))){
+                                         idx1, idx2, 
+                                         time_vec = 1:min(40, length(eigenvalues))){
   sqrt(sum(sapply(time_vec, function(x){
     sum((c(eigenvalues[-1])^x*(right_vector[idx1,-1] - right_vector[idx2,-1]))^2)
   })))
@@ -163,7 +163,7 @@ diffusion_distance <- function(eigenvalues,
 
 ###################################
 
-form_metacell_matrix <- function(dat, clustering, func = median){
+.form_metacell_matrix <- function(dat, clustering, func = median){
   stopifnot(is.character(clustering), length(clustering) == nrow(dat))
   
   uniq_clust <- sort(unique(clustering))
@@ -178,13 +178,12 @@ form_metacell_matrix <- function(dat, clustering, func = median){
 
 
 .form_snn_from_edgelists <- function(mst_edge_mat, 
-                                     nn_idx,
+                                     dist_mat,
                                      k,
-                                     rowname_vec,
-                                     max_edges = 3*k){
-  stopifnot(k <= ncol(nn_idx))
+                                     rowname_vec){
+  stopifnot(k <= ncol(dist_mat))
   
-  n <- length(rowname_vec)
+  n <- nrow(dist_mat)
   
   adj_mat1 <- matrix(0, n, n)
   for(i in 1:nrow(mst_edge_mat)){
@@ -195,29 +194,19 @@ form_metacell_matrix <- function(dat, clustering, func = median){
     adj_mat1[idx2, idx1] <- 1
   }
   diag(adj_mat1) <- 0
-  print("Degree distribution from MST")
-  print(quantile(colSums(adj_mat1)))
   
-  idx <- which(colSums(adj_mat1) > max_edges)
-  if(length(idx) > 0){
-    adj_mat1[idx,] <- 0
-    adj_mat1[,idx] <- 0
-  }
-
   adj_mat2 <- matrix(0, n, n)
-  for(i in 1:nrow(nn_idx)){
-    adj_mat2[i, nn_idx[i,1:k]] <- 1
+  for(i in 1:nrow(dist_mat)){
+    adj_mat2[i, order(dist_mat[i,], decreasing = F)[1:(k+1)]] <- 1
   }
   diag(adj_mat2) <- 0
   adj_mat2 <- adj_mat2*t(adj_mat2)
-  print("Degree distribution from SNN")
-  print(quantile(colSums(adj_mat2)))
-
+  
   adj_mat <- adj_mat1 + adj_mat2
   adj_mat[adj_mat > 0] <- 1
-
+  
   rownames(adj_mat) <- rowname_vec
   colnames(adj_mat) <- rowname_vec
-
+  
   adj_mat
 }

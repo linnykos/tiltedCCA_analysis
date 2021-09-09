@@ -3,70 +3,64 @@ load("../../../../out/Writeup14d/Writeup14d_10x_mouseembryo_dcca.RData")
 
 source("diffusion_distance.R")
 
-cell_idx <- which(as.character(mbrain2@meta.data$wsnn_res.2) %in% c("17", "16", "0", "4", "2", "1", "5", "7", "12", "20"))
-cell_idx <- cell_idx[-which(!mbrain2@meta.data$label_Savercat[cell_idx] %in% c("Radial glia", "Neuroblast", "Cortical or hippocampal glutamatergic"))]
-cell_idx <- cell_idx[-intersect(which(mbrain2[["both"]]@cell.embeddings[cell_idx,1] >= 0),
-                                which(mbrain2[["both"]]@cell.embeddings[cell_idx,2] <= -5))]
-cell_idx <- cell_idx[-intersect(which(mbrain2[["both"]]@cell.embeddings[cell_idx,1] >= -1),
-                                which(mbrain2[["both"]]@cell.embeddings[cell_idx,2] >= 6))]
-cell_idx <- cell_idx[-which(mbrain2[["both"]]@cell.embeddings[cell_idx,1] >= 1)]
+# cell_idx <- cell_idx[-which(!mbrain2@meta.data$label_Savercat[cell_idx] %in% c("Radial glia", "Neuroblast", "Cortical or hippocampal glutamatergic"))]
 
+clustering <- as.character(mbrain2@meta.data$wsnn_res.2)
+selected_clusters <- c("17", "16", "0", "4", "2", "1", "5", "7", "12", "20")
 
 set.seed(10)
-res <- form_snn_graph(dcca_res, k = 30, cell_idx = cell_idx)
+res <- form_snn_graph(dcca_res, k = 5, 
+                      clustering = clustering,
+                      selected_clusters = selected_clusters)
 P <- form_transition(res$snn,
                      lazy_param = 0.85,
                      teleport_param = 0.99)
-diffusion_res <- extract_eigen(P, dims = 1:100, check = T)
+diffusion_res <- extract_eigen(P, check = T)
 n <- nrow(P)
 dist_mat <- diffusion_distance(diffusion_res$eigenvalues, 
                                diffusion_res$right_vector,
-                               time_vec = seq(1,40,by=1))
+                               time_vec = seq(1,5,by=1))
 rownames(dist_mat) <- rownames(P)
 colnames(dist_mat) <- colnames(P)
 
 ############
 
-col_palette <- scales::hue_pal()(length(unique(mbrain2@meta.data$celltype)))
-col_vec <- sapply(res$cell_idx, function(x){
-  col_palette[which(sort(unique(mbrain2@meta.data$celltype)) == mbrain2@meta.data$celltype[x])]
+col_palette <- scales::hue_pal()(length(unique(clustering)))
+col_vec <- sapply(rownames(res$adj_mat), function(x){
+  col_palette[which(sort(unique(clustering)) == x)]
 })
 
 png("../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_snn_both.png",
-    height = 2500, width = 2500, units = "px", res = 300)
+    height = 1500, width = 1500, units = "px", res = 300)
 plot_graph(mbrain2[["both"]]@cell.embeddings,
-           cell_idx = res$cell_idx,
+           clustering = clustering,
            adj_mat = res$adj_mat,
            col_vec = col_vec,
+           cex_missing = 1,
+           cex_normal = 2,
            xlab = "both_1",
            ylab = "both_2",
            main = "SNN graph")
 graphics.off()
 
-radial_idx <- intersect(which(mbrain2@meta.data$celltype == "Radial glia"),
-                        which(as.character(mbrain2@meta.data$wsnn_res.2) == "17"))
-radial_idx2 <- which(rownames(res$adj_mat) %in% rownames(mbrain2@meta.data[radial_idx,]))
-cortical_idx <- intersect(which(mbrain2@meta.data$celltype == "Cortical or hippocampal glutamatergic"),
-                          which(as.character(mbrain2@meta.data$wsnn_res.2) == "20"))
-cortical_idx <- cortical_idx[which(mbrain2[["both"]]@cell.embeddings[cortical_idx,2] >= 0)]
-cortical_idx2 <- which(rownames(res$adj_mat) %in% rownames(mbrain2@meta.data[cortical_idx,]))
-
-starting_radial <- radial_idx2[which.max(apply(dist_mat[radial_idx2,cortical_idx2], 1, median))]
-ending_cortical <- cortical_idx2[which.max(apply(dist_mat[cortical_idx2,radial_idx2], 1, median))]
+radial_start <- which(rownames(res$adj_mat) == "17")
+cortical_end <- which.max(dist_mat[radial_start,])
 
 # compute janky pseudotime
-forward_rank <- rank(dist_mat[starting_radial,])
-backward_rank <- n - rank(dist_mat[ending_cortical,])
+forward_rank <- rank(dist_mat[radial_start,])
+backward_rank <- nrow(res$adj_mat) - rank(dist_mat[cortical_end,])
 avg_rank <- apply(cbind(forward_rank, backward_rank), 1, mean)
 avg_rank <- rank(avg_rank)
 
 png("../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_snn_both_diffusion_radial.png",
     height = 1500, width = 1500, units = "px", res = 300)
 plot_graph(mbrain2[["both"]]@cell.embeddings,
-           cell_idx = res$cell_idx,
+           clustering = clustering,
            adj_mat = res$adj_mat,
-           feature_vec = dist_mat[starting_radial,],
+           feature_vec = dist_mat[radial_start,],
            zlim = range(dist_mat),
+           cex_missing = 1,
+           cex_normal = 2,
            xlab = "both_1",
            ylab = "both_2",
            main = "SNN graph")
@@ -76,10 +70,12 @@ graphics.off()
 png("../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_snn_both_diffusion_cortical.png",
     height = 1500, width = 1500, units = "px", res = 300)
 plot_graph(mbrain2[["both"]]@cell.embeddings,
-           cell_idx = res$cell_idx,
+           clustering = clustering,
            adj_mat = res$adj_mat,
-           feature_vec = dist_mat[ending_cortical,],
+           feature_vec = dist_mat[cortical_end,],
            zlim = range(dist_mat),
+           cex_missing = 1,
+           cex_normal = 2,
            xlab = "both_1",
            ylab = "both_2",
            main = "SNN graph")
@@ -89,9 +85,11 @@ graphics.off()
 png("../../../../out/figures/Writeup14d/Writeup14d_10x_mouseembryo_snn_both_pseudotime.png",
     height = 1500, width = 1500, units = "px", res = 300)
 plot_graph(mbrain2[["both"]]@cell.embeddings,
-           cell_idx = res$cell_idx,
+           clustering = clustering,
            adj_mat = res$adj_mat,
            feature_vec = avg_rank,
+           cex_missing = 1,
+           cex_normal = 2,
            xlab = "both_1",
            ylab = "both_2",
            main = "SNN graph")
