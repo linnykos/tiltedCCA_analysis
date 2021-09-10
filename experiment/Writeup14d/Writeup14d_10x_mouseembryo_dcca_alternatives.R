@@ -462,3 +462,5 @@ make_all_embedding_plots(mbrain2,
 
 save(mbrain2, dcca_res, date_of_run, session_info,
      file = "../../../../out/Writeup14d/Writeup14d_10x_mouseembryo_dcca.RData")
+
+

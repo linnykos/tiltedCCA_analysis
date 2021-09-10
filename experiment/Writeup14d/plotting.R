@@ -214,3 +214,73 @@ plot_gene_de <- function(common_changepoint,
   
   invisible()
 }
+
+plot_gene_de_decomp <- function(common_mat,
+                                distinct_mat,
+                                gene_vec,
+                                prin_df,
+                                common_changepoint,
+                                distinct_changepoint,
+                                filepath, 
+                                height,
+                                width){
+  total_mat <- common_mat + distinct_mat
+  prin_df <- prin_df[order(prin_df$ord, decreasing = F),]
+  cell_ord <- sapply(prin_df$cell, function(cell_name){
+    which(rownames(common_mat) == cell_name)
+  })
+  
+  common_mat <- common_mat[cell_ord,,drop = F]
+  distinct_mat <- distinct_mat[cell_ord,,drop = F]
+  total_mat <- total_mat[cell_ord,,drop = F]
+  
+  for(gene in gene_vec){
+    png(paste0(filepath, "_", gene, "_everything.png"),
+        height = height, width = width, res = 300, units = "px")
+    gene_idx <- which(colnames(total_mat) == gene)
+    plot(total_mat[,gene_idx], 
+         xlab = "Pseudotime ordering",
+         ylab = "Expression",
+         main = paste0(gene, " (Everything)"),
+         pch = 16)
+    graphics.off()
+  }
+  
+  for(gene in gene_vec){
+    png(paste0(filepath, "_", gene, "_common.png"),
+        height = height, width = width, res = 300, units = "px")
+    gene_idx <- which(colnames(total_mat) == gene)
+    col_vec <- rep("black", nrow(common_mat))
+    if(gene %in% names(common_changepoint)){
+      idx <- which(names(common_changepoint) == gene)
+      col_vec[(2*common_changepoint[[idx]]$start):(2*common_changepoint[[idx]]$end)] <- "red"
+    }
+    plot(common_mat[,gene_idx], 
+         xlab = "Pseudotime ordering",
+         ylab = "Expression",
+         main = paste0(gene, " (Common)"),
+         col = col_vec,
+         pch = 16)
+    graphics.off()
+  }
+  
+  for(gene in gene_vec){
+    png(paste0(filepath, "_", gene, "_distinct.png"),
+        height = height, width = width, res = 300, units = "px")
+    gene_idx <- which(colnames(distinct_mat) == gene)
+    col_vec <- rep("black", nrow(distinct_mat))
+    if(gene %in% names(distinct_changepoint)){
+      idx <- which(names(distinct_changepoint) == gene)
+      col_vec[(2*distinct_changepoint[[idx]]$start):(2*distinct_changepoint[[idx]]$end)] <- "red"
+    }
+    plot(distinct_mat[,gene_idx], 
+         xlab = "Pseudotime ordering",
+         ylab = "Expression",
+         main = paste0(gene, " (Distinct)"),
+         col = col_vec,
+         pch = 16)
+    graphics.off()
+  }
+  
+  invisible()
+}

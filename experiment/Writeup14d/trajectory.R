@@ -27,7 +27,7 @@ compute_principal_ordering <- function(obj,
   atac_embedding <- tmp[["everything"]]
   center_vec <- matrixStats::colMeans2(atac_embedding)
   sd_vec <- matrixStats::colSds(atac_embedding)
-  for(j in 1:ncol(atac_embedding_meta)){
+  for(j in 1:ncol(atac_embedding)){
     atac_embedding[,j] <- (atac_embedding[,j]-center_vec[j])/sd_vec[j]
   }
   l2_vec <- apply(atac_embedding, 1, multiomicCCA:::.l2norm)
