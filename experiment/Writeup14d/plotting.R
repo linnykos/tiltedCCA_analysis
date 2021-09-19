@@ -185,28 +185,39 @@ plot_gene_ordering <- function(obj,
 
 plot_gene_de <- function(common_changepoint,
                          distinct_changepoint,
-                         p, 
+                         n, 
                          main1 = "DE in common space",
                          main2 = "DE in distinct space",
+                         min_length = n/20,
                          ...){
   par(mfrow = c(1,2))
-  vec1 <- rep(0, p)
+  vec1 <- rep(0, n)
   for(i in 1:length(common_changepoint)){
-    tmp <- vec1[common_changepoint[[i]]$start:common_changepoint[[i]]$end]
-    vec1[common_changepoint[[i]]$start:common_changepoint[[i]]$end] <- tmp + 1
+    idx <- rep(FALSE, n)
+    for(j in 1:nrow(common_changepoint[[i]])){
+      idx[common_changepoint[[i]][j,"start"]:common_changepoint[[i]][j,"end"]] <- TRUE
+    }
+    if(length(which(idx)) < min_length) next()
+    tmp <- vec1[which(idx)]
+    vec1[which(idx)] <- tmp + 1
   }
-  vec2 <- rep(0, p)
+  vec2 <- rep(0, n)
   for(i in 1:length(distinct_changepoint)){
-    tmp <- vec2[distinct_changepoint[[i]]$start:distinct_changepoint[[i]]$end]
-    vec2[distinct_changepoint[[i]]$start:distinct_changepoint[[i]]$end] <- tmp + 1
+    idx <- rep(FALSE, n)
+    for(j in 1:nrow(distinct_changepoint[[i]])){
+      idx[distinct_changepoint[[i]][j,"start"]:distinct_changepoint[[i]][j,"end"]] <- TRUE
+    }
+    if(length(which(idx)) < min_length) next()
+    tmp <- vec2[which(idx)]
+    vec2[which(idx)] <- tmp + 1
   }
   
-  plot(x = seq(0, 1, length.out = p),
+  plot(x = seq(0, 1, length.out = n),
        y = vec1, 
        main = main1,
        ylim = range(c(0, vec1, vec2)),
        ...)
-  plot(x = seq(0, 1, length.out = p),
+  plot(x = seq(0, 1, length.out = n),
        y = vec2, 
        main = main2,
        ylim = range(c(0, vec1, vec2)),
@@ -253,7 +264,12 @@ plot_gene_de_decomp <- function(common_mat,
     col_vec <- rep("black", nrow(common_mat))
     if(gene %in% names(common_changepoint)){
       idx <- which(names(common_changepoint) == gene)
-      col_vec[(2*common_changepoint[[idx]]$start):(2*common_changepoint[[idx]]$end)] <- "red"
+      bool_vec <- rep(FALSE, floor(nrow(common_mat)/2))
+      for(j in 1:nrow(common_changepoint[[idx]])){
+        bool_vec[common_changepoint[[idx]][j,"start"]:common_changepoint[[idx]][j,"end"]] <- TRUE
+      }
+      tmp <- c(which(bool_vec), which(bool_vec)+1)
+      col_vec[pmin(tmp, length(col_vec))] <- "red"
     }
     plot(common_mat[,gene_idx], 
          xlab = "Pseudotime ordering",
@@ -271,7 +287,12 @@ plot_gene_de_decomp <- function(common_mat,
     col_vec <- rep("black", nrow(distinct_mat))
     if(gene %in% names(distinct_changepoint)){
       idx <- which(names(distinct_changepoint) == gene)
-      col_vec[(2*distinct_changepoint[[idx]]$start):(2*distinct_changepoint[[idx]]$end)] <- "red"
+      bool_vec <- rep(FALSE, floor(nrow(distinct_mat)/2))
+      for(j in 1:nrow(distinct_changepoint[[idx]])){
+        bool_vec[distinct_changepoint[[idx]][j,"start"]:distinct_changepoint[[idx]][j,"end"]] <- TRUE
+      }
+      tmp <- c(which(bool_vec), which(bool_vec)+1)
+      col_vec[pmin(tmp, length(col_vec))] <- "red"
     }
     plot(distinct_mat[,gene_idx], 
          xlab = "Pseudotime ordering",
