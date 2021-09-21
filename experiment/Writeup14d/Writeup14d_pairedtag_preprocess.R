@@ -82,7 +82,7 @@ for(i in 1:length(histone_names)){
   set.seed(10)
   pairedtag <- Seurat::RunUMAP(pairedtag, dims = 1:50)
   
-  dat_1@x <- rep(1, length(dat_1@x))
+  # dat_1@x <- rep(1, length(dat_1@x))
   pairedtag[["DNA"]] <- Seurat::CreateAssayObject(counts = dat_1)
   Seurat::DefaultAssay(pairedtag) <- "DNA"
   pairedtag[["DNA"]]@data <- pairedtag[["DNA"]]@counts

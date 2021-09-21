@@ -5,16 +5,21 @@ library(Signac)
 histone_names <- c("H3K4me1", "H3K4me3", "H3K27ac", "H3K27me3", "H3K9me3")
 
 # create the color vector
-cell_types <- sort(unique(unlist(lapply(1:length(histone_names), function(i){
-  load(paste0("../../../../data/Pairedtag_mousebrain_RNA-Histone/seurat_",
-              histone_names[i], ".RData"))
-  unique(pairedtag@meta.data$celltype)
-}))))
+# cell_types <- sort(unique(unlist(lapply(1:length(histone_names), function(i){
+#   load(paste0("../../../../data/Pairedtag_mousebrain_RNA-Histone/seurat_",
+#               histone_names[i], ".RData"))
+#   unique(pairedtag@meta.data$celltype)
+# }))))
 # [1] "Astro_Myoc"  "Astro_Nnat"  "CA1"         "CA23"        "CGE"        
 # [6] "CT"          "DG"          "Endothelial" "Ependymal"   "L23"        
 # [11] "L4"          "L5"          "L6"          "Microglia"   "NP"         
 # [16] "Oligo_MFOL"  "Oligo_MOL"   "OPC"         "PT"          "Pvalb"      
 # [21] "Sst"         "Subiculum"
+cell_types <- c("Astro_Myoc", "Astro_Nnat", "CA1", "CA23", "CGE",
+                "CT", "DG", "Endothelial", "Ependymal", "L23",
+                "L4", "L5", "L6", "Microglia", "NP",
+                "Oligo_MFOL", "Oligo_MOL", "OPC", "PT", "Pvalb",
+                "Sst", "Subiculum")
 color_vec <- c("#FF6B2C", "#FF8817", "#5E801F", "#06C65B", "#EA6FE6",
                "#294646", "#00803D", "#B26F13", "#804F0F", "#005D7F",
                "#008FC6", "#05A8EB", "#547180", "#EB8E1A", "#487F80",
