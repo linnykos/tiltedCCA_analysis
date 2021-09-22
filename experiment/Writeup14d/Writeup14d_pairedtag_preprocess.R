@@ -75,6 +75,47 @@ for(i in 1:length(histone_names)){
   pairedtag <- Seurat::CreateSeuratObject(counts = dat_rna2)
   Seurat::DefaultAssay(pairedtag) <- "RNA"
   pairedtag[["celltype"]] <- meta_df$Annotation[cell_idx2]
+
+  dat_1b <- dat_1
+  dat_1b@x <- rep(1, length(dat_1b@x))
+  # Cells with less than 200 features in both DNA and RNA matrices were removed. 
+  keep_vec <- rep(1, ncol(dat_1b))
+  colsum_vec <- sparseMatrixStats::colSums2(dat_1b)
+  quantile(colsum_vec)
+  keep_vec[colsum_vec < 200] <- 0
+  keep_vec[which(pairedtag@meta.data$nFeature_RNA <= 200)] <- 0
+  table(keep_vec)
+  pairedtag[["keep"]] <- keep_vec
+  
+  # "removing the 5% highest covered bins"
+  rowsum_vec <- sparseMatrixStats::rowSums2(dat_1b[,which(keep_vec == 1)])
+  idx1 <- which(rowsum_vec >= quantile(rowsum_vec, probs = 0.95))
+  idx2 <- which(rowsum_vec <= 4)
+  dat_1b <- dat_1b[-c(unique(c(idx1, idx2))),]
+  dat_1 <- dat_1[-c(unique(c(idx1, idx2))),]
+  
+  pairedtag[["DNA"]] <- Seurat::CreateAssayObject(counts = dat_1)
+  Seurat::DefaultAssay(pairedtag) <- "DNA"
+  pairedtag[["DNA"]]@data <- pairedtag[["DNA"]]@counts
+  pairedtag <- subset(pairedtag, keep == 1)
+  set.seed(10)
+  dat_1c <- Matrix::t(pairedtag[["DNA"]]@data)
+  rowsum_vec <- sparseMatrixStats::rowSums2(dat_1c)
+  diag_mat <- Matrix::Diagonal(x = 1/rowsum_vec*100)
+  dat_1c <- diag_mat %*% dat_1c
+  center_vec <- sparseMatrixStats::colMeans2(dat_1c)
+  sd_vec <- sparseMatrixStats::colSds(dat_1c)
+  svd_res <- irlba::irlba(dat_1c, nv = 50, 
+                          scale = sd_vec, 
+                          center = center_vec)
+  dim_red <- multiomicCCA:::.mult_mat_vec(svd_res$u, svd_res$d)
+  dim_red <- scale(dim_red, center = T, scale = T)
+  rownames(dim_red) <- rownames(pairedtag@meta.data)
+  colnames(dim_red) <- paste0("lsi_", 1:50)
+  pairedtag[["lsi"]] <- Seurat::CreateDimReducObject(embedding = dim_red, 
+                                                     key = "lsi_", assay = "DNA")
+  
+  Seurat::DefaultAssay(pairedtag) <- "RNA"
   set.seed(10)
   pairedtag <- Seurat::SCTransform(pairedtag, verbose = T)
   pairedtag <- Seurat::FindVariableFeatures(pairedtag)
@@ -82,22 +123,12 @@ for(i in 1:length(histone_names)){
   set.seed(10)
   pairedtag <- Seurat::RunUMAP(pairedtag, dims = 1:50)
   
-  # dat_1@x <- rep(1, length(dat_1@x))
-  pairedtag[["DNA"]] <- Seurat::CreateAssayObject(counts = dat_1)
   Seurat::DefaultAssay(pairedtag) <- "DNA"
-  pairedtag[["DNA"]]@data <- pairedtag[["DNA"]]@counts
-  set.seed(10)
-  svd_res <- irlba::irlba(dat_1, nv = 50)
-  tmp <- multiomicCCA:::.mult_mat_vec(svd_res$v, svd_res$d)
-  rownames(tmp) <- rownames(pairedtag@meta.data)
-  colnames(tmp) <- paste0("lsi_", 1:50)
-  pairedtag[["lsi"]] <- Seurat::CreateDimReducObject(embedding = tmp, 
-                               key = "lsi_", assay = "DNA")
-  
   set.seed(10)
   pairedtag <- Seurat::RunUMAP(pairedtag, 
                                reduction="lsi", 
-                               dims=1:50,
+                               dims=1:25,
+                               metric = "euclidean",
                                reduction.name="umap.dna", 
                                reduction.key="dnaUMAP_")
   
