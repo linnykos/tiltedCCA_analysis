@@ -94,7 +94,7 @@ for(i in 1:length(histone_names)){
   dat_1b <- dat_1b[-c(unique(c(idx1, idx2))),]
   dat_1 <- dat_1[-c(unique(c(idx1, idx2))),]
   
-  pairedtag[["DNA"]] <- Seurat::CreateAssayObject(counts = dat_1)
+  pairedtag[["DNA"]] <- Seurat::CreateAssayObject(counts = dat_1b)
   Seurat::DefaultAssay(pairedtag) <- "DNA"
   pairedtag[["DNA"]]@data <- pairedtag[["DNA"]]@counts
   pairedtag <- subset(pairedtag, keep == 1)
