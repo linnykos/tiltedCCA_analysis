@@ -26,6 +26,8 @@ meta_clustering <- compute_metacells(pbmc,
 
 mat_1 <- Matrix::t(pbmc[["SCT"]]@data)
 mat_2 <- Matrix::t(pbmc[["ATAC"]]@data)
+cell_name <- rownames(mat_1)
+membership_vec <- as.factor(pbmc@meta.data$predicted.id)
 
 set.seed(10)
 rank_1 <- 40; rank_2 <- 50; nn <- 30
@@ -34,12 +36,11 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2,
                                       dims_2 = 2:rank_2,
                                       meta_clustering = meta_clustering, 
                                       num_neigh = nn, 
-                                      center_1 = T, center_2 = T,
-                                      scale_1 = T, scale_2 = T,
+                                      center_1 = T, center_2 = F,
+                                      scale_1 = T, scale_2 = F,
                                       fix_distinct_perc = F, 
                                       verbose = T) 
 
-cell_name <- rownames(mat_1)
 
 rm(list = c("mat_1", "mat_2")); gc(T)
 

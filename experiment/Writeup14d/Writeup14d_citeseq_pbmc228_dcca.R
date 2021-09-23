@@ -18,6 +18,8 @@ set.seed(10)
 idx <- multiomicCCA::construct_celltype_subsample(membership_vec, min_subsample_cell = 3000)
 membership_vec <- membership_vec[idx]
 mat_1 <- mat_1[idx,]; mat_2 <- mat_2[idx,]
+cell_name <- rownames(mat_1)
+membership_vec <- as.factor(pbmc@meta.data$celltype.l2)
 
 print(paste0(Sys.time(),": Applying D-CCA"))
 set.seed(10)
@@ -30,7 +32,6 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2,
                                       cell_max = 15000,
                                       fix_distinct_perc = F, 
                                       verbose = T) 
-cell_name <- rownames(mat_1)
 
 rm(list = c("mat_1", "mat_2")); gc(T)
 
