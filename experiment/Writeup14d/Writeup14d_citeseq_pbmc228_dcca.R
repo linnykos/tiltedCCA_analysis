@@ -28,7 +28,6 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2,
                                       meta_clustering = NA, 
                                       num_neigh = nn, 
                                       cell_max = 15000,
-                                      apply_shrinkage = F, 
                                       fix_distinct_perc = F, 
                                       verbose = T) 
 cell_name <- rownames(mat_1)
