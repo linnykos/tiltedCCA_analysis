@@ -11,15 +11,12 @@ session_info <- devtools::session_info()
 mat_1 <- t(pbmc[["SCT"]]@scale.data)
 mat_2 <- t(pbmc[["ADT"]]@scale.data)
 dim(mat_1); dim(mat_2)
-metadata <- pbmc@meta.data
-membership_vec <- as.factor(metadata$celltype.l2)
 
 set.seed(10)
 idx <- multiomicCCA::construct_celltype_subsample(membership_vec, min_subsample_cell = 3000)
-membership_vec <- membership_vec[idx]
 mat_1 <- mat_1[idx,]; mat_2 <- mat_2[idx,]
 cell_name <- rownames(mat_1)
-membership_vec <- as.factor(pbmc@meta.data$celltype.l2)
+membership_vec <- as.factor(pbmc@meta.data$celltype.l2[idx])
 
 print(paste0(Sys.time(),": Applying D-CCA"))
 set.seed(10)
