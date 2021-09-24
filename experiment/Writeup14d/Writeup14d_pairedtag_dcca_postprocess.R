@@ -101,5 +101,30 @@ for(kk in 1:length(histone_names)){
   plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
   ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_dcca_both_everything_umap.png"),
                   plot1, device = "png", width = 6, height = 5, units = "in")
+}
+
+################################
+
+for(kk in 1:length(histone_names)){
+  print(kk)
   
+  load(paste0("../../../../out/Writeup14d/Writeup14d_pairedtag_",  
+              histone_names[kk], ".RData"))
+  
+  png(paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",
+             histone_names[kk], "_dcca_summary.png"),
+      height = 1500, width = 1500, units = "px", res = 300)
+  par(mar = c(5,5,5,5))
+  multiomicCCA::plot_summary(dcca_res,
+                             main = paste0("Paired-Tag: ", histone_names[kk]))
+  graphics.off()
+  
+  png(paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",
+      histone_names[kk], "_dcca_scores.png"),
+      height = 1200, width = 2500, units = "px", res = 300)
+  par(mfrow = c(1,3), mar = c(4,4,4,0.5))
+  multiomicCCA::plot_scores_heatmap.dcca(dcca_res,
+                                         membership_vec = as.factor(pairedtag@meta.data$celltype),
+                                         log_scale = T, scaling_power = 2)
+  graphics.off()
 }
