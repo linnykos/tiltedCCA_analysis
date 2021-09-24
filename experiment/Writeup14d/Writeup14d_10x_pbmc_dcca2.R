@@ -15,7 +15,7 @@ keep_vec[rm_idx] <- 0
 pbmc[["keep"]] <- keep_vec
 pbmc <- subset(pbmc, keep == 1)
 
-mat_1 <- Matrix::t(pbmc[["SCT"]]@data)
+mat_1 <- Matrix::t(pbmc[["SCT"]]@data[,Seurat::VariableFeatures(pbmc)])
 mat_2 <- Matrix::t(pbmc[["ATAC"]]@data)
 cell_name <- rownames(mat_1)
 membership_vec <- as.factor(pbmc@meta.data$predicted.id)
