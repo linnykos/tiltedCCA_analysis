@@ -53,20 +53,20 @@ rna_frnn <- multiomicCCA::construct_frnn(dcca_res,
                                          verbose = T)
 
 #compute all rna basis vectors
-print(paste0(Sys.time(),": RNA eigenbasis"))
-k_max <- 50
-c_eig <- multiomicCCA::compute_laplacian(rna_frnn$c_g, 
-                                         k_max = k_max, 
-                                         rowname_vec = cell_name, 
-                                         colname_vec = paste0("clap_", 1:k_max), verbose = F)
-d_eig <- multiomicCCA::compute_laplacian(rna_frnn$d_g, 
-                                         k_max = k_max,
-                                         rowname_vec = cell_name, 
-                                         colname_vec = paste0("dlap_", 1:k_max), verbose = F)
-e_eig <- multiomicCCA::compute_laplacian(rna_frnn$e_g, 
-                                         k_max = k_max, 
-                                         rowname_vec = cell_name, 
-                                         colname_vec = paste0("elap_", 1:k_max), verbose = F)
+# print(paste0(Sys.time(),": RNA eigenbasis"))
+# k_max <- 50
+# c_eig <- multiomicCCA::compute_laplacian(rna_frnn$c_g, 
+#                                          k_max = k_max, 
+#                                          rowname_vec = cell_name, 
+#                                          colname_vec = paste0("clap_", 1:k_max), verbose = F)
+# d_eig <- multiomicCCA::compute_laplacian(rna_frnn$d_g, 
+#                                          k_max = k_max,
+#                                          rowname_vec = cell_name, 
+#                                          colname_vec = paste0("dlap_", 1:k_max), verbose = F)
+# e_eig <- multiomicCCA::compute_laplacian(rna_frnn$e_g, 
+#                                          k_max = k_max, 
+#                                          rowname_vec = cell_name, 
+#                                          colname_vec = paste0("elap_", 1:k_max), verbose = F)
 
 print(paste0(Sys.time(),": RNA embedding"))
 set.seed(10)
@@ -97,20 +97,20 @@ atac_frnn <- multiomicCCA::construct_frnn(dcca_res,
                                           bool_matrix = T, symmetrize = F, verbose = T)
 
 #compute all the degree vectors
-print(paste0(Sys.time(),": ATAC eigenbasis"))
-k_max <- 50
-c_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$c_g, 
-                                          k_max = k_max, 
-                                          rowname_vec = cell_name, 
-                                          colname_vec = paste0("clap_", 1:k_max), verbose = F)
-d_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$d_g,
-                                          k_max = k_max, 
-                                          rowname_vec = cell_name, 
-                                          colname_vec = paste0("dlap_", 1:k_max), verbose = F)
-e_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$e_g, 
-                                          k_max = k_max, 
-                                          rowname_vec = cell_name, 
-                                          colname_vec = paste0("elap_", 1:k_max), verbose = F)
+# print(paste0(Sys.time(),": ATAC eigenbasis"))
+# k_max <- 50
+# c_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$c_g, 
+#                                           k_max = k_max, 
+#                                           rowname_vec = cell_name, 
+#                                           colname_vec = paste0("clap_", 1:k_max), verbose = F)
+# d_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$d_g,
+#                                           k_max = k_max, 
+#                                           rowname_vec = cell_name, 
+#                                           colname_vec = paste0("dlap_", 1:k_max), verbose = F)
+# e_eig2 <- multiomicCCA::compute_laplacian(atac_frnn$e_g, 
+#                                           k_max = k_max, 
+#                                           rowname_vec = cell_name, 
+#                                           colname_vec = paste0("elap_", 1:k_max), verbose = F)
 
 print(paste0(Sys.time(),": ATAC embedding"))
 set.seed(10)
