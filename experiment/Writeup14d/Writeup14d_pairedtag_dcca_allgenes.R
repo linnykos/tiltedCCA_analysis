@@ -20,7 +20,7 @@ for(i in 1:length(histone_names)){
   #                                      embedding_2 = embedding_2)
   
   Seurat::DefaultAssay(pairedtag) <- "SCT"
-  mat_1 <- Matrix::t(pairedtag[["SCT"]]@data[Seurat::VariableFeatures(pairedtag),])
+  mat_1 <- Matrix::t(pairedtag[["SCT"]]@data)
   mat_2 <- Matrix::t(pairedtag[["DNA"]]@data)
   cell_name <- rownames(mat_1)
   membership_vec <- as.factor(pairedtag@meta.data$celltype)
@@ -39,7 +39,7 @@ for(i in 1:length(histone_names)){
   
   save(pairedtag, dcca_res, 
        file = paste0("../../../../out/Writeup14d/Writeup14d_pairedtag_",
-                     histone_names[i], ".RData"))
+                     histone_names[i], "_allgenes.RData"))
   
   print(paste0(Sys.time(),": RNA frNN"))
   set.seed(10)
@@ -69,7 +69,7 @@ for(i in 1:length(histone_names)){
   
   save(pairedtag, dcca_res, rna_frnn, rna_embeddings,
        file = paste0("../../../../out/Writeup14d/Writeup14d_pairedtag_",
-                     histone_names[i], ".RData"))
+                     histone_names[i], "_allgenes.RData"))
   
   print(paste0(Sys.time(),": DNA frNN"))
   set.seed(10)
@@ -98,7 +98,7 @@ for(i in 1:length(histone_names)){
   save(pairedtag, dcca_res, rna_frnn, rna_embeddings,
        dna_frnn, dna_embeddings,
        file = paste0("../../../../out/Writeup14d/Writeup14d_pairedtag_",
-                     histone_names[i], ".RData"))
+                     histone_names[i], "_allgenes.RData"))
   
   print(paste0(Sys.time(),": Combining embeddings"))
   set.seed(10)
@@ -114,6 +114,6 @@ for(i in 1:length(histone_names)){
   save(pairedtag, dcca_res, rna_frnn, rna_embeddings,
        dna_frnn, dna_embeddings, combined_common_umap,
        file = paste0("../../../../out/Writeup14d/Writeup14d_pairedtag_",
-                     histone_names[i], ".RData"))
+                     histone_names[i], "_allgenes.RData"))
   
 }
