@@ -20,7 +20,7 @@ for(i in 1:length(histone_names)){
   #                                      embedding_2 = embedding_2)
   
   Seurat::DefaultAssay(pairedtag) <- "SCT"
-  mat_1 <- Matrix::t(pairedtag[["SCT"]]@data[Seurat::VariableFeatures(pairedtag),])
+  mat_1 <- Matrix::t(pairedtag[["SCT"]]@data)
   mat_2 <- Matrix::t(pairedtag[["DNA"]]@data)
   cell_name <- rownames(mat_1)
   membership_vec <- as.factor(pairedtag@meta.data$celltype)
