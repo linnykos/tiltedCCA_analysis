@@ -128,3 +128,13 @@ for(kk in 1:length(histone_names)){
                                          log_scale = T, scaling_power = 2)
   graphics.off()
 }
+
+for(kk in 1:length(histone_names)){
+  print(kk)
+  
+  load(paste0("../../../../out/Writeup14d/Writeup14d_pairedtag_",  
+              histone_names[kk], ".RData"))
+  print(dim(dcca_res$svd_1$u))
+  print(dim(dcca_res$svd_1$v))
+  print(dim(dcca_res$svd_2$v))
+}

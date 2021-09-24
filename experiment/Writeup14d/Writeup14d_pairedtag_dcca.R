@@ -11,15 +11,16 @@ for(i in 1:length(histone_names)){
   load(paste0("../../../../data/Pairedtag_mousebrain_RNA-Histone/seurat_",
               histone_names[i], ".RData"))
   
-  embedding_1 <- pairedtag[["pca"]]@cell.embeddings
-  embedding_2 <- pairedtag[["lsi"]]@cell.embeddings
+  # embedding_1 <- pairedtag[["pca"]]@cell.embeddings
+  # embedding_2 <- pairedtag[["lsi"]]@cell.embeddings
+  # 
+  # set.seed(10)
+  # meta_clustering <- compute_metacells(pairedtag,
+  #                                      embedding_1 = embedding_1,
+  #                                      embedding_2 = embedding_2)
   
-  set.seed(10)
-  meta_clustering <- compute_metacells(pairedtag,
-                                       embedding_1 = embedding_1,
-                                       embedding_2 = embedding_2)
-  
-  mat_1 <- Matrix::t(pairedtag[["SCT"]]@data)
+  Seurat::DefaultAssay(pairedtag) <- "SCT"
+  mat_1 <- Matrix::t(pairedtag[["SCT"]]@data[Seurat::VariableFeatures(pairedtag),])
   mat_2 <- Matrix::t(pairedtag[["DNA"]]@data)
   cell_name <- rownames(mat_1)
   membership_vec <- as.factor(pairedtag@meta.data$celltype)
@@ -29,7 +30,7 @@ for(i in 1:length(histone_names)){
   dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, 
                                         dims_1 = 1:rank_1, 
                                         dims_2 = 1:rank_2,
-                                        meta_clustering = meta_clustering, 
+                                        meta_clustering = NA, 
                                         num_neigh = nn, 
                                         center_1 = T, center_2 = T,
                                         scale_1 = T, scale_2 = T,
