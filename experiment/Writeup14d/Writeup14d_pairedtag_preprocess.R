@@ -45,10 +45,10 @@ histone_names <- c("H3K4me1", "H3K4me3", "H3K27ac", "H3K27me3", "H3K9me3")
 # colname_vec <- tmp[,1]
 # tmp <- read.table(file = "../../../../data/Pairedtag_mousebrain_RNA-Histone/01.Paired-Tag_seq_RNA_filtered_matrix/genes.tsv",
 #                   sep = '\t', header = F)
-# rowname_vec <- tmp[,1]
+# rowname_vec <- tmp[,2]
 # dat_rna <- as(dat_rna, "dgCMatrix")
 # rownames(dat_rna) <- rowname_vec; colnames(dat_rna) <- colname_vec
-# 
+
 # save(dat_rna, file = "../../../../data/Pairedtag_mousebrain_RNA-Histone/preprocessed_RNA.RData")
 # 
 # #######################################
@@ -118,7 +118,7 @@ for(i in 1:length(histone_names)){
   Seurat::DefaultAssay(pairedtag) <- "RNA"
   set.seed(10)
   pairedtag <- Seurat::SCTransform(pairedtag, verbose = T)
-  pairedtag <- Seurat::FindVariableFeatures(pairedtag)
+  pairedtag <- Seurat::FindVariableFeatures(pairedtag) ## ? Do I need to call this line?
   pairedtag <- Seurat::RunPCA(pairedtag, verbose = FALSE)
   set.seed(10)
   pairedtag <- Seurat::RunUMAP(pairedtag, dims = 1:50)

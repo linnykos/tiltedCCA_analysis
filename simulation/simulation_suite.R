@@ -1,107 +1,98 @@
 rm(list=ls())
-library(simulator)
 library(multiomicCCA)
 source("../multiomicCCA_analysis/simulation/data_generator.R")
+source("../multiomicCCA_analysis/simulation/plotting.R")
+source("../multiomicCCA_analysis/simulation/wnn.R")
+source("../multiomicCCA_analysis/simulation/pca_combine.R")
+source("../multiomicCCA_analysis/simulation/plotting.R")
+source("../multiomicCCA_analysis/simulation/dcca_custom.R")
 
-df_param <- data.frame(setting = c(1, 2, 3, 4, 5, 6), 
-                       rank_1 =  c(2, 2, 2, 2, 2, 2),
-                       rank_2 =  c(2, 2, 2, 2, 2, 2))
+df_param <- data.frame(setting = c(1, 4, 3, 5, 7), 
+                       rank_1 =  rep(2, 5),
+                       rank_2 =  rep(2, 5))
 
-rule <- function(vec){
-  simulation_all(vec$setting)
-}
-
-criterion <- function(dat, vec, y){
-  dcca_res <- dcca_factor(dat$dat$mat_1, dat$dat$mat_2, rank_1 = vec$rank_1, rank_2 = vec$rank_2, 
-                          apply_shrinkage = F, verbose = F)
-  dcca_decomp <- dcca_decomposition(dcca_res, rank_c = min(vec$rank_1, vec$rank_2), verbose = F)
-  
-  list(dat = dat$dat, true_membership_vec = dat$true_membership_vec,
-       dcca_decomp = dcca_decomp)
-}
-
-##################
-
-res <- simulator::simulator(rule, criterion, df_param, ntrials = 1,
-                            cores = 1, verbose = T)
-
-###################
-
-# choose a particular setting to investigate
-i <- 1
-dcca_decomp <- res[[i]][[1]]$result$dcca_decomp
-true_membership_vec <- as.factor(res[[i]][[1]]$result$true_membership_vec)
-
-dcca_decomp$distinct_perc_2
-par(mar = c(4,4,4,0.5))
-plot_data(dcca_decomp, membership_vec = true_membership_vec)
-par(mar = c(4,4,4,0.5))
-plot_data(dcca_decomp, membership_vec = true_membership_vec, pca = T)
-
-par(mar = c(4,4,4,4), mfrow = c(1,1))
-plot_summary(dcca_decomp)
-
-par(mar = c(4,4,4,0.5))
-plot_scores_heatmap(dcca_decomp, membership_vec = true_membership_vec)
-par(mar = c(4,4,4,0.5))
-plot_scores_heatmap(dcca_decomp, membership_vec = true_membership_vec, scaling_power = 0.5)
-
-par(mar = c(4,4,4,0.5))
-plot_scores(dcca_decomp, membership_vec = true_membership_vec, decomposition = T)
-
-par(mar = c(4,4,4,0.5), mfrow = c(1,2))
-plot_decomposition_2d(dcca_decomp$score_1[,1], dcca_decomp$score_2[,1], dcca_decomp$common_score[,1], 
-                      main = bquote(atop(bold("Canonical dim. 1"), ~ lambda ~ plain(":") ~ .(round(dcca_decomp$cca_obj[1],2)) 
-                                         ~ plain(",")~ gamma ~ plain(":") ~ .(round(dcca_decomp$distinct_perc_2[1],2)))),
-                      xlab = "Dataset 1", ylab = "Dataset 2")
-plot_decomposition_2d(dcca_decomp$score_1[,2], dcca_decomp$score_2[,2], dcca_decomp$common_score[,2], 
-                      main = bquote(atop(bold("Canonical dim. 2"), ~ lambda ~ plain(":") ~ .(round(dcca_decomp$cca_obj[2],2)) 
-                                         ~ plain(",")~ gamma ~ plain(":") ~ .(round(dcca_decomp$distinct_perc_2[2],2)))),
-                      xlab = "Dataset 1", ylab = "Dataset 2")
-
-par(mar = c(4,4,4,0.5))
-plot_embeddings(dcca_decomp, true_membership_vec, data_1 = T, data_2 = F, main_addition = "\nDataset 1",
-                add_noise = T)
-par(mar = c(4,4,4,0.5))
-plot_embeddings(dcca_decomp, true_membership_vec, data_1 = F, data_2 = T, main_addition = "\nDataset 2",
-                add_noise = T)
-par(mar = c(4,4,4,0.5))
-plot_embeddings(dcca_decomp, true_membership_vec, data_1 = T, data_2 = T, main_addition = "\nBoth datasets",
-                add_noise = T)
-
-set.seed(10)
-clisi_1 <- clisi_information(dcca_decomp$common_mat_1, dcca_decomp$distinct_mat_1,
-                             true_membership_vec, rank_c = 2, rank_d = 2, 
-                             nn = round(0.5*min(table(true_membership_vec))),
-                             radius_quantile = 0.9, max_subsample_clisi = min(table(true_membership_vec)),
-                             verbose = F)
-clisi_2 <- clisi_information(dcca_decomp$common_mat_2, dcca_decomp$distinct_mat_2,
-                             true_membership_vec, rank_c = 2, rank_d = 2, 
-                             nn = round(0.5*min(table(true_membership_vec))),
-                             radius_quantile = 0.9, max_subsample_clisi = min(table(true_membership_vec)),
-                             verbose = F)
-plot_clisi(clisi_1, clisi_2)
-plot_clisi_legend(clisi_1)
-
-
-######
-
-for(i in 1:6){
-  dcca_decomp <- res[[i]][[1]]$result$dcca_decomp
-  true_membership_vec <- as.factor(res[[i]][[1]]$result$true_membership_vec)
+for(row_idx in 1:4){
+  print(row_idx)
   set.seed(10)
-  clisi_1 <- clisi_information(dcca_decomp$common_mat_1, dcca_decomp$distinct_mat_1,
-                               true_membership_vec, rank_c = 2, rank_d = 2, 
-                               nn = round(0.5*min(table(true_membership_vec))),
-                               radius_quantile = 0.9, max_subsample_clisi = min(table(true_membership_vec)),
-                               verbose = F)
-  clisi_2 <- clisi_information(dcca_decomp$common_mat_2, dcca_decomp$distinct_mat_2,
-                               true_membership_vec, rank_c = 2, rank_d = 2, 
-                               nn = round(0.5*min(table(true_membership_vec))),
-                               radius_quantile = 0.9, max_subsample_clisi = min(table(true_membership_vec)),
-                               verbose = F)
-  png(paste0("../../out/simulation/Writeup13/Writeup13_simulation", i, "_clisi.png"), height = 900, width = 1500, units = "px", res = 300)
-  plot_clisi(clisi_1, clisi_2, col_vec = 1:length(levels(true_membership_vec)))
-  graphics.off()
+  setting <- df_param[row_idx,"setting"]
+  dat <- simulation_all(setting)
+  
+  set.seed(10)
+  dcca_res <- dcca_factor(dat$dat$mat_1, dat$dat$mat_2, 
+                          dims_1 = 1:2, dims_2 = 1:2, 
+                          fix_distinct_perc = F,
+                          verbose = F)
+  
+  svd_1 <- dcca_res$svd_1
+  svd_2 <- dcca_res$svd_2
+  dims_1 <- 1:2
+  dims_2 <- 1:2
+  mat_1 <- dat$dat$mat_1
+  mat_2 <- dat$dat$mat_2
+  dimred1 <- multiomicCCA:::.mult_mat_vec(svd_1$u, svd_1$d)
+  dimred2 <- multiomicCCA:::.mult_mat_vec(svd_2$u, svd_2$d)
+  dimred_combined <- pca_combine(svd_1, svd_2, dims_1, dims_2)
+  dimred_wnn <- wnn_custom(mat_1, mat_2, svd_1, svd_2, dims_1, dims_2)
+  dimred_dcca <- dcca_custom(dcca_res)
+  
+  if(setting < 7){
+    color_vec <- scales::hue_pal()(length(unique(dat$true_membership_vec)))
+ 
+    # dataset 1
+    plot_custom_cluster(dimred1,
+                        membership_vec = dat$true_membership_vec,
+                        color_vec = color_vec,
+                        filename = paste0("../../out/figures/Writeup14d_simulation/simulation", setting,
+                                          "_embedding1.png"),
+                        main = "Dataset 1 (PCA)")
+    
+    # dataset 2
+    plot_custom_cluster(dimred2,
+                        membership_vec = dat$true_membership_vec,
+                        color_vec = color_vec,
+                        filename = paste0("../../out/figures/Writeup14d_simulation/simulation", setting,
+                                          "_embedding2.png"),
+                        main = "Dataset 2 (PCA)")
+    
+    # pca combined
+    plot_custom_cluster(dimred_combined,
+                        membership_vec = dat$true_membership_vec,
+                        color_vec = color_vec,
+                        filename = paste0("../../out/figures/Writeup14d_simulation/simulation", setting,
+                                          "_pcacombined.png"),
+                        main = "PCA Combined")
+    
+    # wnn
+    plot_custom_cluster(dimred_wnn,
+                        membership_vec = dat$true_membership_vec,
+                        color_vec = color_vec,
+                        filename = paste0("../../out/figures/Writeup14d_simulation/simulation", setting,
+                                          "_wnn.png"),
+                        main = "WNN")
+    
+    plot_custom_cluster(dimred_dcca$common,
+                        membership_vec = dat$true_membership_vec,
+                        color_vec = color_vec,
+                        filename = paste0("../../out/figures/Writeup14d_simulation/simulation", setting,
+                                          "_dcca_common.png"),
+                        main = "Tilted-CCA (Common)")
+    
+    plot_custom_cluster(dimred_dcca$distinct_1,
+                        membership_vec = dat$true_membership_vec,
+                        color_vec = color_vec,
+                        filename = paste0("../../out/figures/Writeup14d_simulation/simulation", setting,
+                                          "_dcca_distinct_1.png"),
+                        main = "Tilted-CCA (Distinct 1)")
+    
+    plot_custom_cluster(dimred_dcca$distinct_2,
+                        membership_vec = dat$true_membership_vec,
+                        color_vec = color_vec,
+                        filename = paste0("../../out/figures/Writeup14d_simulation/simulation", setting,
+                                          "_dcca_distinct_2.png"),
+                        main = "Tilted-CCA (Distinct 2)")
+    
+  } else {
+    
+  }
 }
 

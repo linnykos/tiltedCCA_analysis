@@ -18,7 +18,19 @@ for(kk in 1:length(histone_names)){
   print(kk)
   
   load(paste0("../../../../out/Writeup14d/Writeup14d_pairedtag_",  
-               histone_names[kk], ".RData"))
+               histone_names[kk], "_allgenes.RData"))
+  
+  print(dim(dcca_res$svd_1$u))
+  print(dim(dcca_res$svd_1$v))
+  print(dim(dcca_res$svd_2$v))
+  
+  mat_1 <- pairedtag[["SCT"]]@counts
+  mat_2 <- pairedtag[["DNA"]]@counts
+  print(median(sparseMatrixStats::colSums2(mat_1)))
+  print(median(sparseMatrixStats::rowSums2(mat_1)))
+  print("====")
+  print(median(sparseMatrixStats::colSums2(mat_2)))
+  print(median(sparseMatrixStats::rowSums2(mat_2)))
   
   pairedtag[["common"]] <- Seurat::CreateDimReducObject(embedding = rna_embeddings[[1]], key = "common_", assay = "RNA")
   pairedtag[["distinct"]] <- Seurat::CreateDimReducObject(embedding = rna_embeddings[[2]], key = "distinct_", assay = "RNA")
@@ -66,7 +78,7 @@ for(kk in 1:length(histone_names)){
                              repel = TRUE, label.size = 2.5)
     plot1 <- plot1 + ggplot2::ggtitle(paste0("Paired-Tag: ", histone_names[kk], " (RNA)\n", title_vec[i]))
     plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_dcca_rna_", main_vec[i], "_umap.png"),
+    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_allgenes_dcca_rna_", main_vec[i], "_umap.png"),
                     plot1, device = "png", width = 6, height = 5, units = "in")
   }
   
@@ -78,7 +90,7 @@ for(kk in 1:length(histone_names)){
                              repel = TRUE, label.size = 2.5)
     plot1 <- plot1 + ggplot2::ggtitle(paste0("Paired-Tag: ", histone_names[kk], " (Histone)\n", title_vec[i]))
     plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_dcca_dna_", main_vec[i], "_umap.png"),
+    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_allgenes_dcca_dna_", main_vec[i], "_umap.png"),
                     plot1, device = "png", width = 6, height = 5, units = "in")
   }
   
@@ -89,7 +101,7 @@ for(kk in 1:length(histone_names)){
                            repel = TRUE, label.size = 2.5)
   plot1 <- plot1 + ggplot2::ggtitle(paste0("Paired-Tag: ", histone_names[kk], "\nBoth Common"))
   plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-  ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_dcca_both_common_umap.png"),
+  ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_allgenes_dcca_both_common_umap.png"),
                   plot1, device = "png", width = 6, height = 5, units = "in")
   
   # plot the everything combined for both
@@ -99,20 +111,11 @@ for(kk in 1:length(histone_names)){
                            repel = TRUE, label.size = 2.5)
   plot1 <- plot1 + ggplot2::ggtitle(paste0("Paired-Tag: ", histone_names[kk], "\nBoth Everything"))
   plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-  ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_dcca_both_everything_umap.png"),
+  ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_allgenes_dcca_both_everything_umap.png"),
                   plot1, device = "png", width = 6, height = 5, units = "in")
-}
 
-################################
-
-for(kk in 1:length(histone_names)){
-  print(kk)
-  
-  load(paste0("../../../../out/Writeup14d/Writeup14d_pairedtag_",  
-              histone_names[kk], ".RData"))
-  
   png(paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",
-             histone_names[kk], "_dcca_summary.png"),
+             histone_names[kk], "_allgenes_dcca_summary.png"),
       height = 1500, width = 1500, units = "px", res = 300)
   par(mar = c(5,5,5,5))
   multiomicCCA::plot_summary(dcca_res,
@@ -120,7 +123,7 @@ for(kk in 1:length(histone_names)){
   graphics.off()
   
   png(paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",
-      histone_names[kk], "_dcca_scores.png"),
+      histone_names[kk], "_allgenes_dcca_scores.png"),
       height = 1200, width = 2500, units = "px", res = 300)
   par(mfrow = c(1,3), mar = c(4,4,4,0.5))
   multiomicCCA::plot_scores_heatmap.dcca(dcca_res,
@@ -129,12 +132,38 @@ for(kk in 1:length(histone_names)){
   graphics.off()
 }
 
-for(kk in 1:length(histone_names)){
-  print(kk)
-  
-  load(paste0("../../../../out/Writeup14d/Writeup14d_pairedtag_",  
-              histone_names[kk], ".RData"))
-  print(dim(dcca_res$svd_1$u))
-  print(dim(dcca_res$svd_1$v))
-  print(dim(dcca_res$svd_2$v))
-}
+
+kk <- 5
+load(paste0("../../../../out/Writeup14d/Writeup14d_pairedtag_",  
+            histone_names[kk], "_allgenes.RData"))
+uniq_celltypes <- sort(unique(pairedtag@meta.data$celltype))
+color_vec <- sapply(uniq_celltypes, function(i){
+  color_df[which(color_df$celltype == i),"color"]
+})
+title_vec <- c("Common view", "Distinct view", "Everything view")
+main_vec <- c("common", "distinct", "everything")
+i <- 2
+pairedtag[["distinct2"]] <- Seurat::CreateDimReducObject(embedding = dna_embeddings[[2]], key = "distinct2_", assay = "RNA")
+cell_vec <- which(pairedtag@meta.data$celltype %in% c("Astro_Nnat", "Oligo_MOL", "Oligo_MFOL", "Astro_Myoc", "Endothelial"))
+plot1 <- Seurat::DimPlot(pairedtag, reduction = paste0(main_vec[i], "2"),
+                         group.by = "celltype", label = TRUE,
+                         cols = color_vec,
+                         cells = cell_vec,
+                         repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Paired-Tag: ", histone_names[kk], " (Histone)\n", title_vec[i]))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_dcca_dna_", main_vec[i], "_umap_zoom1.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+cell_vec <- which(pairedtag@meta.data$celltype %in% c("PT", "L5", "L6", "NP", "CT", "CA23", "CA1", "L4", "L23", "DG", 
+                                                      "CGE", "Pvalb", "OPC", "Sst", "Ependymal", "Microglia"))
+plot1 <- Seurat::DimPlot(pairedtag, reduction = paste0(main_vec[i], "2"),
+                         group.by = "celltype", label = TRUE,
+                         cols = color_vec,
+                         cells = cell_vec,
+                         repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Paired-Tag: ", histone_names[kk], " (Histone)\n", title_vec[i]))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14d/Writeup14d_pairedtag_",  histone_names[kk], "_dcca_dna_", main_vec[i], "_umap_zoom2.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
