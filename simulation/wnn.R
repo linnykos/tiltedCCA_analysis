@@ -18,15 +18,22 @@ wnn_custom <- function(mat_1,
                                                           key = "dimred2_", assay = "ATAC")
   
   seurat_obj <- Seurat::FindMultiModalNeighbors(
-    seurat_obj, 
+    seurat_obj,
+    prune.SNN = 0,
     reduction.list = list("dimred1", "dimred2"), 
     dims.list = list(1:length(dims_1), 1:length(dims_2))
   )
   
-  seurat_obj <- Seurat::RunUMAP(seurat_obj, 
-                                nn.name = "weighted.nn", 
-                                reduction.name = "wnn.umap", 
-                                reduction.key = "wnnUMAP_")
+  adj_mat <- as.matrix(seurat_obj@graphs$wknn)
+  diag(adj_mat) <- 0
+  adj_mat <- scale(adj_mat, center = T, scale = F)
+  svd_res <- svd(adj_mat)
+  multiomicCCA:::.mult_mat_vec(svd_res$u[,1:2], svd_res$d[1:2])
   
-  seurat_obj[["wnn.umap"]]@cell.embeddings
+  # seurat_obj <- Seurat::RunUMAP(seurat_obj, 
+  #                               nn.name = "weighted.nn", 
+  #                               reduction.name = "wnn.umap", 
+  #                               reduction.key = "wnnUMAP_")
+  # 
+  # seurat_obj[["wnn.umap"]]@cell.embeddings
 }

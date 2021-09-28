@@ -7,7 +7,7 @@ source("../multiomicCCA_analysis/simulation/pca_combine.R")
 source("../multiomicCCA_analysis/simulation/plotting.R")
 source("../multiomicCCA_analysis/simulation/dcca_custom.R")
 
-df_param <- data.frame(setting = c(1, 4, 3, 5, 7), 
+df_param <- data.frame(setting = c(1, 4, 3, 6, 7), 
                        rank_1 =  rep(2, 5),
                        rank_2 =  rep(2, 5))
 
@@ -70,26 +70,32 @@ for(row_idx in 1:4){
                                           "_wnn.png"),
                         main = "WNN")
     
+    xlim <- range(c(dimred_dcca$common[,1], dimred_dcca$distinct_1[,1], dimred_dcca$distinct_2[,1]))
+    ylim <- range(c(dimred_dcca$common[,2], dimred_dcca$distinct_1[,2], dimred_dcca$distinct_2[,2]))
+    
     plot_custom_cluster(dimred_dcca$common,
                         membership_vec = dat$true_membership_vec,
                         color_vec = color_vec,
                         filename = paste0("../../out/figures/Writeup14d_simulation/simulation", setting,
                                           "_dcca_common.png"),
-                        main = "Tilted-CCA (Common)")
+                        main = "Tilted-CCA (Common)",
+                        xlim = xlim, ylim = ylim)
     
     plot_custom_cluster(dimred_dcca$distinct_1,
                         membership_vec = dat$true_membership_vec,
                         color_vec = color_vec,
                         filename = paste0("../../out/figures/Writeup14d_simulation/simulation", setting,
                                           "_dcca_distinct_1.png"),
-                        main = "Tilted-CCA (Distinct 1)")
+                        main = "Tilted-CCA (Distinct 1)",
+                        xlim = xlim, ylim = ylim)
     
     plot_custom_cluster(dimred_dcca$distinct_2,
                         membership_vec = dat$true_membership_vec,
                         color_vec = color_vec,
                         filename = paste0("../../out/figures/Writeup14d_simulation/simulation", setting,
                                           "_dcca_distinct_2.png"),
-                        main = "Tilted-CCA (Distinct 2)")
+                        main = "Tilted-CCA (Distinct 2)",
+                        xlim = xlim, ylim = ylim)
     
   } else {
     

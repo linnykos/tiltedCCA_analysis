@@ -81,25 +81,23 @@ simulation3 <- function(){
   list(dat = dat, true_membership_vec = true_membership_vec)
 }
 
-# high distinct 1, high distinct 2 with 4 clusters. 
-# distinct 1 separates (1) from (2) and 
-# distinct 2 seperates (3) from (4) analogously
+# 3 clusters
 simulation4 <- function(){
-  B_mat <- matrix(c(0.9, 0.4, 0.1,
-                    0.4, 0.9, 0.1,
-                    0.1, 0.1, 0.3), 3, 3, byrow = T)
+  B_mat <- matrix(c(0.9, 0.9, 0.1,
+                    0.9, 0.9, 0.1,
+                    0.1, 0.1, 0.9), 3, 3, byrow = T)
   K <- ncol(B_mat); n_clust <- 100
   
-  true_membership_vec <- rep(1:4, each = n_clust)
+  true_membership_vec <- rep(1:3, each = n_clust)
   n <- length(true_membership_vec)
   
-  membership_vec <- c(rep(1, n_clust), rep(2, n_clust), rep(3, 2*n_clust))
+  membership_vec <- c(rep(1, n_clust), rep(2, n_clust), rep(3, n_clust))
   svd_u_1 <- multiomicCCA::generate_sbm_orthogonal(B_mat, membership_vec, centered = T)
-  membership_vec <- c(rep(3, 2*n_clust), rep(1, n_clust), rep(2, n_clust))
+  membership_vec <- c(rep(1, n_clust), rep(3, n_clust), rep(2, n_clust))
   svd_u_2 <- multiomicCCA::generate_sbm_orthogonal(B_mat, membership_vec, centered = T)
 
-  p_1 <- 20; p_2 <- 40
-  svd_d_1 <- sqrt(n*p_1)*c(1.5,1); svd_d_2 <- sqrt(n*p_2)*c(1.5,1)
+  p_1 <- 40; p_2 <- 40
+  svd_d_1 <- sqrt(n*p_1)*c(5,1); svd_d_2 <- sqrt(n*p_2)*c(5,1)
   svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, K-1)
   svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, K-1)
   
@@ -134,27 +132,27 @@ simulation5 <- function(){
   list(dat = dat, true_membership_vec = true_membership_vec)
 }
 
-# same setting as above, but now w/ different number variables
+# same setting as above, but now w/ only 4 variables
 simulation6 <- function(){
-  B_mat <- matrix(c(0.9, 0.4, 0.1, 
-                    0.4, 0.9, 0.1, 
-                    0.1, 0.1, 0.9), 3, 3, byrow = T)
+  B_mat <- matrix(c(0.9, 0.9, 0.3,  
+                    0.9, 0.9, 0.3,
+                    0.3, 0.3, 0.9), 3, 3, byrow = T)
   K <- ncol(B_mat); n_clust <- 100
-  true_membership_vec <- rep(1:5, each = n_clust)
+  true_membership_vec <- rep(1:4, each = n_clust)
   n <- length(true_membership_vec)
   
-  membership_vec <-  c(rep(1, 2*n_clust), rep(2, 2*n_clust), rep(3, n_clust))
+  membership_vec <-  c(rep(1, n_clust), rep(2, n_clust), rep(3, 2*n_clust))
   svd_u_1 <- multiomicCCA::generate_sbm_orthogonal(B_mat, membership_vec, centered = T)
-  membership_vec <-  c(rep(1, n_clust), rep(2, n_clust), rep(1, n_clust), rep(2, n_clust), rep(3, n_clust))
+  membership_vec <-  c(rep(1, n_clust), rep(3, n_clust), rep(2, n_clust), rep(3, n_clust))
   svd_u_2 <- multiomicCCA::generate_sbm_orthogonal(B_mat, membership_vec, centered = T)
   
-  p_1 <- 20; p_2 <- 40
-  svd_d_1 <- sqrt(n*p_1)*c(1.5,1); svd_d_2 <- sqrt(n*p_1)*c(0.75,0.5)
+  p_1 <- 40; p_2 <- 40
+  svd_d_1 <- sqrt(n*p_1)*c(1.5,1); svd_d_2 <- sqrt(n*p_2)*c(1.5,1)
   svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, K-1)
   svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, K-1)
   
   dat <- multiomicCCA::generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2,
-                       noise_val = 2)
+                                     noise_val = 2)
   list(dat = dat, true_membership_vec = true_membership_vec)
 }
 
