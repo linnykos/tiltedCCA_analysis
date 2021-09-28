@@ -13,23 +13,38 @@ simulation_all <- function(idx){
 
 # easy setting: low distinct 1, low distinct 2 with 3 clusters
 simulation1 <- function(){
-  n_clust <- 100
-  B_mat <- matrix(c(0.9, 0.2, 0.1, 
-                    0.2, 0.9, 0.1,
-                    0.1, 0.1, 0.5), 3, 3, byrow = T)
-  K <- ncol(B_mat); 
-  rho1 <- 1; rho2 <- 0.3
-  membership_vec <- c(rep(1, n_clust), rep(2, n_clust), rep(3, n_clust))
-  n <- length(membership_vec); true_membership_vec <- membership_vec
-  svd_u_1 <- multiomicCCA::generate_sbm_orthogonal(rho1*B_mat, membership_vec, centered = T)
-  svd_u_2 <- multiomicCCA::generate_sbm_orthogonal(rho2*B_mat, membership_vec, centered = T)
+  n_each <- 100
+  true_membership_vec <- rep(1:3, each = n_each)
+  mat_1 <- do.call(rbind, lapply(1:3, function(i){
+    if(i == 1){
+      MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    } else if(i == 2){
+      MASS::mvrnorm(n = n_each, mu = c(0,12), Sigma = diag(2)) 
+    } else {
+      MASS::mvrnorm(n = n_each, mu = c(12,0), Sigma = diag(2)) 
+    }
+  }))
   
-  p_1 <- 20; p_2 <- 40
-  svd_d_1 <- sqrt(n*p_1)*c(1.5,1); svd_d_2 <- sqrt(n*p_2)*c(1.5,1)
-  svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, K-1)
-  svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, K-1)
+  mat_2 <- do.call(rbind, lapply(1:3, function(i){
+    if(i == 1){
+      MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    } else if(i == 2){
+      MASS::mvrnorm(n = n_each, mu = c(0,12), Sigma = diag(2)) 
+    } else {
+      MASS::mvrnorm(n = n_each, mu = c(12,0), Sigma = diag(2)) 
+    }
+  }))
   
-  dat <- multiomicCCA::generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2)
+  mat_1 <- scale(mat_1, center = T, scale = F)
+  mat_2 <- scale(mat_2, center = T, scale = F)
+  svd_1 <- svd(mat_1)
+  svd_2 <- svd(mat_2)
+  
+  p_1 <- 40; p_2 <- 40
+  svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, 2)
+  svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, 2)
+  
+  dat <- multiomicCCA::generate_data(svd_1$u, svd_2$u, svd_1$d, svd_1$d, svd_v_1, svd_v_2)
   list(dat = dat, true_membership_vec = true_membership_vec)
 }
 
@@ -83,25 +98,34 @@ simulation3 <- function(){
 
 # 3 clusters
 simulation4 <- function(){
-  B_mat <- matrix(c(0.9, 0.9, 0.1,
-                    0.9, 0.9, 0.1,
-                    0.1, 0.1, 0.9), 3, 3, byrow = T)
-  K <- ncol(B_mat); n_clust <- 100
+  n_each <- 100
+  true_membership_vec <- rep(1:3, each = n_each)
+  mat_1 <- do.call(rbind, lapply(1:3, function(i){
+    if(i %in% c(1,2)){
+      MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    } else {
+      MASS::mvrnorm(n = n_each, mu = c(9,0), Sigma = diag(2)) 
+    }
+  }))
   
-  true_membership_vec <- rep(1:3, each = n_clust)
-  n <- length(true_membership_vec)
+  mat_2 <- do.call(rbind, lapply(1:3, function(i){
+    if(i %in% c(1,3)){
+      MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    } else {
+      MASS::mvrnorm(n = n_each, mu = c(9,0), Sigma = diag(2)) 
+    }
+  }))
   
-  membership_vec <- c(rep(1, n_clust), rep(2, n_clust), rep(3, n_clust))
-  svd_u_1 <- multiomicCCA::generate_sbm_orthogonal(B_mat, membership_vec, centered = T)
-  membership_vec <- c(rep(1, n_clust), rep(3, n_clust), rep(2, n_clust))
-  svd_u_2 <- multiomicCCA::generate_sbm_orthogonal(B_mat, membership_vec, centered = T)
-
+  mat_1 <- scale(mat_1, center = T, scale = F)
+  mat_2 <- scale(mat_2, center = T, scale = F)
+  svd_1 <- svd(mat_1)
+  svd_2 <- svd(mat_2)
+  
   p_1 <- 40; p_2 <- 40
-  svd_d_1 <- sqrt(n*p_1)*c(5,1); svd_d_2 <- sqrt(n*p_2)*c(5,1)
-  svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, K-1)
-  svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, K-1)
+  svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, 2)
+  svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, 2)
   
-  dat <- multiomicCCA::generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2)
+  dat <- multiomicCCA::generate_data(svd_1$u, svd_2$u, svd_1$d, svd_2$d, svd_v_1, svd_v_2)
   list(dat = dat, true_membership_vec = true_membership_vec)
 }
 
@@ -134,24 +158,34 @@ simulation5 <- function(){
 
 # same setting as above, but now w/ only 4 variables
 simulation6 <- function(){
-  B_mat <- matrix(c(0.9, 0.9, 0.3,  
-                    0.9, 0.9, 0.3,
-                    0.3, 0.3, 0.9), 3, 3, byrow = T)
-  K <- ncol(B_mat); n_clust <- 100
-  true_membership_vec <- rep(1:4, each = n_clust)
-  n <- length(true_membership_vec)
+  n_each <- 100
+  true_membership_vec <- rep(1:4, each = n_each)
+  mat_1 <- do.call(rbind, lapply(1:4, function(i){
+    if(i %in% c(1,2)){
+      MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    } else {
+      MASS::mvrnorm(n = n_each, mu = c(12,0), Sigma = diag(2)) 
+    }
+  }))
   
-  membership_vec <-  c(rep(1, n_clust), rep(2, n_clust), rep(3, 2*n_clust))
-  svd_u_1 <- multiomicCCA::generate_sbm_orthogonal(B_mat, membership_vec, centered = T)
-  membership_vec <-  c(rep(1, n_clust), rep(3, n_clust), rep(2, n_clust), rep(3, n_clust))
-  svd_u_2 <- multiomicCCA::generate_sbm_orthogonal(B_mat, membership_vec, centered = T)
+  mat_2 <- do.call(rbind, lapply(1:4, function(i){
+    if(i %in% c(1,3)){
+      MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    } else {
+      MASS::mvrnorm(n = n_each, mu = c(12,0), Sigma = diag(2)) 
+    }
+  }))
+  
+  mat_1 <- scale(mat_1, center = T, scale = F)
+  mat_2 <- scale(mat_2, center = T, scale = F)
+  svd_1 <- svd(mat_1)
+  svd_2 <- svd(mat_2)
   
   p_1 <- 40; p_2 <- 40
-  svd_d_1 <- sqrt(n*p_1)*c(1.5,1); svd_d_2 <- sqrt(n*p_2)*c(1.5,1)
-  svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, K-1)
-  svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, K-1)
+  svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, 2)
+  svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, 2)
   
-  dat <- multiomicCCA::generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2,
+  dat <- multiomicCCA::generate_data(svd_1$u, svd_2$u, svd_1$d, svd_1$d, svd_v_1, svd_v_2,
                                      noise_val = 2)
   list(dat = dat, true_membership_vec = true_membership_vec)
 }
