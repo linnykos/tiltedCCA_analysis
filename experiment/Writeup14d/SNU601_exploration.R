@@ -27,3 +27,4 @@ nrow(barcodes)
 barcodes[1:5,1]
 
 all(rownames(genomat) %in% barcodes[,1])
+all(genomat[!is.na(genomat)] == genotype_est[!is.na(genotype_est)])

@@ -34,11 +34,11 @@ rank_1 <- 40; rank_2 <- 50; nn <- 30
 dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, 
                                       dims_1 = 1:rank_1, 
                                       dims_2 = 2:rank_2,
-                                      meta_clustering = meta_clustering, 
+                                      metacell_clustering = meta_clustering, 
                                       num_neigh = nn, 
                                       center_1 = T, center_2 = F,
                                       scale_1 = T, scale_2 = F,
-                                      fix_distinct_perc = F, 
+                                      fix_tilt_perc = F, 
                                       verbose = T) 
 
 

@@ -44,8 +44,17 @@ simulation1 <- function(){
   svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, 2)
   svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, 2)
   
-  dat <- multiomicCCA::generate_data(svd_1$u, svd_2$u, svd_1$d, svd_1$d, svd_v_1, svd_v_2)
-  list(dat = dat, true_membership_vec = true_membership_vec)
+  mat_1 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_1$u, svd_1$d), svd_v_1)
+  mat_1 <- mat_1 + matrix(rnorm(prod(dim(mat_1)), sd = 1), ncol = ncol(mat_1), nrow = nrow(mat_1))
+  mat_2 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_2$u, svd_2$d), svd_v_2)
+  mat_2 <- mat_2 + matrix(rnorm(prod(dim(mat_2)), sd = 1), ncol = ncol(mat_2), nrow = nrow(mat_2))
+  
+  rownames(mat_1) <- paste0("c", 1:nrow(mat_1))
+  rownames(mat_2) <- paste0("c", 1:nrow(mat_2))
+  colnames(mat_1) <- paste0("g", 1:ncol(mat_1))
+  colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
+  
+  list(mat_1 = mat_1, mat_2 = mat_2, true_membership_vec = true_membership_vec)
 }
 
 # high distinct 1, low distinct 2 with 3 clusters
@@ -68,9 +77,17 @@ simulation2 <- function(){
   svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, K-1)
   svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, K-1)
   
-  dat <- multiomicCCA::generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2, 
-                                     noise_val = 0.1)
-  list(dat = dat, true_membership_vec = true_membership_vec)
+  mat_1 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_u_1, svd_d_1), svd_v_1)
+  mat_1 <- mat_1 + matrix(rnorm(prod(dim(mat_1)), sd = 0.1), ncol = ncol(mat_1), nrow = nrow(mat_1))
+  mat_2 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_u_2, svd_d_2), svd_v_2)
+  mat_2 <- mat_2 + matrix(rnorm(prod(dim(mat_2)), sd = 0.1), ncol = ncol(mat_2), nrow = nrow(mat_2))
+  
+  rownames(mat_1) <- paste0("c", 1:nrow(mat_1))
+  rownames(mat_2) <- paste0("c", 1:nrow(mat_2))
+  colnames(mat_1) <- paste0("g", 1:ncol(mat_1))
+  colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
+  
+  list(mat_1 = mat_1, mat_2 = mat_2, true_membership_vec = true_membership_vec)
 }
 
 # even more dramatic high distinct 1, low distinct 2 with 3 clusters
@@ -91,9 +108,18 @@ simulation3 <- function(){
   svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, 2)
   svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, 2)
   
-  dat <- multiomicCCA::generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_1, 
-                                     noise_val = 2)
-  list(dat = dat, true_membership_vec = true_membership_vec)
+  mat_1 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_u_1, svd_d_1), svd_v_1)
+  mat_1 <- mat_1 + matrix(rnorm(prod(dim(mat_1)), sd = 2), ncol = ncol(mat_1), nrow = nrow(mat_1))
+  mat_2 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_u_2, svd_d_2), svd_v_2)
+  mat_2 <- mat_2 + matrix(rnorm(prod(dim(mat_2)), sd = 2), ncol = ncol(mat_2), nrow = nrow(mat_2))
+  
+  rownames(mat_1) <- paste0("c", 1:nrow(mat_1))
+  rownames(mat_2) <- paste0("c", 1:nrow(mat_2))
+  colnames(mat_1) <- paste0("g", 1:ncol(mat_1))
+  colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
+  
+  list(mat_1 = mat_1, mat_2 = mat_2, 
+       true_membership_vec = true_membership_vec)
 }
 
 # 3 clusters
@@ -125,8 +151,17 @@ simulation4 <- function(){
   svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, 2)
   svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, 2)
   
-  dat <- multiomicCCA::generate_data(svd_1$u, svd_2$u, svd_1$d, svd_2$d, svd_v_1, svd_v_2)
-  list(dat = dat, true_membership_vec = true_membership_vec)
+  mat_1 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_1$u, svd_1$d), svd_v_1)
+  mat_1 <- mat_1 + matrix(rnorm(prod(dim(mat_1)), sd = 1), ncol = ncol(mat_1), nrow = nrow(mat_1))
+  mat_2 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_2$u, svd_2$d), svd_v_2)
+  mat_2 <- mat_2 + matrix(rnorm(prod(dim(mat_2)), sd = 1), ncol = ncol(mat_2), nrow = nrow(mat_2))
+
+  rownames(mat_1) <- paste0("c", 1:nrow(mat_1))
+  rownames(mat_2) <- paste0("c", 1:nrow(mat_2))
+  colnames(mat_1) <- paste0("g", 1:ncol(mat_1))
+  colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
+  
+  list(mat_1 = mat_1, mat_2 = mat_2, true_membership_vec = true_membership_vec)
 }
 
 # high distinct 1, high distinct 2 with 5 clusters
@@ -151,9 +186,17 @@ simulation5 <- function(){
   svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, K-1)
   svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, K-1)
   
-  dat <- multiomicCCA::generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2,
-                       noise_val = 2)
-  list(dat = dat, true_membership_vec = true_membership_vec)
+  mat_1 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_u_1, svd_d_1), svd_v_1)
+  mat_1 <- mat_1 + matrix(rnorm(prod(dim(mat_1)), sd = 2), ncol = ncol(mat_1), nrow = nrow(mat_1))
+  mat_2 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_u_2, svd_d_2), svd_v_2)
+  mat_2 <- mat_2 + matrix(rnorm(prod(dim(mat_2)), sd = 2), ncol = ncol(mat_2), nrow = nrow(mat_2))
+  
+  rownames(mat_1) <- paste0("c", 1:nrow(mat_1))
+  rownames(mat_2) <- paste0("c", 1:nrow(mat_2))
+  colnames(mat_1) <- paste0("g", 1:ncol(mat_1))
+  colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
+  
+  list(mat_1 = mat_1, mat_2 = mat_2, true_membership_vec = true_membership_vec)
 }
 
 # same setting as above, but now w/ only 4 variables
@@ -185,9 +228,17 @@ simulation6 <- function(){
   svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, 2)
   svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, 2)
   
-  dat <- multiomicCCA::generate_data(svd_1$u, svd_2$u, svd_1$d, svd_1$d, svd_v_1, svd_v_2,
-                                     noise_val = 2)
-  list(dat = dat, true_membership_vec = true_membership_vec)
+  mat_1 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_1$u, svd_1$d), svd_v_1)
+  mat_1 <- mat_1 + matrix(rnorm(prod(dim(mat_1)), sd = 2), ncol = ncol(mat_1), nrow = nrow(mat_1))
+  mat_2 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_2$u, svd_2$d), svd_v_2)
+  mat_2 <- mat_2 + matrix(rnorm(prod(dim(mat_2)), sd = 2), ncol = ncol(mat_2), nrow = nrow(mat_2))
+  
+  rownames(mat_1) <- paste0("c", 1:nrow(mat_1))
+  rownames(mat_2) <- paste0("c", 1:nrow(mat_2))
+  colnames(mat_1) <- paste0("g", 1:ncol(mat_1))
+  colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
+  
+  list(mat_1 = mat_1, mat_2 = mat_2, true_membership_vec = true_membership_vec)
 }
 
 # trajectory setting where the first modality has pseudotime and
@@ -242,8 +293,16 @@ simulation7 <- function(){
   svd_v_1 <- multiomicCCA::generate_random_orthogonal(p_1, K)
   svd_v_2 <- multiomicCCA::generate_random_orthogonal(p_2, K)
   
-  dat <- multiomicCCA::generate_data(svd_u_1, svd_u_2, svd_d_1, svd_d_2, svd_v_1, svd_v_2,
-                                     noise_val = 2)
-  list(dat = dat, true_branch = branch_vec,
+  mat_1 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_u_1, svd_d_1), svd_v_1)
+  mat_1 <- mat_1 + matrix(rnorm(prod(dim(mat_1)), sd = 2), ncol = ncol(mat_1), nrow = nrow(mat_1))
+  mat_2 <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_u_2, svd_d_2), svd_v_2)
+  mat_2 <- mat_2 + matrix(rnorm(prod(dim(mat_2)), sd = 2), ncol = ncol(mat_2), nrow = nrow(mat_2))
+  
+  rownames(mat_1) <- paste0("c", 1:nrow(mat_1))
+  rownames(mat_2) <- paste0("c", 1:nrow(mat_2))
+  colnames(mat_1) <- paste0("g", 1:ncol(mat_1))
+  colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
+  
+  list(mat_1 = mat_1, mat_2 = mat_2, true_branch = branch_vec,
        true_pseudotime = pseudotime_vec)
 }
