@@ -70,9 +70,9 @@ for(j in 1:ncol(v_mat)){
   v_mat[,j] <- stats::residuals(lm_res)
 }
 mat2 <- tcrossprod(svd_res$u, v_mat)
+colnames(mat2) <- colnames(mat)
+rownames(mat2) <- rownames(mat)
 SNU[["atac"]]@data <- mat2
-colnames(SNU[["atac"]]@data) <- colnames(mat)
-rownames(SNU[["atac"]]@data) <- rownames(mat)
 SNU[["lsi"]] <- Signac::RunSVD(SNU[["atac"]]@data,
                                assay = "atac")
 set.seed(10)
