@@ -60,9 +60,6 @@ SNU <- Signac::FindTopFeatures(SNU, min.cutoff = 'q10')
 mat <- mat[SNU[["atac"]]@var.features,]
 set.seed(10)
 svd_res <- irlba::irlba(mat, nv = 200, verbose = T)
-save(SNU, svd_res,
-     file = "../../../../out/Writeup14e/Writeup14e_SNU_atac_exploratory.RData")
-
 v_mat <- multiomicCCA:::.mult_mat_vec(svd_res$v, svd_res$d)
 for(j in 1:ncol(v_mat)){
   df <- data.frame(y = v_mat[,j], library_size = SNU@meta.data[,"nCount_atac"])
@@ -73,7 +70,6 @@ mat2 <- tcrossprod(svd_res$u, v_mat)
 colnames(mat2) <- colnames(mat)
 rownames(mat2) <- rownames(mat)
 SNU[["atac"]]@data <- mat2
-save(SNU, file = "../../../../out/Writeup14e/Writeup14e_SNU_atac_exploratory.RData")
 
 SNU[["lsi"]] <- Signac::RunSVD(SNU[["atac"]]@data,
                                assay = "atac")
@@ -82,4 +78,35 @@ SNU <- Seurat::RunUMAP(SNU, reduction = 'lsi', dims = 1:50,
                        reduction.name = "umap.atac", 
                        reduction.key = "atacUMAP_")
 rownames(SNU[["umap.atac"]]@cell.embeddings) <- rownames(SNU@meta.data)
-save(SNU, file = "../../../../out/Writeup14e/Writeup14e_SNU_atac_exploratory2.RData")
+save(SNU, file = "../../../../out/Writeup14e/Writeup14e_SNU_atac_exploratory.RData")
+
+#####################
+
+
+group_vec <- c("clone")
+for(group in group_vec){
+  plot1 <- Seurat::DimPlot(SNU, reduction = "umap.atac",
+                           group.by = group, label = TRUE,
+                           repel = TRUE, label.size = 2.5)
+  plot1 <- plot1 + ggplot2::ggtitle(paste0("SNU (ATAC)\n",group))
+  plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+  ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14e/Writeup14e_SNU_atac_exploration_", group, ".png"),
+                  plot1, device = "png", width = 5, height = 5, units = "in")
+  
+}
+
+group_vec <- c("nCount_atac", "nFeature_atac", "total_frags",
+               "frac_peak", "frac_promoter", "frac_tss",
+               "frac_enhancer", "nucleosome_signal",
+               "nucleosome_percentile", "TSS.enrichment", "TSS.percentile")
+for(group in group_vec){
+  plot1 <- Seurat::FeaturePlot(SNU, reduction = "umap.atac",
+                               features = group)
+  plot1 <- plot1 + ggplot2::ggtitle(paste0("SNU (ATAC)\n",group))
+  plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+  ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14e/Writeup14e_SNU_atac_exploration_", group, ".png"),
+                  plot1, device = "png", width = 5, height = 5, units = "in")
+  
+}
+
+
