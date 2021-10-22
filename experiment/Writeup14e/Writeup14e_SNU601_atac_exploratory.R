@@ -77,7 +77,6 @@ set.seed(10)
 SNU <- Seurat::RunUMAP(SNU, reduction = 'lsi', dims = 1:50, 
                        reduction.name = "umap.atac", 
                        reduction.key = "atacUMAP_")
-rownames(SNU[["umap.atac"]]@cell.embeddings) <- rownames(SNU@meta.data)
 save(SNU, file = "../../../../out/Writeup14e/Writeup14e_SNU_atac_exploratory.RData")
 
 #####################
@@ -108,5 +107,18 @@ for(group in group_vec){
                   plot1, device = "png", width = 5, height = 5, units = "in")
   
 }
+
+###############
+
+p_list <- lapply(sort(unique(SNU@meta.data[,"clone"])), function(clone){
+  p0 <- Seurat::DimPlot(SNU, cells.highlight = rownames(SNU@meta.data)[which(SNU[["clone"]] == clone)])
+  p0 <- p0 + ggplot2::theme(legend.position="none") + ggplot2::ggtitle(paste0("Clone ", clone))
+  p0
+})
+
+p <- cowplot::plot_grid(p_list[[1]], p_list[[2]], p_list[[3]], 
+                        p_list[[4]], p_list[[5]], p_list[[6]])
+cowplot::save_plot(filename = "../../../../out/figures/Writeup14e/Writeup14e_SNU_atac_exploration_clone_separate.png", p, 
+                   ncol = 3, nrow = 2, base_asp = 1, device = "png")
 
 
