@@ -53,19 +53,18 @@ plot_scores_heatmap.list(list(mat_2[,1:25]), membership_vec = as.factor(seurat_o
 ##########################
 
 # let's start tinkering
-pull_factor <- 0.4
+pull_factor <- 0.9
 mat_2_new <- mat_2
 seurat_obj2 <- seurat_obj
 
-for(celltype_l2_type in list(c("Hippocampal_neurons"),
-                             c("Cortical_neurons", "Inhibitory_neurons"),
-                             c("Non_neurons"))){
-  idx <- which(seurat_obj2$celltype_l2 %in% celltype_l2_type)
+for(celltype in c("CT", "NP", "L6", "L5", "L4", "L23", "PT")){
+  idx <- which(seurat_obj2$celltype == celltype)
   mean_vec <- Matrix::colMeans(mat_2_new[idx,,drop = F])
   for(i in idx){
     mat_2_new[i,] <- pull_factor*mean_vec + (1-pull_factor)*mat_2_new[i,]
   }
 }
+
 mat_2_new <- scale(mat_2_new, center = T, scale = F)
 svd_res <- svd(mat_2_new)
 svd_res$d[1:10] <- exp(seq(log(27), log(10), length.out = 10))
@@ -89,28 +88,23 @@ Seurat::DimPlot(seurat_obj2, reduction = "umap.dna",
 
 #######
 
-pairs_list <- list(c("Astro_Myoc", "Astro_Nnat", "CA23"),
-                   c("Oligo_MFOL", "Oligo_MOL", "Subiculum", "CA1"),
-                   c("Microglia", "DG"))
-pull_factor_vec <- rep(0.9, 3) 
 mat_1_new <- mat_1
 rowsum_vec <- apply(mat_1_new, 1, multiomicCCA:::.l2norm)
 mat_1_new <- multiomicCCA:::.mult_vec_mat(1/rowsum_vec, mat_1_new)
+pull_factor <- 0.7
 
 set.seed(10)
-for(kk in 1:length(pairs_list)){
-  pair_vec <- pairs_list[[kk]]
-  idx <- which(seurat_obj2$celltype %in% pair_vec)
-  mean_vec <- Matrix::colMeans(mat_1_new[idx,,drop = F])
-  sd_val <- median(matrixStats::colSds(mat_1_new[idx,,drop = F]))/4
-  for(i in idx){
-    mat_1_new[i,] <- pull_factor_vec[kk]*mean_vec + (1-pull_factor_vec[kk])*mat_1_new[i,]
-    mat_1_new[i,] <- mat_1_new[i,] + rnorm(ncol(mat_1_new), mean = 0, sd = sd_val)
-  }
+idx <- which(seurat_obj2$celltype_l2 == "Cortical_neurons")
+mean_vec <- Matrix::colMeans(mat_1_new[idx,,drop = F])
+sd_val <- median(matrixStats::colSds(mat_1_new[idx,,drop = F]))/4
+for(i in idx){
+  mat_1_new[i,] <- pull_factor*mean_vec + (1-pull_factor)*mat_1_new[i,]
+  mat_1_new[i,] <- mat_1_new[i,] + rnorm(ncol(mat_1_new), mean = 0, sd = sd_val)
 }
+
 mat_1_new <- scale(mat_1_new, center = T, scale = F)
 svd_res <- svd(mat_1_new)
-svd_res$d[1:10] <- seq(27, 13.5, by = -0.5)
+svd_res$d[1:10] <- seq(27, 13.5, by = -0.5)[1:10]
 mat_1_new <- multiomicCCA:::.mult_mat_vec(svd_res$u, svd_res$d)
 colnames(mat_1_new) <- colnames(mat_2)[1:ncol(mat_1_new)]
 rownames(mat_1_new) <- rownames(mat_2)
@@ -119,7 +113,8 @@ seurat_obj2[["pca"]] <- Seurat::CreateDimReducObject(mat_1_new, assay = "RNA")
 set.seed(10)
 seurat_obj2 <- Seurat::RunUMAP(seurat_obj2, dims = 1:20, reduction = "pca",
                                metric = "euclidean",
-                               reduction.name = "umap")
+                               reduction.name = "umap", 
+                               reduction.key = "umapRNA_")
 Seurat::DimPlot(seurat_obj2, reduction = "umap", 
                 cols = color_vec, 
                 group.by = "celltype",
@@ -220,7 +215,7 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2,
                                       metacell_clustering_2 = metacell_clustering_2,
                                       fix_tilt_perc = 0.5)
 dcca_res$cca_obj
-dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res, rank_c = 4)
+dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res, rank_c = 20)
 
 set.seed(10)
 dcca_common_umap <- Seurat::RunUMAP(cbind(dcca_decomp$common_mat_1, dcca_decomp$common_mat_2), 
