@@ -12,7 +12,9 @@ jive <- function(mat_1, mat_2, r, max_iter = 10){
   while(TRUE){
     if(is.matrix(embedding_old) && iter > 4){
       if(svd(embedding_old - embedding)$d[1] <= 1e-3) break()
-    }
+    } 
+    if(iter >= max_iter) break()
+    
     svd_res <- irlba::irlba(mat, nv = r)
     embedding <- multiomicCCA:::.mult_mat_vec(svd_res$u, svd_res$d)
     pred_mat <- tcrossprod(embedding, svd_res$v)

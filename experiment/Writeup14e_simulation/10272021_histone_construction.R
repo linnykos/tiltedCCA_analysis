@@ -67,8 +67,9 @@ for(celltype in c("CT", "NP", "L6", "L5", "L4", "L23", "PT")){
 
 mat_2_new <- scale(mat_2_new, center = T, scale = F)
 svd_res <- svd(mat_2_new)
-svd_res$d[1:10] <- exp(seq(log(27), log(10), length.out = 10))
-svd_res$d[11:50] <- exp(seq(log(10), log(1), length.out = 40))
+svd_res$d[1] <- 27
+svd_res$d[2:10] <- exp(seq(log(15), log(2), length.out = 9))
+svd_res$d[11:50] <- exp(seq(log(2), log(1), length.out = 40))
 mat_2_new <- multiomicCCA:::.mult_mat_vec(svd_res$u, svd_res$d)
 colnames(mat_2_new) <- colnames(mat_2)[1:ncol(mat_2_new)]
 rownames(mat_2_new) <- rownames(mat_2)
@@ -104,7 +105,7 @@ for(i in idx){
 
 mat_1_new <- scale(mat_1_new, center = T, scale = F)
 svd_res <- svd(mat_1_new)
-svd_res$d[1:10] <- seq(27, 13.5, by = -0.5)[1:10]
+svd_res$d[1:10] <- seq(27, 20, length.out = 10)[1:10]
 mat_1_new <- multiomicCCA:::.mult_mat_vec(svd_res$u, svd_res$d)
 colnames(mat_1_new) <- colnames(mat_2)[1:ncol(mat_1_new)]
 rownames(mat_1_new) <- rownames(mat_2)
@@ -255,3 +256,12 @@ Seurat::DimPlot(seurat_obj2, reduction = "dcca_distinct2",
                 label = TRUE, 
                 repel = TRUE, label.size = 2.5)
 
+#################################
+
+n <- nrow(mat_1)
+svd_1 <- svd(mat_1); head(svd_1$d)
+svd_2 <- svd(mat_2); head(svd_2$d)
+resid_1 <- (diag(n) - tcrossprod(svd_2$u)) %*% mat_1
+resid_svd_1 <- svd(resid_1); head(resid_svd_1$d)
+resid_2 <- (diag(n) - tcrossprod(svd_1$u)) %*% mat_2
+resid_svd_2 <- svd(resid_2); head(resid_svd_2$d)
