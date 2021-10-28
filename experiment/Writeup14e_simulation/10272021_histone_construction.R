@@ -213,8 +213,10 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2,
                                       dims_1 = 1:20, dims_2 = 1:20,
                                       metacell_clustering_1 = metacell_clustering_1,
                                       metacell_clustering_2 = metacell_clustering_2,
-                                      fix_tilt_perc = 0.5)
+                                      fix_tilt_perc = F)
 dcca_res$cca_obj
+dcca_res$df_percentage
+dcca_res$tilt_perc
 dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res, rank_c = 20)
 
 set.seed(10)
