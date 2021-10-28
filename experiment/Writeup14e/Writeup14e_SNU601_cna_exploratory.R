@@ -107,13 +107,17 @@ length(which(is.na(mat_theta_org)))
 
 #################
 # version 1: no clustering
-mat_2 <- .form_matrix(mat_rho_org, mat_theta_org)
-SNU[["cloneumap1"]] <- .create_umapobj(mat_2, SNU, rank_k = 10)
+perc_na1 <- (length(which(is.na(mat_rho_org))) + length(which(is.na(mat_theta_org))))/(2*prod(dim(mat_rho_org)))
+rank_1 <- 40
+mat_2 <- .form_matrix(mat_rho_org, mat_theta_org,
+                      rho_const = NA, theta_const = NA)
+SNU[["cloneumap1"]] <- .create_umapobj(mat_2, SNU, rank_k = rank_1)
 
 # version 2: clustering
+rank_2 <- 40
 res <- .cluster_values(mat_rho_org, mat_theta_org, SNU)
 mat_2 <- .form_matrix(res$mat_rho, res$mat_theta)
-SNU[["cloneumap2"]] <- .create_umapobj(mat_2, SNU, rank_k = 10)
+SNU[["cloneumap2"]] <- .create_umapobj(mat_2, SNU, rank_k = rank_2)
 
 ##############################
 
@@ -132,13 +136,17 @@ for(i in 1:27){
   mat_theta[genotype_est == i] <- canonicalPoints[i,"theta"]
 }
 
-mat_2 <- .form_matrix(mat_rho, mat_theta)
-SNU[["cloneumap3"]] <- .create_umapobj(mat_2, SNU, rank_k = 25)
+rank_3 <- 40
+perc_na2 <- (length(which(is.na(mat_rho))) + length(which(is.na(mat_theta))))/(2*prod(dim(mat_rho)))
+mat_2 <- .form_matrix(mat_rho, mat_theta,
+                      rho_const = NA, theta_const = NA)
+SNU[["cloneumap3"]] <- .create_umapobj(mat_2, SNU, rank_k = rank_3)
 
 # version 2: clustering
+rank_4 <- 40
 res <- .cluster_values(mat_rho, mat_theta, SNU)
 mat_2 <- .form_matrix(res$mat_rho, res$mat_theta)
-SNU[["cloneumap4"]] <- .create_umapobj(mat_2, SNU, rank_k = 25)
+SNU[["cloneumap4"]] <- .create_umapobj(mat_2, SNU, rank_k = rank_4)
 
 
 ###########################
@@ -146,27 +154,27 @@ SNU[["cloneumap4"]] <- .create_umapobj(mat_2, SNU, rank_k = 25)
 plot1 <- Seurat::DimPlot(SNU, reduction = "cloneumap1",
                          group.by = "clone", label = TRUE,
                          repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("SNU (CNA):\nObserved, no averaging"))
+plot1 <- plot1 + ggplot2::ggtitle(paste0("SNU (CNA): (", round(100*perc_na1), " NA%)\nObs., no avg., k=", rank_1))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 
 plot2 <- Seurat::DimPlot(SNU, reduction = "cloneumap2",
                          group.by = "clone", label = TRUE,
                          repel = TRUE, label.size = 2.5)
-plot2 <- plot2 + ggplot2::ggtitle(paste0("SNU (CNA):\nObserved, averaging"))
+plot2 <- plot2 + ggplot2::ggtitle(paste0("SNU (CNA):\nObs., avg, k=", rank_2))
 plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 
 
 plot3 <- Seurat::DimPlot(SNU, reduction = "cloneumap3",
                          group.by = "clone", label = TRUE,
                          repel = TRUE, label.size = 2.5)
-plot3 <- plot3 + ggplot2::ggtitle(paste0("SNU (CNA):\nEstimated, no averaging"))
+plot3 <- plot3 + ggplot2::ggtitle(paste0("SNU (CNA): (", round(100*perc_na2), " NA%)\nEst., no avg. k=", rank_3))
 plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 
 
 plot4 <- Seurat::DimPlot(SNU, reduction = "cloneumap4",
                          group.by = "clone", label = TRUE,
                          repel = TRUE, label.size = 2.5)
-plot4 <- plot4 + ggplot2::ggtitle(paste0("SNU (CNA):\nEstimated, averaging"))
+plot4 <- plot4 + ggplot2::ggtitle(paste0("SNU (CNA):\nEst., avg. k=", rank_4))
 plot4 <- plot4 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 
 p <- cowplot::plot_grid(plot1, plot2, plot3, plot4)

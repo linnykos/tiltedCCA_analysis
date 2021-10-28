@@ -38,14 +38,18 @@ mat_rho <- genotype_values[,grep("^rho*", colnames(genotype_values))]
 mat_rho <- mat_rho[rownames(mat_rho) %in% rownames(SNU@meta.data),]
 mat_theta <- genotype_values[,grep("^theta*", colnames(genotype_values))]
 mat_theta <- mat_theta[rownames(mat_theta) %in% rownames(SNU@meta.data),]
-mat_rho[is.na(mat_rho)] <- 1
-mat_theta[is.na(mat_theta)] <- 0.5
 
 #############################
 
 color_mat <- matrix(NA, nrow = nrow(mat_theta), ncol = ncol(mat_theta))
+rownames(color_mat) <- rownames(mat_theta)
+colnames(color_mat) <- colnames(mat_theta)
 for(i in 1:nrow(mat_theta)){
   for(j in 1:ncol(mat_theta)){
+    if(is.na(mat_rho[i,j]) | is.na(mat_theta[i,j])){
+      color_mat[i,j] <- 0; next()
+    }
+    
     rho <- round(mat_rho[i,j]*2)/2
     if(rho == 0){
       color_mat[i,j] <- 0
@@ -125,11 +129,14 @@ clone_list[[7]] <- which(is.na(SNU$clone))
 clone_len <- sapply(clone_list, length)
 cell_idx <- unlist(clone_list)
 
-color_mat <- color_mat[cell_idx,]
+color_mat2 <- color_mat[cell_idx,]
+zz <- sapply(rownames(color_mat2), function(x){SNU@meta.data[which(rownames(SNU@meta.data) == x),"clone"]})
+names(zz) <- NULL
+zz
 
 png("../../../../out/figures/Writeup14e/Writeup14e_SNU_atac_rawheatmap.png",
     height = 2000, width = 3000, units = "px", res = 300)
-image(multiomicCCA:::.rotate(color_mat),
+image(multiomicCCA:::.rotate(color_mat2),
       breaks = seq(0.5, 21.5, by = 1), 
       col = col_vec)
 for(i in 1:(length(clone_len)-1)){
