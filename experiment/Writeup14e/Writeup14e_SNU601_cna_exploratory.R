@@ -181,3 +181,12 @@ p <- cowplot::plot_grid(plot1, plot2, plot3, plot4)
 cowplot::save_plot(filename = "../../../../out/figures/Writeup14e/Writeup14e_SNU_cna_exploratory_panel.png", p, 
                    ncol = 2, nrow = 2, base_asp = 1.2, device = "png")
 
+
+plot1 <- Seurat::DimPlot(SNU, reduction = "cloneumap1",
+                         group.by = "clone", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("SNU (CNA)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14e/Writeup14e_SNU_cna_exploratory_usedversion.png"),
+                plot1, device = "png", width = 5, height = 5, units = "in")
+
