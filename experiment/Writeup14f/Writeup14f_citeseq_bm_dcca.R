@@ -29,6 +29,9 @@ bm$ADT_snn_res.0.25[bm$ADT_snn_res.0.25 %in% rm_idx] <- NA
 
 ###############
 
+mat_1 <- t(bm[["RNA"]]@scale.data)
+mat_2 <- t(bm[["ADT"]]@scale.data)
+
 mat_1b <- mat_1
 sd_vec <- sparseMatrixStats::colSds(mat_1b)
 if(any(sd_vec <= 1e-6)){
@@ -47,8 +50,8 @@ rank_1 <- 30; rank_2 <- 18; nn <- 30
 set.seed(10)
 dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, 
                                       dims_1 = 1:rank_1, dims_2 = 1:rank_2,
-                                      center_1 = T, center_2 = T,
-                                      scale_1 = T, scale_2 = T,
+                                      center_1 = F, center_2 = F,
+                                      scale_1 = F, scale_2 = F,
                                       num_neigh = nn, 
                                       metacell_clustering_1 = factor(bm$RNA_snn_res.0.25),
                                       metacell_clustering_2 = factor(bm$ADT_snn_res.0.25),
