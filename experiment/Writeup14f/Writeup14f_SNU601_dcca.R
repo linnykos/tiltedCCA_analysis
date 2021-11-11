@@ -1,5 +1,7 @@
 rm(list=ls())
+
 load("../../../../out/Writeup14f/Writeup14f_SNU_preprocessed.RData")
+date_of_run <- Sys.time(); session_info <- devtools::session_info()
 
 Seurat::DefaultAssay(SNU) <- "atac"
 mat_1 <- Matrix::t(SNU[["atac"]]@data[Seurat::VariableFeatures(object = SNU),])
