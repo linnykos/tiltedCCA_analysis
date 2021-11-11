@@ -1,3 +1,5 @@
+# this version runs TF-IDF -- in retrospect, probably not needed
+
 rm(list=ls())
 genotype_est <- readRDS("../../../../data/Chiyun_SNU601/SNU601/genotype_est.rds")
 genotype_values <- readRDS("../../../../data/Chiyun_SNU601/SNU601/genotype_values_h1_h2_c20.rds")
