@@ -26,7 +26,7 @@ if(any(sd_vec <= 1e-6)){
 
 rank_1 <- 50; rank_2 <- 50; nn <- 30
 set.seed(10)
-dcca_res <- multiomicCCA::dcca_factor(mat_1, mat_2, 
+dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, 
                                       dims_1 = 1:rank_1, dims_2 = 2:rank_2,
                                       center_1 = T, center_2 = F,
                                       scale_1 = T, scale_2 = F,
