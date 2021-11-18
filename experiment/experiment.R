@@ -1,120 +1,101 @@
-rm(list=ls())
-n <- 100; K <- 2
-common_space <- scale(MASS::mvrnorm(n = n, mu = rep(0,K), Sigma = diag(K)), center = T, scale = F)
-
-p1 <- 5; p2 <- 10
-transform_mat_1 <- matrix(stats::runif(K*p1, min = -1, max = 1), nrow = K, ncol = p1)
-transform_mat_2 <- matrix(stats::runif(K*p2, min = -1, max = 1), nrow = K, ncol = p2)
-
-mat_1 <- common_space %*% transform_mat_1; mat_2 <- common_space %*% transform_mat_2 
-
-# dcca_res <- dcca_factor(mat_1, mat_2, dims_1 = 1:K, dims_2 = 1:K, 
-#                         verbose = F, center_1 = F, center_2 = F, 
-#                         scale_1 = F, scale_2 = F)
-###########################
-dims_1 = 1:K
-dims_2 = 1:K
-verbose = F
-center_1 = F
-center_2 = F
-scale_1 = F
-scale_2 = F
-cell_max = nrow(mat_1)
-discretization_gridsize = 9
-enforce_boundary = is.factor(metacell_clustering_1)
-fix_tilt_perc = F
-form_meta_matrix = F
-metacell_clustering_1 = NA
-metacell_clustering_2 = NA
-num_neigh = min(30, round(nrow(mat_1)/20))
+obj = dcca_res2
+membership_vec = NA
+nn = 30
+data_1 = F
+data_2 = T
+normalization_type = "cosine_itself"
+max_subsample_frnn = nrow(obj$common_score)
+frnn_approx = 0
+radius_quantile = 0.5
+bool_matrix = T
+center = T
+renormalize = F
+symmetrize = F
 verbose = T
 
-stopifnot((all(is.na(metacell_clustering_1)) & all(is.na(metacell_clustering_2))) ||
-            (is.list(metacell_clustering_1) & is.list(metacell_clustering_2)) ||
-            (is.factor(metacell_clustering_1) & is.factor(metacell_clustering_2)))
-rank_1 <- max(dims_1); rank_2 <- max(dims_2)
-stopifnot(nrow(mat_1) == nrow(mat_2), 
-          rank_1 <= min(dim(mat_1)), rank_2 <= min(dim(mat_2)))
+###########
 
-n <- nrow(mat_1)
-
-if(verbose) print(paste0(Sys.time(),": D-CCA: Starting matrix shrinkage"))
-svd_1 <- .svd_truncated(mat_1, K = rank_1, symmetric = F, rescale = F, 
-                        mean_vec = center_1, sd_vec = scale_1, K_full_rank = F)
-svd_2 <- .svd_truncated(mat_2, K = rank_2, symmetric = F, rescale = F, 
-                        mean_vec = center_2, sd_vec = scale_2, K_full_rank = F)
-
-svd_1 <- .check_svd(svd_1, dims = dims_1)
-svd_2 <- .check_svd(svd_2, dims = dims_2)
-
-if(all(is.na(metacell_clustering_1)) & all(is.na(metacell_clustering_2))){
-  tmp <- .form_snns(num_neigh = num_neigh, svd_1 = svd_1, svd_2 = svd_2)
-  metacell_clustering_1 <- tmp$metacell_clustering_1
-  metacell_clustering_2 <- tmp$metacell_clustering_2
+stopifnot(frnn_approx >= 0, frnn_approx <= 1)
+if(!all(is.na(membership_vec))){
+  stopifnot(length(membership_vec) == nrow(obj$common_score),
+            is.factor(membership_vec))
 }
 
-cca_res <- .cca(svd_1, svd_2, dims_1 = NA, dims_2 = NA, return_scores = F)
+embedding <- multiomicCCA:::.prepare_embeddings(obj, data_1 = data_1, data_2 = data_2, 
+                                 center = center, 
+                                 renormalize = renormalize)
+embedding <- multiomicCCA:::.normalize_embeddings(embedding, normalization_type)
+n <- nrow(embedding[[1]])
 
-res <- .dcca_common_score(cca_res = cca_res, 
-                          cell_max = cell_max,
-                          check_alignment = all(!is.na(metacell_clustering_1)), 
-                          discretization_gridsize = discretization_gridsize,
-                          enforce_boundary = T,
-                          fix_tilt_perc = T, 
-                          metacell_clustering_1 = metacell_clustering_1,
-                          metacell_clustering_2 = metacell_clustering_2,
-                          num_neigh = num_neigh,
-                          svd_1 = svd_1, 
-                          svd_2 = svd_2, 
-                          verbose = verbose, msg = "")
+# construct subsamples
+if(!all(is.na(membership_vec))){
+  cell_subidx <- multiomicCCA:::.construct_celltype_subsample(membership_vec, max_subsample_frnn)
+  if(length(cell_subidx) < n) {
+    membership_vec <- membership_vec[cell_subidx]
+  }
+  for(i in 1:3){
+    embedding[[i]] <- embedding[[i]][cell_subidx,,drop = F]
+  }
+}
+n <- nrow(embedding[[1]])
 
-############################3
+######################
 
-stopifnot(cell_max > 10)
-full_rank <- length(cca_res$obj_vec)
-n <- nrow(svd_1$u)
+vec_print <- c("common", "distinct")
+vec_rad <- sapply(1:2, function(i){
+  if(verbose) print(paste0(Sys.time(),": cLISI: Computing radius -- ", vec_print[i]))
+  multiomicCCA:::.compute_radius(embedding[[i]], nn, radius_quantile)
+})
+vec_rad_org <- vec_rad
+names(vec_rad_org) <- c("common", "distinct")
+vec_rad[1:2] <- max(vec_rad[1:2])
 
-if(verbose) print(paste0(Sys.time(),": D-CCA", msg, ": Computing unnormalized scores"))
-tmp <- .compute_unnormalized_scores(svd_1, svd_2, cca_res)
-score_1 <- tmp$score_1; score_2 <- tmp$score_2
-stopifnot(ncol(score_1) == length(svd_1$d), ncol(score_2) == length(svd_2$d),
-          nrow(score_1) == nrow(score_2))
+#################
 
-n <- nrow(score_1)
-if(cell_max < n){
-  n_idx <- sample(1:n, size = cell_max)
+list_g <- lapply(1:2, function(i){
+  if(verbose) print(paste0(Sys.time(),": cLISI: Construct graph -- ", vec_print[i]))
+  multiomicCCA:::.construct_frnn(embedding[[i]], radius = vec_rad[i], nn = nn, 
+                  frnn_approx = frnn_approx, 
+                  resolve_isolated_nodes = T,
+                  radius_quantile = NA,
+                  verbose = verbose)
+}) 
+
+########################
+
+i = 1
+list_g[[i]] <-  multiomicCCA:::.nnlist_to_matrix(list_g[[i]], set_to_one = F)
+if(symmetrize){
+  list_g[[i]] <- .symmetrize_sparse(list_g[[i]], set_ones = F)
+}
+
+# convert back to list form if needed
+if(bool_matrix){
+  if(length(rownames(obj$common_score)) != 0){
+    rownames(list_g[[i]]) <- rownames(obj$common_score)
+    colnames(list_g[[i]]) <- rownames(obj$common_score)
+  }
 } else {
-  n_idx <- 1:n
+  # [[note to self: add a test to make sure this conversion is bijective]]
+  list_g[[i]] <- .matrix_to_nnlist(list_g[[i]])
 }
-tmp <- .common_decomposition(discretization_gridsize = discretization_gridsize,
-                             enforce_boundary = enforce_boundary,
-                             fix_tilt_perc = fix_tilt_perc,
-                             metacell_clustering_1 = metacell_clustering_1,
-                             metacell_clustering_2 = metacell_clustering_2,
-                             n_idx = n_idx,
-                             num_neigh = num_neigh,
-                             score_1 = score_1,
-                             score_2 = score_2,
-                             svd_1 = svd_1, 
-                             svd_2 = svd_2,
-                             verbose = verbose)
 
-#########################3
+i = 2
+list_g[[i]] <-  multiomicCCA:::.nnlist_to_matrix(list_g[[i]], set_to_one = F)
+if(symmetrize){
+  list_g[[i]] <- .symmetrize_sparse(list_g[[i]], set_ones = F)
+}
 
-rank_c <- min(ncol(score_1), ncol(score_2))
-stopifnot(all(sapply(1:rank_c, function(k){
-  val <- score_1[,k] %*% score_2[,k]; val >= 0 
-}))) # ensures score matrices contain pair of acute vectors
-
-basis_list <- lapply(1:rank_c, function(k){
-  .representation_2d(score_1[,k], score_2[,k])
-})
-
-circle_list <- lapply(1:rank_c, function(k){
-  vec1 <- basis_list[[k]]$rep1
-  vec2 <- basis_list[[k]]$rep2
-  .construct_circle(vec1, vec2)
-})
+# convert back to list form if needed
+if(bool_matrix){
+  if(length(rownames(obj$common_score)) != 0){
+    rownames(list_g[[i]]) <- rownames(obj$common_score)
+    colnames(list_g[[i]]) <- rownames(obj$common_score)
+  }
+} else {
+  # [[note to self: add a test to make sure this conversion is bijective]]
+  list_g[[i]] <- .matrix_to_nnlist(list_g[[i]])
+}
 
 
 

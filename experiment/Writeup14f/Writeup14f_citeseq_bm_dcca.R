@@ -72,7 +72,7 @@ save(bm, dcca_res, dcca_res2,
 # first plot according to celltype
 reduction_vec <- c("rna.umap", "adt.umap", "wnn.umap")
 group_vec <- c("celltype.l2")
-main_vec <- c("(RNA)", "(ATAC)", "(WNN)")
+main_vec <- c("(RNA)", "(Protein)", "(WNN)")
 file_vec <- c("rna", "adt", "wnn")
 
 for(i in 1:length(reduction_vec)){
