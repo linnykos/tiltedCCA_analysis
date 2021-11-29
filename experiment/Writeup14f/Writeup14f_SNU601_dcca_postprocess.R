@@ -1,6 +1,25 @@
 rm(list=ls())
+library(Seurat); library(Signac)
 load("../../../../out/Writeup14f/Writeup14f_SNU601_dcca.RData")
 dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res2)
+
+residual_mat_1 <- sapply(1:ncol(dcca_res2$distinct_score_1), function(j){
+  df <- cbind(dcca_res2$distinct_score_1[,j], dcca_res2$common_score)
+  df <- as.data.frame(df)
+  colnames(df) <- c("y", paste0("x", 1:ncol(dcca_res2$common_score)))
+  lm_res <- stats::lm(y ~ . , data = df)
+  stats::residuals(lm_res)
+})
+alignment_1 <- 1 - sum((residual_mat_1)^2)/sum((dcca_res2$distinct_score_1)^2)
+
+residual_mat_2 <- sapply(1:ncol(dcca_res2$distinct_score_2), function(j){
+  df <- cbind(dcca_res2$distinct_score_2[,j], dcca_res2$common_score)
+  df <- as.data.frame(df)
+  colnames(df) <- c("y", paste0("x", 1:ncol(dcca_res2$common_score)))
+  lm_res <- stats::lm(y ~ ., data = df)
+  stats::residuals(lm_res)
+})
+alignment_2 <- 1 - sum((residual_mat_2)^2)/sum((dcca_res2$distinct_score_2)^2)
 
 #######################################
 
@@ -85,7 +104,9 @@ for(umap_name in other_names){
 reduction_vec <- c(anchor_name, other_names)
 group_vec <- c("clone")
 main_vec <- c("(ATAC)", "(Copy number)", "(WNN)", 
-              "(Tilted-CCA, Common)", "(Tilted-CCA, Distinct 1)", "(Tilted-CCA, Distinct 2)")
+              "(Tilted-CCA, Common)",  
+              paste0("(T-CCA, Distinct 1, Alignment: ", round(alignment_1, 2),")"), 
+              paste0("(T-CCA, Distinct 2, Alignment: ", round(alignment_2, 2),")"))
 file_vec <- c("atac", "cna", "wnn", "tiltedcca-common", "tiltedcca-distinct1", "tiltedcca-distinct2")
 
 for(i in 1:length(reduction_vec)){
@@ -93,7 +114,7 @@ for(i in 1:length(reduction_vec)){
     plot1 <- Seurat::DimPlot(SNU, reduction = reduction_vec[i],
                              group.by = group_vec[j], label = TRUE,
                              repel = TRUE, label.size = 2.5)
-    plot1 <- plot1 + ggplot2::ggtitle(paste0("SNU ", main_vec[i], ": ", group_vec[j]))
+    plot1 <- plot1 + ggplot2::ggtitle(paste0("SNU:\n", main_vec[i]))
     plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
     ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14f/Writeup14f_SNU_", file_vec[i], "_", group_vec[j], ".png"),
                     plot1, device = "png", width = 5, height = 5, units = "in")
@@ -118,3 +139,31 @@ for(i in 1:length(reduction_vec)){
   cowplot::save_plot(filename = paste0("../../../../out/figures/Writeup14f/Writeup14f_SNU_", file_vec[i], "_separate.png"), p, 
                      ncol = 3, nrow = 2, base_asp = 1, device = "png")
 }
+
+##################
+
+png(file = "../../../../out/figures/Writeup14f/Writeup14f_SNU_cca.png",
+    height = 1500, width = 1500, units = "px", res = 300)
+plot(NA,
+     xlim = c(0,1), ylim = c(0, 1),
+     xlab = "CCA value (across latent dimensions)",
+     ylab = "Tilt percentage (0, tilt towards Modality 2)",
+     main = paste0("SNU\nT-CCA summary (", ncol(dcca_res2$common_score), " out of ", 
+                   max(ncol(dcca_res2$distinct_score_1), ncol(dcca_res2$distinct_score_2)), " dims.)"))
+lines(c(-1e5,1e5), rep(0.5, 2), col = 2, lty = 2)
+lines(c(-1e5,1e5), rep(dcca_res$tilt_perc[1], 2), col = 3, lwd = 2)
+points(dcca_res2$cca_obj, dcca_res2$tilt_perc, pch = 16)
+graphics.off()
+
+###########
+
+png("../../../../out/figures/Writeup14f/Writeup14f_SNU_dcca_scores.png",
+    height = 1200, width = 2500, units = "px", res = 300)
+par(mfrow = c(1,3), mar = c(4,4,4,0.5))
+multiomicCCA::plot_scores_heatmap.dcca(dcca_res2,
+                                       membership_vec = as.factor(SNU$clone),
+                                       log_scale = T, scaling_power = 4)
+graphics.off()
+
+
+

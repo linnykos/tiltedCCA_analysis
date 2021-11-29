@@ -33,8 +33,12 @@ cna_clisi <- clisi_information(common_g, cna_frnn$d_g,
 cna_clisi$common_clisi$clisi_mat
 cna_clisi$distinct_clisi$clisi_mat
 
+
 save(atac_clisi, cna_clisi,
      file = "../../../../out/Writeup14f/Writeup14f_SNU601_clisi_tmp.RData")
+metadata <- SNU@meta.data
+save(metadata,
+     file = "../../../../out/Writeup14f/Writeup14f_SNU601_metadata.RData")
 
 # ###########################
 # 
@@ -56,6 +60,7 @@ save(atac_clisi, cna_clisi,
 
 # for local mac
 load("../../out/experiment/Writeup14f/Writeup14f_SNU601_clisi_tmp.RData")
+load("../../out/experiment/Writeup14f/Writeup14f_SNU601_metadata.RData")
 color_vec <- scales::hue_pal()(6)
 
 mat_c <- atac_clisi$common_clisi$clisi_mat
@@ -104,4 +109,50 @@ lines(c(-100, 100), c(-100, 100), col = 2, lty = 2, lwd = 2)
 
 graphics.off()
 
+###############################
+
+idx <- which(metadata$clone == "5")
+row_idx <- 5
+mat_c <- atac_clisi$common_clisi$clisi_cell_mat[row_idx,idx]
+mat_d1 <- atac_clisi$distinct_clisi$clisi_cell_mat[row_idx,idx]
+mat_d2 <- cna_clisi$distinct_clisi$clisi_cell_mat[row_idx,idx]
+
+z_quantiles <- c(0, 0.5, 0.65, 0.8, 0.9, 0.95, 1)
+z_levels <- quantile(f1$z, probs = z_quantiles)
+density_colors <- colorRampPalette(c("white", "gray"))(6)
+f1 <- MASS::kde2d(x = -mat_d1, y = mat_c, n = 100)
+# min_val <- min(f1$z); max_val <- max(f1$z); tol <- 1e-2
+# z_levels <- pretty(c(min_val, max_val), n = 11)
+image(f1, col = density_colors, xlim = c(-1,0), ylim = c(0,1),
+      breaks = z_levels)
+graphics::contour(f1, add = T, 
+                  drawlabels = F, levels = z_levels)
+points(x = -mat_d1, y = mat_c, col = rgb(0.5,0.5,0.5,0.5))
+
+par(mfrow = c(1,2), mar = c(4, 0.5, 2, 3))
+max_val <- max(c(mat_c, mat_d1, mat_d2))
+plot(NA, xlim = c(-max_val, 0), ylim = c(0, max_val), 
+     xlab = "",
+     ylab = "", bty = "n", yaxt = "n", xaxt = "n", asp = T)
+axis(side = 1, at = seq(-1, 0, by = 0.2), labels = format(seq(1,0,by=-0.2), nsmall = 1),
+     line = -1.5)
+axis(side = 4, at = seq(0, 1, by = 0.2), col = 2, col.axis = 2)
+graphics::mtext("Common enrichment", side = 4, line = 2.5, col = 2)
+graphics::mtext("Distinct 1 enrichment", side = 1, line = 1)
+lines(c(-100, 100), c(100, -100), col = 2, lty = 2, lwd = 2)
+for(i in 1:length(mat_c)){
+  points(x = -mat_d1[i], y = mat_c[i], pch = 16, cex = 1, col = rgb(0.5,0.5,0.5,0.5))
+}
+
+par(mar = c(4, 3, 2, 0.5))
+plot(NA, xlim = c(0, max_val), ylim = c(0, max_val), xlab = "",
+     ylab = "", bty = "n", asp = T, yaxt = "n", xaxt = "n")
+graphics::mtext("Distinct 2 enrichment", side = 1, line = 1)
+axis(side = 1, at = seq(0, 1, by = 0.2),
+     line = -1.5)
+axis(side = 2, at = seq(0, 1, by = 0.2), col = 2, col.axis = 2)
+lines(c(-100, 100), c(-100, 100), col = 2, lty = 2, lwd = 2)
+for(i in 1:length(mat_c)){
+  points(x = mat_d2[i], y = mat_c[i], pch = 16, cex = 1, col = rgb(0.5,0.5,0.5,0.5))
+}
 

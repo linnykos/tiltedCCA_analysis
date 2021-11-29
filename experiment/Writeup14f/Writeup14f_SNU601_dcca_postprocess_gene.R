@@ -41,3 +41,30 @@ points(summary_mat[c(idx_3_rho, idx_3_theta, idx_20_rho, idx_20_theta),2],
 graphics.off()
 
 rownames(summary_mat)[order(summary_mat[,2], decreasing = T)[1:10]]
+
+#####################
+load("../../../../out/Writeup14f/Writeup14f_SNU_preprocessed.RData")
+Seurat::DefaultAssay(SNU) <- "cna"
+mat_2 <- Matrix::t(SNU[["cna"]]@data)
+
+j_vec <- c(8,60)
+uniq_clone <- sort(unique(SNU$clone))
+color_vec <- scales::hue_pal()(length(uniq_clone))
+
+for(j in 1:2){
+    png(paste0("../../../../out/figures/Writeup14f/Writeup14f_SNU601_cna_exploration_specific_",
+        rownames(summary_mat)[j_vec[j]], ".png"), 
+        height = 2000, width = 1500, 
+        res = 300, units = "px")
+    par(mfrow = c(3,2), mar = c(4,4,4,0.5))
+    xlim <- c(min(mat_2[,j_vec[j]]), quantile(mat_2[,j_vec[j]], prob = 0.95))
+    for(i in 1:length(uniq_clone)){
+        cell_idx <- intersect(
+            intersect(which(SNU$clone == uniq_clone[i]),
+                      which(mat_2[,j_vec[j]] >= xlim[1])),
+            which(mat_2[,j_vec[j]] <= xlim[2]))
+        hist(mat_2[cell_idx,j_vec[j]], col = color_vec[i], xlim = xlim,
+             main = paste0("Clone ", uniq_clone[i]), breaks = 25)
+    }
+    graphics.off()
+}

@@ -1,6 +1,25 @@
 rm(list=ls())
+library(Seurat); library(Signac)
 load("../../../../out/Writeup14f/Writeup14f_citeseq_bm_dcca.RData")
 dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res2)
+
+residual_mat_1 <- sapply(1:ncol(dcca_res2$distinct_score_1), function(j){
+  df <- cbind(dcca_res2$distinct_score_1[,j], dcca_res2$common_score)
+  df <- as.data.frame(df)
+  colnames(df) <- c("y", paste0("x", 1:ncol(dcca_res2$common_score)))
+  lm_res <- stats::lm(y ~ . , data = df)
+  stats::residuals(lm_res)
+})
+alignment_1 <- 1 - sum((residual_mat_1)^2)/sum((dcca_res2$distinct_score_1)^2)
+
+residual_mat_2 <- sapply(1:ncol(dcca_res2$distinct_score_2), function(j){
+  df <- cbind(dcca_res2$distinct_score_2[,j], dcca_res2$common_score)
+  df <- as.data.frame(df)
+  colnames(df) <- c("y", paste0("x", 1:ncol(dcca_res2$common_score)))
+  lm_res <- stats::lm(y ~ . , data = df)
+  stats::residuals(lm_res)
+})
+alignment_2 <- 1 - sum((residual_mat_2)^2)/sum((dcca_res2$distinct_score_2)^2)
 
 #######################################
 
@@ -15,7 +34,7 @@ svd_2 <- multiomicCCA:::.svd_truncated(dcca_decomp$common_mat_2, K = rank_2, K_f
                                        mean_vec = F, sd_vec = F,
                                        symmetric = F)
 dimred_1 <- multiomicCCA:::.mult_mat_vec(svd_1$u, svd_1$d/svd_1$d[1]*sqrt(n))
-l2_vec <- apply(dimred_2, 1, function(x){multiomicCCA:::.l2norm(x)})
+l2_vec <- apply(dimred_1, 1, function(x){multiomicCCA:::.l2norm(x)})
 dimred_1 <- multiomicCCA:::.mult_vec_mat(1/l2_vec, dimred_1)
 dimred_2 <- multiomicCCA:::.mult_mat_vec(svd_2$u, svd_2$d/svd_2$d[1]*sqrt(n))
 l2_vec <- apply(dimred_2, 1, function(x){multiomicCCA:::.l2norm(x)})
@@ -78,12 +97,13 @@ for(umap_name in other_names){
   bm[[umap_name]]@cell.embeddings <- tmp
 }
 
-
 # plot according to clones
 reduction_vec <- c(anchor_name, other_names)
 group_vec <- c("celltype.l2")
 main_vec <- c("(RNA)", "(Protein)", "(WNN)", 
-              "(Tilted-CCA, Common)", "(Tilted-CCA, Distinct 1)", "(Tilted-CCA, Distinct 2)")
+              "(Tilted-CCA, Common)", 
+              paste0("(T-CCA, Distinct 1, Alignment: ", round(alignment_1, 2),")"), 
+              paste0("(T-CCA, Distinct 2, Alignment: ", round(alignment_2, 2),")"))
 file_vec <- c("rna", "adt", "wnn", "tiltedcca-common", "tiltedcca-distinct1", "tiltedcca-distinct2")
 
 for(i in 1:length(reduction_vec)){
@@ -97,4 +117,29 @@ for(i in 1:length(reduction_vec)){
                     plot1, device = "png", width = 6, height = 5, units = "in")
   }
 }
+
+#############################
+
+png(file = "../../../../out/figures/Writeup14f/Writeup14f_citeseq_bm_cca.png",
+    height = 1500, width = 1500, units = "px", res = 300)
+plot(NA,
+     xlim = c(0,1), ylim = c(0, 1),
+     xlab = "CCA value (across latent dimensions)",
+     ylab = "Tilt percentage (0, tilt towards Modality 2)",
+     main = paste0("Human PBMC (Cite-seq)\nT-CCA summary (", ncol(dcca_res2$common_score), " out of ", 
+                   max(ncol(dcca_res2$distinct_score_1), ncol(dcca_res2$distinct_score_2)), " dims.)"))
+lines(c(-1e5,1e5), rep(0.5, 2), col = 2, lty = 2)
+lines(c(-1e5,1e5), rep(dcca_res$tilt_perc[1], 2), col = 3, lwd = 2)
+points(dcca_res2$cca_obj, dcca_res2$tilt_perc, pch = 16)
+graphics.off()
+
+###########
+
+png("../../../../out/figures/Writeup14f/Writeup14f_citeseq_bm_dcca_scores.png",
+    height = 1200, width = 2500, units = "px", res = 300)
+par(mfrow = c(1,3), mar = c(4,4,4,0.5))
+multiomicCCA::plot_scores_heatmap.dcca(dcca_res2,
+                                       membership_vec = as.factor(bm$celltype.l2),
+                                       log_scale = T, scaling_power = 4)
+graphics.off()
 
