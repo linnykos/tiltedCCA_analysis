@@ -27,7 +27,7 @@ atac_clisi$common_clisi$clisi_mat
 atac_clisi$distinct_clisi$clisi_mat
 
 set.seed(10)
-cna_clisi <- clisi_information(common_g, cna_frnn$d_g,
+cna_clisi <- multiomicCCA::clisi_information(common_g, cna_frnn$d_g,
                                 membership_vec = factor(SNU$clone),
                                 max_subsample_clisi = 4000)
 cna_clisi$common_clisi$clisi_mat
@@ -111,48 +111,127 @@ graphics.off()
 
 ###############################
 
+# see https://www.r-graph-gallery.com/100-high-density-scatterplot-with-binning.html
 idx <- which(metadata$clone == "5")
 row_idx <- 5
 mat_c <- atac_clisi$common_clisi$clisi_cell_mat[row_idx,idx]
 mat_d1 <- atac_clisi$distinct_clisi$clisi_cell_mat[row_idx,idx]
 mat_d2 <- cna_clisi$distinct_clisi$clisi_cell_mat[row_idx,idx]
 
-z_quantiles <- c(0, 0.5, 0.65, 0.8, 0.9, 0.95, 1)
-z_levels <- quantile(f1$z, probs = z_quantiles)
-density_colors <- colorRampPalette(c("white", "gray"))(6)
-f1 <- MASS::kde2d(x = -mat_d1, y = mat_c, n = 100)
-# min_val <- min(f1$z); max_val <- max(f1$z); tol <- 1e-2
-# z_levels <- pretty(c(min_val, max_val), n = 11)
-image(f1, col = density_colors, xlim = c(-1,0), ylim = c(0,1),
-      breaks = z_levels)
-graphics::contour(f1, add = T, 
-                  drawlabels = F, levels = z_levels)
-points(x = -mat_d1, y = mat_c, col = rgb(0.5,0.5,0.5,0.5))
+png("../../out/figures/Writeup14f/Writeup14f_SNU_clisi_clone5_part1.png", height = 1300, 
+    width = 1500, res = 300, units = "px")
+par(mar = c(4,4,0.5,0.5))
+bin <- hexbin::hexbin(-mat_d1, mat_c)
+my_colors <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(11,'Spectral')))
+plot(bin, main="" , colramp = my_colors, trans = function(x){sqrt(x)},
+     inv = function(x){x^2},
+     xlab = "Distinct 1 enrichment",
+     ylab = "Common enrichment")
+graphics.off()
+png("../../out/figures/Writeup14f/Writeup14f_SNU_clisi_clone5_part2.png", height = 1300, 
+    width = 1500, res = 300, units = "px")
+par(mar = c(4,4,0.5,0.5))
+bin <- hexbin::hexbin(mat_d2, mat_c)
+my_colors <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(11,'Spectral')))
+plot(bin, main="" , colramp = my_colors, trans = function(x){sqrt(x)},
+     inv = function(x){x^2},
+     xlab = "Distinct 2 enrichment",
+     ylab = "Common enrichment")
+graphics.off()
 
-par(mfrow = c(1,2), mar = c(4, 0.5, 2, 3))
-max_val <- max(c(mat_c, mat_d1, mat_d2))
-plot(NA, xlim = c(-max_val, 0), ylim = c(0, max_val), 
-     xlab = "",
-     ylab = "", bty = "n", yaxt = "n", xaxt = "n", asp = T)
-axis(side = 1, at = seq(-1, 0, by = 0.2), labels = format(seq(1,0,by=-0.2), nsmall = 1),
-     line = -1.5)
-axis(side = 4, at = seq(0, 1, by = 0.2), col = 2, col.axis = 2)
-graphics::mtext("Common enrichment", side = 4, line = 2.5, col = 2)
-graphics::mtext("Distinct 1 enrichment", side = 1, line = 1)
-lines(c(-100, 100), c(100, -100), col = 2, lty = 2, lwd = 2)
-for(i in 1:length(mat_c)){
-  points(x = -mat_d1[i], y = mat_c[i], pch = 16, cex = 1, col = rgb(0.5,0.5,0.5,0.5))
-}
+#########################
 
-par(mar = c(4, 3, 2, 0.5))
-plot(NA, xlim = c(0, max_val), ylim = c(0, max_val), xlab = "",
-     ylab = "", bty = "n", asp = T, yaxt = "n", xaxt = "n")
-graphics::mtext("Distinct 2 enrichment", side = 1, line = 1)
-axis(side = 1, at = seq(0, 1, by = 0.2),
-     line = -1.5)
-axis(side = 2, at = seq(0, 1, by = 0.2), col = 2, col.axis = 2)
-lines(c(-100, 100), c(-100, 100), col = 2, lty = 2, lwd = 2)
-for(i in 1:length(mat_c)){
-  points(x = mat_d2[i], y = mat_c[i], pch = 16, cex = 1, col = rgb(0.5,0.5,0.5,0.5))
-}
+idx <- which(metadata$clone == "6")
+row_idx <- 6
+mat_c <- atac_clisi$common_clisi$clisi_cell_mat[row_idx,idx]
+mat_d1 <- atac_clisi$distinct_clisi$clisi_cell_mat[row_idx,idx]
+mat_d2 <- cna_clisi$distinct_clisi$clisi_cell_mat[row_idx,idx]
 
+png("../../out/figures/Writeup14f/Writeup14f_SNU_clisi_clone6_part1.png", height = 1300, 
+    width = 1500, res = 300, units = "px")
+par(mar = c(4,4,0.5,0.5))
+bin <- hexbin::hexbin(-mat_d1, mat_c)
+my_colors <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(11,'Spectral')))
+plot(bin, main="" , colramp = my_colors, trans = function(x){sqrt(x)},
+     inv = function(x){x^2},
+     xlab = "Distinct 1 enrichment",
+     ylab = "Common enrichment")
+graphics.off()
+png("../../out/figures/Writeup14f/Writeup14f_SNU_clisi_clone6_part2.png", height = 1300, 
+    width = 1500, res = 300, units = "px")
+par(mar = c(4,4,0.5,0.5))
+bin <- hexbin::hexbin(mat_d2, mat_c)
+my_colors <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(11,'Spectral')))
+plot(bin, main="" , colramp = my_colors, trans = function(x){sqrt(x)},
+     inv = function(x){x^2},
+     xlab = "Distinct 2 enrichment",
+     ylab = "Common enrichment")
+graphics.off()
+
+##########################
+
+load("../../out/experiment/Writeup14f/Writeup14f_SNU601_umap.RData")
+zz <- SNU2[["dcca_distinct1"]]@cell.embeddings
+cell_idx <- which(metadata$clone == "5")
+xrange <- c(0, 2.5)
+yrange <- c(-4, -1.5)
+plot(zz[,1], zz[,2], asp = T, col = rgb(0.5,0.5,0.5,0.5), pch = 16)
+points(zz[cell_idx,1], zz[cell_idx,2], col = 1, pch = 16)
+cell_idx2 <- which(sapply(cell_idx, function(i){
+  bool1 <- zz[i,1] >= xrange[1]
+  bool2 <- zz[i,1] <= xrange[2]
+  bool3 <- zz[i,2] >= yrange[1]
+  bool4 <- zz[i,2] <= yrange[2]
+  
+  bool1 & bool2 & bool3 & bool4
+}))
+points(zz[cell_idx[cell_idx2],1], zz[cell_idx[cell_idx2],2], col = 2, pch = 16)
+cell_names <- rownames(SNU2@meta.data)[cell_idx[cell_idx2]]
+
+mat_c <- atac_clisi$common_clisi$clisi_cell_mat[5,cell_names]
+mat_d1 <- atac_clisi$distinct_clisi$clisi_cell_mat[5,cell_names]
+mat_d2 <- cna_clisi$distinct_clisi$clisi_cell_mat[5,cell_names]
+
+png("../../out/figures/Writeup14f/Writeup14f_SNU_clisi_clone5_part1_sub.png", height = 1300, 
+    width = 1500, res = 300, units = "px")
+par(mar = c(4,4,0.5,0.5))
+bin <- hexbin::hexbin(-mat_d1, mat_c)
+my_colors <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(11,'Spectral')))
+plot(bin, main="" , colramp = my_colors, trans = function(x){sqrt(x)},
+     inv = function(x){x^2},
+     xlab = "Distinct 1 enrichment",
+     ylab = "Common enrichment")
+graphics.off()
+
+
+zz <- SNU2[["dcca_distinct2"]]@cell.embeddings
+cell_idx <- which(metadata$clone == "6")
+xrange <- c(-5,-3)
+yrange <- c(-5, -3)
+plot(zz[,1], zz[,2], asp = T, col = rgb(0.5,0.5,0.5,0.5), pch = 16)
+points(zz[cell_idx,1], zz[cell_idx,2], col = 1, pch = 16)
+cell_idx2 <- which(sapply(cell_idx, function(i){
+  bool1 <- zz[i,1] >= xrange[1]
+  bool2 <- zz[i,1] <= xrange[2]
+  bool3 <- zz[i,2] >= yrange[1]
+  bool4 <- zz[i,2] <= yrange[2]
+  
+  bool1 & bool2 & bool3 & bool4
+}))
+points(zz[cell_idx[cell_idx2],1], zz[cell_idx[cell_idx2],2], col = 2, pch = 16)
+cell_names <- rownames(SNU2@meta.data)[cell_idx[cell_idx2]]
+
+mat_c <- atac_clisi$common_clisi$clisi_cell_mat[6,cell_names]
+mat_d1 <- atac_clisi$distinct_clisi$clisi_cell_mat[6,cell_names]
+mat_d2 <- cna_clisi$distinct_clisi$clisi_cell_mat[6,cell_names]
+
+png("../../out/figures/Writeup14f/Writeup14f_SNU_clisi_clone6_part2_sub.png", height = 1300, 
+    width = 1500, res = 300, units = "px")
+par(mar = c(4,4,0.5,0.5))
+bin <- hexbin::hexbin(mat_d2, mat_c)
+my_colors <- grDevices::colorRampPalette(rev(RColorBrewer::brewer.pal(11,'Spectral')))
+plot(bin, main="" , colramp = my_colors, trans = function(x){sqrt(x)},
+     inv = function(x){x^2},
+     xlab = "Distinct 2 enrichment",
+     ylab = "Common enrichment")
+graphics.off()

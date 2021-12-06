@@ -9,13 +9,70 @@ summary_mat <- compute_variable_summary(mat = dcca_decomp$common_mat_2 + dcca_de
                                         metacell_clustering = factor(SNU$clone),
                                         verbose = 1)
 
+# load in the NA mask
+genotype_values <- readRDS("../../../../data/Chiyun_SNU601/SNU601/genotype_values_h1_h2_c20.rds")
+
+mat_rho_org <- genotype_values[,grep("^rho*", colnames(genotype_values))]
+mat_rho_org <- mat_rho_org[rownames(mat_rho_org) %in% rownames(SNU@meta.data),]
+mat_theta_org <- genotype_values[,grep("^theta*", colnames(genotype_values))]
+mat_theta_org <- mat_theta_org[rownames(mat_theta_org) %in% rownames(SNU@meta.data),]
+all(rownames(mat_rho_org) == rownames(SNU@meta.data))
+length(which(is.na(mat_rho_org)))
+length(which(is.na(mat_theta_org)))
+cna_org <- t(cbind(mat_rho_org, mat_theta_org))
+
+# Wilcox rank-sum test
+uniq_celltype <- sort(unique(SNU$clone))
+combn_mat <- utils::combn(length(uniq_celltype), 2)
+set.seed(10)
+Seurat::Idents(SNU) <- "clone"
+Seurat::DefaultAssay(SNU) <- "cna"
+de_list <- lapply(1:ncol(combn_mat), function(i){
+    ident_1 <- which(SNU$clone == uniq_celltype[combn_mat[1,i]])
+    ident_2 <- which(SNU$clone == uniq_celltype[combn_mat[2,i]])
+    
+    p_val_vec <- sapply(1:nrow(SNU[["cna"]]@data), function(j){
+        mask1 <- which(!is.na(cna_org[j,ident_1]))
+        mask2 <- which(!is.na(cna_org[j,ident_2]))
+        if(length(mask1) == 0 | length(mask2) == 0) return(1)
+        
+        vec1 <- SNU[["cna"]]@data[j,ident_1[mask1]]
+        vec2 <- SNU[["cna"]]@data[j,ident_2[mask2]]
+        
+        tmp <- stats::wilcox.test(vec1, vec2)
+        tmp$p.value
+    })
+    
+    data.frame(variable = rownames(SNU[["cna"]]@data), 
+               p_val = p_val_vec)
+})
+sapply(de_list, function(x){quantile(x[,2])})
+
+summary_mat <- cbind(summary_mat, rep(0, nrow(summary_mat)))
+colnames(summary_mat)[3] <- "p_val"
+# overwrite column of summary_mat
+for(i in 1:nrow(summary_mat)){
+    gene_name <- rownames(summary_mat)[i]
+    val <- mean(sapply(1:length(de_list), function(j){
+        idx <- which(de_list[[j]][,1] == gene_name)
+        if(length(idx) == 0) return(1)
+        de_list[[j]][idx, "p_val"]
+    }))
+    
+    summary_mat[i,"p_val"] <- val
+}
+
+# add jitter
+set.seed(10)
+summary_mat[,"p_val"] <- pmax(pmin(summary_mat[,"p_val"] + runif(nrow(summary_mat), min = -.05, max = .05), 1), 0)
+
 col_vec <- rep(1, ncol(dcca_decomp$common_mat_2))
 col_vec[grep("theta", colnames(dcca_decomp$common_mat_2))] <- 2
 
 png("../../../../out/figures/Writeup14f/Writeup14f_SNU601_cna_exploration.png", 
     height = 1500, width = 1500, res = 300, units = "px")
-plot(summary_mat[,2], summary_mat[,1], pch = 16,
-     col = col_vec, xlab = "Separability (KL divergence)",
+plot(summary_mat[,3], summary_mat[,1], pch = 16,
+     col = col_vec, xlab = "Separability (Average p-value, jittered)",
      ylab = "Alignment w/ common space (R^2)",
      main = "SNU601 (CNA):\n(Theta: red, Rho: black)")
 graphics.off()
@@ -29,11 +86,11 @@ idx_20_theta <- c(123,124)
 
 png("../../../../out/figures/Writeup14f/Writeup14f_SNU601_cna_exploration_specific.png", 
     height = 1500, width = 1500, res = 300, units = "px")
-plot(summary_mat[,2], summary_mat[,1], pch = 16,
-     col = "gray", xlab = "Separability (KL divergence)",
+plot(summary_mat[,3], summary_mat[,1], pch = 16,
+     col = "gray", xlab = "Separability (Average p-value, jittered)",
      ylab = "Alignment w/ common space (R^2)",
      main = "Chr3: red, Chr20: green\nRho: circle, Theta: triangle")
-points(summary_mat[c(idx_3_rho, idx_3_theta, idx_20_rho, idx_20_theta),2], 
+points(summary_mat[c(idx_3_rho, idx_3_theta, idx_20_rho, idx_20_theta),3], 
        summary_mat[c(idx_3_rho, idx_3_theta, idx_20_rho, idx_20_theta),1],
        pch = c(rep(16,3),rep(17,2), rep(16,3),rep(17,2)),
        col = c(rep(2, 5), rep(3, 5)),

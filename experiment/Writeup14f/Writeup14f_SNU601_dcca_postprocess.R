@@ -48,7 +48,7 @@ common_umap <- Seurat::RunUMAP(cbind(dimred_1, dimred_2),
                                metric = "euclidean",
                                reduction.key = "umapCommon_")
 rownames(common_umap@cell.embeddings) <- rownames(SNU@meta.data)
-SNU[["dcca_common"]] <- Seurat::CreateDimReducObject(common_umap@cell.embeddings, assay = "atac")
+SNU[["dcca_common"]] <- Seurat::CreateDimReducObject(common_umap@cell.embeddings, assay = "cna")
 
 #######################################
 
@@ -65,7 +65,7 @@ distinct1_umap <- Seurat::RunUMAP(dimred_1,
                                   metric = "cosine",
                                   reduction.key = "umapDistinct1_")
 rownames(distinct1_umap@cell.embeddings) <- rownames(SNU@meta.data)
-SNU[["dcca_distinct1"]] <- Seurat::CreateDimReducObject(distinct1_umap@cell.embeddings, assay = "atac")
+SNU[["dcca_distinct1"]] <- Seurat::CreateDimReducObject(distinct1_umap@cell.embeddings, assay = "cna")
 
 #######################################
 
@@ -81,7 +81,7 @@ distinct2_umap <- Seurat::RunUMAP(dimred_2,
                                   metric = "cosine",
                                   reduction.key = "umapDistinct2_")
 rownames(distinct2_umap@cell.embeddings) <- rownames(SNU@meta.data)
-SNU[["dcca_distinct2"]] <- Seurat::CreateDimReducObject(distinct2_umap@cell.embeddings, assay = "atac")
+SNU[["dcca_distinct2"]] <- Seurat::CreateDimReducObject(distinct2_umap@cell.embeddings, assay = "cna")
 
 #######################################
 
@@ -99,6 +99,11 @@ for(umap_name in other_names){
   colnames(tmp) <- colnames(SNU[[umap_name]]@cell.embeddings)
   SNU[[umap_name]]@cell.embeddings <- tmp
 }
+
+SNU2 <- SNU
+Seurat::DefaultAssay(SNU2) <- "cna"
+SNU2[["atac"]] <- NULL
+save(SNU2, file = "../../../../out/Writeup14f/Writeup14f_SNU601_umap.RData")
 
 # plot according to clones
 reduction_vec <- c(anchor_name, other_names)
