@@ -65,7 +65,7 @@ set.seed(10)
 Seurat::DefaultAssay(bm) <- "RNA"
 Seurat::Idents(bm) <- "celltype.l3"
 gene_de_list <- lapply(1:ncol(combn_mat), function(i){
-  print(j)
+  print(i)
   ident_1 <- as.character(combn_mat[1,i])
   ident_2 <- as.character(combn_mat[2,i])
   
