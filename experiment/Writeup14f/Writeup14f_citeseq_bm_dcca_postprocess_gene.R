@@ -74,6 +74,8 @@ gene_de_list <- lapply(1:ncol(combn_mat), function(i){
                       ident.1 = ident_1,
                       ident.2 = ident_2,
                       test.use = "MAST",
+                      logfc.threshold = 0,
+                      min.pct = 0,
                       verbose = F)
 })
 
@@ -86,7 +88,7 @@ colnames(summary_mat1)[3] <- "p_val"
 for(i in 1:nrow(summary_mat1)){
   gene_name <- rownames(summary_mat1)[i]
   val <- mean(sapply(1:length(gene_de_list), function(j){
-    idx <- which(gene_de_list[[j]][,1] == gene_name)
+    idx <- which(rownames(gene_de_list[[j]]) == gene_name)
     if(length(idx) == 0) return(1)
     gene_de_list[[j]][idx, "p_val"]
   }))
