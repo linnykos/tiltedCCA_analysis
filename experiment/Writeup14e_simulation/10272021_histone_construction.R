@@ -49,8 +49,8 @@ seurat_obj <- Seurat::RunUMAP(seurat_obj, dims = 1:25, reduction = "lsi",
                               metric = "euclidean",
                               reduction.name = "umap.dna")
 
-Seurat::DimPlot(seurat_obj, reduction = "umap", cols = color_vec, group.by = "celltype")
-Seurat::DimPlot(seurat_obj, reduction = "umap.dna", cols = color_vec, group.by = "celltype")
+Seurat::DimPlot(seurat_obj, reduction = "umap", cols = color_vec, group.by = "celltype_custom")
+Seurat::DimPlot(seurat_obj, reduction = "umap.dna", cols = color_vec, group.by = "celltype_custom")
 
 plot_scores_heatmap.list(list(mat_1[,1:25]), membership_vec = as.factor(seurat_obj[["celltype"]][,1]),
                          log_scale = T, scaling_power = 2)

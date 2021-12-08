@@ -9,12 +9,13 @@ compute_variable_summary <- function(mat, common_mat,
     
     r_val <- .gene_regression(x_vec = common_mat[,j],
                               y_vec = mat[,j])
-    kl_val <- .separation_value(vec = mat[,j],
-                                metacell_clustering = metacell_clustering)
-    
+    # kl_val <- .separation_value(vec = mat[,j],
+    #                             metacell_clustering = metacell_clustering)
+    kl_val <- 1
+      
     c(r_val = r_val, kl_val = kl_val)
   }))
- 
+  
   colnames(summary_mat) <- c("r_squared", "kl_div")
   rownames(summary_mat) <- colnames(mat)
   
