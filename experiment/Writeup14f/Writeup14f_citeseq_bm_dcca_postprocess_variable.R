@@ -71,6 +71,7 @@ gene_de_list <- lapply(1:ncol(combn_mat), function(i){
   
   set.seed(10)
   Seurat::FindMarkers(bm,
+                      features = colnames(dcca_decomp$common_mat_1),
                       ident.1 = ident_1,
                       ident.2 = ident_2,
                       test.use = "MAST",
@@ -96,5 +97,5 @@ for(i in 1:nrow(summary_mat1)){
   summary_mat1[i,"p_val"] <- val
 }
 
-save(summary_mat1, summary_mat2, adt_de_list, gene_de_list,
+save(summary_mat1, summary_mat2, adt_de_list, gene_de_list, cell_lists,
      file = "../../../../out/Writeup14f/Writeup14f_citeseq_bm_dcca_postprocess_gene.RData")

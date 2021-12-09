@@ -1,4 +1,4 @@
-jive <- function(mat_1, mat_2, r, max_iter = 10){
+jive <- function(mat_1, mat_2, r, max_iter = 100){
   mat_1 <- scale(mat_1, center = T, scale = T)
   mat_2 <- scale(mat_2, center = T, scale = T)
   n <- nrow(mat_1)
@@ -7,13 +7,14 @@ jive <- function(mat_1, mat_2, r, max_iter = 10){
   
   mat <- cbind(mat_1, mat_2)
   embedding_old <- numeric(0)
+  obj_vec <- numeric(0)
   iter <- 1
   
-  while(TRUE){
-    if(is.matrix(embedding_old) && iter > 4){
-      if(svd(embedding_old - embedding)$d[1] <= 1e-3) break()
-    } 
-    if(iter >= max_iter) break()
+  while(iter <= max_iter){
+    print(iter)
+    if(iter > 4 && abs(obj_vec[iter-2] - obj_vec[iter-1])/obj_vec[iter-2] <= 1e-6){
+      break()
+    }
     
     svd_res <- irlba::irlba(mat, nv = r)
     embedding <- multiomicCCA:::.mult_mat_vec(svd_res$u, svd_res$d)
@@ -29,8 +30,10 @@ jive <- function(mat_1, mat_2, r, max_iter = 10){
     
     mat <- cbind(mat_1 - proj_1, mat_2 - proj_2)
     embedding_old <- embedding
+    obj_vec <- c(obj_vec, norm(resid_1, "F")^2 + norm(resid_2, "F")^2)
     iter <- iter + 1
   }
 
-  list(embedding = embedding, iter = iter)
+  list(embedding = embedding, iter = iter,
+       obj_vec = obj_vec)
 }

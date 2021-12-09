@@ -5,6 +5,7 @@ source("../multiomicCCA_analysis/simulation/jive.R")
 mat_1 <- seurat_obj2[["pca"]]@cell.embeddings
 mat_2 <- seurat_obj2[["lsi"]]@cell.embeddings
 jive_res <- jive(mat_1, mat_2, r = 20)
+plot(jive_res$obj_vec)
 
 set.seed(10)
 rownames(jive_res$embedding) <- colnames(seurat_obj2)
