@@ -13,7 +13,7 @@ rownames(embedding_all) <- colnames(bm)
 
 embedding_all <- scale(embedding_all, center = T, scale = F)
 pca_res <- svd(embedding_all)
-consensus_mat <- multiomicCCA:::.mult_mat_vec(pca_res$u[,1:30], pca_res$d[1:30])
+consensus_mat <- multiomicCCA:::.mult_mat_vec(pca_res$u[,1:20], pca_res$d[1:20])
 
 set.seed(10)
 consensus_umap <- Seurat::RunUMAP(consensus_mat, 
