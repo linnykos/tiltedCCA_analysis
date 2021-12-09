@@ -45,6 +45,7 @@ ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14g/Writeup14g
 
 ###########################
 
+n <- ncol(bm2)
 Seurat::DefaultAssay(bm2) <- "RNA"
 set.seed(10)
 bm2 <- Seurat::FindNeighbors(bm2, dims = 1:30)
