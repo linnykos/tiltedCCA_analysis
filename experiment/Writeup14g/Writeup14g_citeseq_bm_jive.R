@@ -9,5 +9,5 @@ session_info <- devtools::session_info()
 
 mat_1 <- t(bm[["RNA"]]@scale.data)
 mat_2 <- t(bm[["ADT"]]@scale.data)
-jive_res <- jive(mat_1, mat_2, r = 20)
+jive_res <- jive(mat_1, mat_2, r = min(ncol(mat_1), ncol(mat_2)))
 save.image(file = "../../../../out/Writeup14g/Writeup14g_citeseq_bm25_jive.RData")
