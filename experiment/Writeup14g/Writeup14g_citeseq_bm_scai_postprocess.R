@@ -1,5 +1,6 @@
 rm(list=ls())
 load("../../../../out/Writeup14g/Writeup14g_citeseq_bm25_scai.RData")
+dim(scai_res$H)
 
 for(j in 1:ncol(scai_res$H)){
   val <- max(scai_res$H[,j])

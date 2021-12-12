@@ -1,5 +1,6 @@
 rm(list=ls())
 load("../../../../out/Writeup14g/Writeup14g_citeseq_bm25_jive.RData")
+dim(jive_res$embedding)
 
 set.seed(10)
 jive_umap <- Seurat::RunUMAP(jive_res$embedding, 

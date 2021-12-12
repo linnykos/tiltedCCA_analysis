@@ -50,6 +50,25 @@ plot_decomposition_2d(vec1, vec2, common_vec,
                       bty = "n")
 graphics.off()
 
+
+radian <- .compute_radian(circle = circle,
+                          enforce_boundary = T,
+                          percentage_val = 1-0.125, 
+                          vec1 = basis$rep1,
+                          vec2 = basis$rep2)
+common_vec <- .position_from_circle(circle, radian)
+# common_vec <- (1-tan(acos(vec1 %*% vec2)/2)) * (vec1 + vec2)/2
+png("../../out/simulation/Writeup14e_simulation/example2.png",
+    height = 1500, width = 1500, units = "px", res = 300)
+par(mar = c(4,4,0.5,0.5))
+plot_decomposition_2d(vec1, vec2, common_vec,
+                      xlab = "2D plane, 1st dimension",
+                      ylab = "2D plane, 2nd dimension",
+                      plot_bg = T,
+                      bty = "n")
+graphics.off()
+
+
 ######################################
 
 vec1 <- c(1, 0)
