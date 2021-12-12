@@ -17,9 +17,9 @@ mat_1 <- mat_1[idx,]
 mat_2 <- mat_2[idx,]
 celltype_vec <- celltype_vec[idx]
 
-iterations <- 3
+iterations <- 15
 cell_fraction <- 1/10
-pull_factor <- 0.6
+pull_factor <- 0.65
 
 idx_from_list <- list("CD14 Mono", "Memory B", "Naive B")
 idx_to_list <- list("CD8 Naive", "CD4 Memory", "CD4 Naive")
