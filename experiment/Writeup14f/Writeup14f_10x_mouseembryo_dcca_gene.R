@@ -104,7 +104,7 @@ sapply(gene_list, length)
 
 
 png("../../../../out/figures/Writeup14f/Writeup14f_10x_mouseembryo_rna_exploration.png",
-    height = 1500, width = 1500, res = 300, units = "px")
+    height = 1250, width = 1250, res = 300, units = "px")
 tmp <- summary_mat[,3]; tmp <- tmp[tmp > 0]
 xmin <- floor(log10(min(tmp)))
 summary_mat[which(summary_mat[,3] == 0),3] <- 10^xmin
@@ -116,7 +116,7 @@ plot(NA,
      xaxt = "n",
      xlab = "Separability (Median -Log10(p-value))",
      ylab = "Alignment w/ common space (R^2)",
-     main = "Mouse embryo (RNA)")
+     main = "10x: Mouse embryo (Gene)")
 tmp <- seq(xmin, xmax, by = 1)
 xaxt_vec <- sort(unique(unlist(sapply(1:(length(tmp)-1), function(i){
   lower <- 10^(tmp[i]); upper <- 10^(tmp[i+1])
@@ -138,7 +138,7 @@ for(x_val in xaxt_vec[major]){
   lines(rep(x_val,2), c(-1e5,1e5), lty = 2, col = "gray", lwd = 1.5)
 }
 points(log10(summary_mat[,3]), summary_mat[,1], 
-       pch = 16, col = rgb(0.5, 0.5, 0.5, 0.3))
+       pch = 16, col = rgb(0.5, 0.5, 0.5, 0.2))
 graphics.off()
 
 label_vec <- c("Cortical", "Forebrain", "Glioblast", "Neuroblast", "Oligodendrocyte", "Radial")

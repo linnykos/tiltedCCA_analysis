@@ -13,13 +13,9 @@ mat_2 <- t(bm[["ADT"]]@scale.data)
 celltype_vec <- bm$celltype.l2
 
 idx <- sample(1:nrow(mat_1), floor(nrow(mat_1)/4))
-mat_1 <- mat_1[idx,]
-mat_2 <- mat_2[idx,]
-celltype_vec <- celltype_vec[idx]
+mat_1 <- mat_1[idx,]; mat_2 <- mat_2[idx,]; celltype_vec <- celltype_vec[idx]
 
-iterations <- 15
-cell_fraction <- 1/10
-pull_factor <- 0.65
+iterations <- 15; cell_fraction <- 1/10; pull_factor <- 0.65
 
 idx_from_list <- list("CD14 Mono", "Memory B", "Naive B")
 idx_to_list <- list("CD8 Naive", "CD4 Memory", "CD4 Naive")
@@ -31,6 +27,7 @@ for(k in 1:length(idx_from_list)){
   for(i in idx_from){
     mat_2[i,] <- mat_2[i,] - mean_vec_from + mean_vec_to
   }
+  original_sd <- matrixStats::colSds(mat_2[c(idx_from, idx_to),])
   
   for(iter in 1:iterations){
     set.seed(iter)
@@ -49,9 +46,17 @@ for(k in 1:length(idx_from_list)){
     }
     
     all_idx <- c(idx_from_subsample, idx_to_subsample)
-    # all_idx <- all_idx[sample(1:length(all_idx), size = floor(length(all_idx)/10))]
     shuf_idx <- sample(all_idx)
     mat_2[all_idx,] <- mat_2[shuf_idx,]
+  }
+  
+  idx_from <- which(celltype_vec %in% idx_from_list[[k]])
+  idx_to <- which(celltype_vec %in% idx_to_list[[k]])
+  current_mean <- matrixStats::colMeans2(mat_2[c(idx_from, idx_to),])
+  current_sd <- matrixStats::colSds(mat_2[c(idx_from, idx_to),])
+  multiplier <- 4*original_sd/current_sd
+  for(j in 1:ncol(mat_2)){
+    mat_2[,j] <- (mat_2[,j] - current_mean[j])*multiplier[j] + current_mean[j]
   }
 }
 
@@ -65,6 +70,7 @@ for(k in 1:length(idx_from_list)){
   for(i in idx_from){
     mat_1[i,] <- mat_1[i,] - mean_vec_from + mean_vec_to
   }
+  original_sd <- matrixStats::colSds(mat_1[c(idx_from, idx_to),])
   
   for(iter in 1:iterations){
     set.seed(iter)
@@ -83,9 +89,17 @@ for(k in 1:length(idx_from_list)){
     }
     
     all_idx <- c(idx_from_subsample, idx_to_subsample)
-    # all_idx <- all_idx[sample(1:length(all_idx), size = floor(length(all_idx)/10))]
     shuf_idx <- sample(all_idx)
     mat_1[all_idx,] <- mat_1[shuf_idx,]
+  }
+  
+  idx_from <- which(celltype_vec %in% idx_from_list[[k]])
+  idx_to <- which(celltype_vec %in% idx_to_list[[k]])
+  current_mean <- matrixStats::colMeans2(mat_1[c(idx_from, idx_to),])
+  current_sd <- matrixStats::colSds(mat_1[c(idx_from, idx_to),])
+  multiplier <- 4*original_sd/current_sd
+  for(j in 1:ncol(mat_1)){
+    mat_1[,j] <- (mat_1[,j] - current_mean[j])*multiplier[j] + current_mean[j]
   }
 }
 
@@ -154,24 +168,9 @@ consensus_umap <- Seurat::RunUMAP(consensus_mat,
 bm2[["consensus.umap"]] <- Seurat::CreateDimReducObject(consensus_umap@cell.embeddings)
 
 ################################
+bm_safe <- bm2
 
-anchor_name <- "rna.umap"
-other_names <- c("rna.umap", "adt.umap", "wnn.umap", "consensus.umap")
-
-for(umap_name in other_names){
-  print(umap_name)
-  u_mat1 <- bm[[anchor_name]]@cell.embeddings
-  u_mat2 <- bm2[[umap_name]]@cell.embeddings
-  u_mat1 <- u_mat1[rownames(u_mat1) %in% rownames(u_mat2),]
-  tmp <- svd(t(u_mat1) %*% u_mat2)
-  rotation_mat <- tmp$u %*% t(tmp$v)
-  tmp <- u_mat2 %*% t(rotation_mat)
-  rownames(tmp) <- rownames(bm2@meta.data)
-  colnames(tmp) <- colnames(bm2[[umap_name]]@cell.embeddings)
-  bm2[[umap_name]]@cell.embeddings <- tmp
-}
-
-celltype_table <- c("red", "yellow 1", "yellow 2", "green", "blue 1", "blue")
+celltype_table <- c("red", "yellow 1", "yellow 2", "green", "blue 1", "blue 2")
 names(celltype_table) <- sort(unique(bm2$celltype.l2))
 # "CD14 Mono", "CD4 Memory", "CD4 Naive", "CD8 Naive", "Memory B", "Naive B"  
 color_vec <- scales::hue_pal()(length(unique(bm$celltype.l2)))
@@ -184,6 +183,59 @@ for(i in 1:length(celltype_table)){
 }
 names(celltype_color) <- colnames(bm2)
 bm2$celltype_color <- celltype_color
+
+# modify the positions just for visual clarity
+group_list <- list(c("green", "yellow 1", "yellow 2"),
+            c("blue 1", "blue 2", "red"),
+            c("green", "red"),
+            c("blue 2", "yellow 2"),
+            "green", "yellow 2", "yellow 1", "blue 1", "blue 2", "red")
+reduc_vec <- c("rna.umap", "rna.umap", 
+                "adt.umap", "adt.umap",
+                rep("consensus.umap", 6))
+mean_mat <- matrix(c(-5, -5,
+                     5, 5,
+                     -2,5,
+                     5,-5,
+                     -5, 5,
+                     0, 1,
+                     5,6,
+                     0.5,6,
+                     2,-5,
+                     -5,-4),
+                   ncol = 2, nrow = 10,
+                   byrow = T)
+for(i in 1:length(group_list)){
+  zz <- bm2[[reduc_vec[i]]]@cell.embeddings
+  idx <- which(bm2$celltype_color %in% group_list[[i]])
+  current_mean <- colMeans(zz[idx,])
+  for(j in 1:2){
+    zz[idx,j] <- zz[idx,j] - current_mean[j] + mean_mat[i,j]
+  }
+  bm2[[reduc_vec[i]]]@cell.embeddings <- zz
+}
+
+tmp <- bm2[["rna.umap"]]@cell.embeddings
+tmp[which(tmp[,1] > 9),] <- NA
+tmp[which(tmp[,1] < -15),] <- NA
+bm2[["rna.umap"]]@cell.embeddings <- tmp
+
+tmp <- bm2[["adt.umap"]]@cell.embeddings
+tmp[which(tmp[,1] > 20),] <- NA
+tmp[which(tmp[,1] < -8),] <- NA
+tmp[which(tmp[,2] > 15),] <- NA
+tmp[which(tmp[,2] < -55),] <- NA
+bm2[["adt.umap"]]@cell.embeddings <- tmp
+
+tmp <- bm2[["consensus.umap"]]@cell.embeddings
+tmp[which(tmp[,1] > 7),] <- NA
+tmp[which(tmp[,1] < -8),] <- NA
+tmp[which(tmp[,2] > 8),] <- NA
+tmp[which(tmp[,2] < -10),] <- NA
+bm2[["consensus.umap"]]@cell.embeddings <- tmp
+
+################################
+
 
 # plot according to clones
 reduction_vec <-  c("rna.umap", "adt.umap", "wnn.umap", "consensus.umap")
@@ -198,33 +250,5 @@ for(i in 1:length(reduction_vec)){
   plot1 <- plot1 + ggplot2::ggtitle(paste0("Pseudo-real:\n", main_vec[i]))
   plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
   ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14g/Writeup14g_pseudoreal_", file_vec[i], ".png"),
-                  plot1, device = "png", width = 6, height = 5, units = "in")
+                  plot1, device = "png", width = 5, height = 5, units = "in")
 }
-
-# ######################################
-# ######################################
-# dims_1 <- 1:30; dims_2 <- 1:18; nn <- 30
-# 
-# rank_1 <- max(dims_1); rank_2 <- max(dims_2)
-# n <- nrow(mat_1)
-# 
-# svd_1 <- multiomicCCA:::.svd_truncated(mat_1, K = rank_1, symmetric = F, rescale = F, 
-#                                        mean_vec = F, sd_vec = F, K_full_rank = F)
-# svd_2 <- multiomicCCA:::.svd_truncated(mat_2, K = rank_2, symmetric = F, rescale = F, 
-#                                        mean_vec = F, sd_vec = F, K_full_rank = F)
-# 
-# svd_1 <- multiomicCCA:::.check_svd(svd_1, dims = dims_1)
-# svd_2 <- multiomicCCA:::.check_svd(svd_2, dims = dims_2)
-# 
-# dimred_1 <- multiomicCCA:::.mult_mat_vec(svd_1$u, svd_1$d)
-# dimred_2 <- multiomicCCA:::.mult_mat_vec(svd_2$u, svd_2$d)
-# 
-# set.seed(10)
-# jive_umap <- Seurat::RunUMAP(jive_res$embedding, 
-#                              metric = "cosine",
-#                              reduction.key = "umapJive1_")
-# rownames(jive_umap@cell.embeddings) <- rownames(bm@meta.data)
-# bm[["jive_umap"]] <- Seurat::CreateDimReducObject(jive_umap@cell.embeddings)
-# 
-
-  

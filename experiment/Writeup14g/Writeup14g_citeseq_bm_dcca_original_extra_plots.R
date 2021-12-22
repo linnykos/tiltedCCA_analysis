@@ -194,6 +194,14 @@ color_vec3 <- c(rgb(127, 127, 127, max = 255),
                 rgb(77, 194, 61, max = 255))
 names(color_vec3) <- c("none", "neigh", "neighdcca", "intersect", "target")
 
+png("../../../../out/figures/Writeup14g/Writeup14g_citeseq_bm_dcca_none.png",
+    height = 2050, width = 1800, res = 300, units = "px")
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+tmp <- bm[["dcca_common"]]@cell.embeddings
+plot(tmp[,1], tmp[,2], 
+     pch = 16, col = "gray50", cex = 0.5,
+     xaxt = "n", yaxt = "n", bty = "n")
+graphics.off()
 
 png("../../../../out/figures/Writeup14g/Writeup14g_citeseq_bm_rna_onlycell.png",
     height = 2050, width = 1800, res = 300, units = "px")
@@ -210,6 +218,17 @@ png("../../../../out/figures/Writeup14g/Writeup14g_citeseq_bm_adt_onlycell.png",
     height = 2050, width = 1800, res = 300, units = "px")
 par(mar = c(0.5, 0.5, 0.5, 0.5))
 tmp <- bm[["adt.umap"]]@cell.embeddings
+plot(tmp[,1], tmp[,2], 
+     pch = 16, col = "gray50", cex = 0.5,
+     xaxt = "n", yaxt = "n", bty = "n")
+points(tmp[cell_idx,1], tmp[cell_idx,2], col = "white", pch = 16, cex = 4)
+points(tmp[cell_idx,1], tmp[cell_idx,2], col = color_vec3["target"], pch = 16, cex = 3)
+graphics.off()
+
+png("../../../../out/figures/Writeup14g/Writeup14g_citeseq_bm_dcca_onlycell.png",
+    height = 2050, width = 1800, res = 300, units = "px")
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+tmp <- bm[["dcca_common"]]@cell.embeddings
 plot(tmp[,1], tmp[,2], 
      pch = 16, col = "gray50", cex = 0.5,
      xaxt = "n", yaxt = "n", bty = "n")
@@ -325,6 +344,22 @@ points(tmp[cell_idx,1], tmp[cell_idx,2], col = color_vec3["target"], pch = 16, c
 graphics.off()
 
 #############################################
+
+tmp <- bm[["adt.umap"]]@cell.embeddings
+zz <- tmp[c(rann_res_2[target_idx,],cell_idx),]
+xlim <- range(zz[,1]); ylim <- range(zz[,2])
+png("../../../../out/figures/Writeup14g/Writeup14g_citeseq_bm_adt_neigh_zoomin.png",
+    height = 1000, width = 1000, res = 300, units = "px")
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+plot(tmp[,1], tmp[,2], 
+     pch = 16, col = "gray50", cex = 0.5,
+     xlim = xlim, ylim = ylim, asp = T,
+     xaxt = "n", yaxt = "n", bty = "n")
+points(tmp[rann_res_2[target_idx,],1], tmp[rann_res_2[target_idx,],2], col = "gray", pch = 16, cex = 5)
+points(tmp[rann_res_2[target_idx,],1], tmp[rann_res_2[target_idx,],2], col = color_vec3["neigh"], pch = 16, cex = 4)
+points(tmp[cell_idx,1], tmp[cell_idx,2], col = "white", pch = 16, cex = 5)
+points(tmp[cell_idx,1], tmp[cell_idx,2], col = color_vec3["target"], pch = 16, cex = 4)
+graphics.off()
 
 tmp <- bm[["adt.umap"]]@cell.embeddings
 zz <- tmp[c(rann_res_2[target_idx,],cell_idx),]

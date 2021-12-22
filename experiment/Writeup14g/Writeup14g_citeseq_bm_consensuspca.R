@@ -100,3 +100,56 @@ points(vec1, vec2, col = col_vec_trans, pch = 16)
 points(projection_vec, pch = 16, col = "white", cex = 2)
 points(projection_vec, pch = 16, col = col_vec, cex = 0.5)
 graphics.off()
+
+########################################
+
+rm(list=ls())
+library(Seurat); library(Signac)
+load("../../../../out/Writeup14f/Writeup14f_citeseq_bm_dcca.RData")
+n <- ncol(bm)
+mat_1 <- t(bm[["RNA"]]@scale.data)
+mat_1 <- scale(mat_1)
+svd_1 <- irlba::irlba(mat_1, 30)
+embedding_1 <- multiomicCCA:::.mult_mat_vec(svd_1$u, svd_1$d/svd_1$d[1]*sqrt(n))
+mat_2 <- t(bm[["RNA"]]@scale.data)
+mat_2 <- scale(mat_2)
+svd_2 <- svd(mat_2)
+embedding_2 <- multiomicCCA:::.mult_mat_vec(svd_2$u, svd_2$d/svd_2$d[1]*sqrt(n))
+embedding_all <- cbind(embedding_1, embedding_2)
+rownames(embedding_all) <- colnames(bm)
+
+vec1 <- embedding_1[,1]
+n <- length(vec1)
+vec2 <- rnorm(n); vec2 <- vec2 * multiomicCCA:::.l2norm(vec1)/multiomicCCA:::.l2norm(vec2)
+mean(vec1); mean(vec2); sd(vec1); sd(vec2)
+pca_res <- stats::prcomp(cbind(vec1, vec2))
+projection_vec <- cbind(vec1, vec2) %*% pca_res$rotation[,1] %*% t(pca_res$rotation[,1])
+
+quantile(projection_vec[,1]/projection_vec[,2])
+pca_1 <- projection_vec[,1]
+pca_2 <- projection_vec[,2]
+cor(pca_1, pca_2)
+tmp_1 <- vec1 %*% pca_res$rotation[,1] 
+
+vec1 <- as.matrix(vec1, nrow = length(vec1), ncol = 1)
+vec2 <- as.matrix(vec2, nrow = length(vec2), ncol = 1)
+
+svd_1 <- svd(vec1); svd_2 <- svd(vec2)
+
+# perform CCA
+cov_1_invhalf <- multiomicCCA:::.mult_mat_vec(svd_1$v, sqrt(n)/svd_1$d)
+cov_2_invhalf <- multiomicCCA:::.mult_mat_vec(svd_2$v, sqrt(n)/svd_2$d)
+
+agg_mat <- multiomicCCA:::.compute_cca_aggregate_matrix(svd_1, svd_2, augment = T)
+svd_res <- svd(agg_mat)
+rank_1 <- 1; rank_2 <- 1
+full_rank <- min(c(rank_1, rank_2))
+
+loading_1 <- cov_1_invhalf %*% svd_res$u[1:ncol(cov_1_invhalf), 1:rank_1, drop = F]
+loading_2 <- cov_2_invhalf %*% svd_res$v[1:ncol(cov_2_invhalf), 1:rank_2, drop = F]
+score_1 = vec1 %*% loading_1
+score_2 = vec2 %*% loading_2
+cor(score_1, score_2)
+
+quantile(score_1/pca_1)
+
