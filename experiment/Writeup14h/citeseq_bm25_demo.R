@@ -4,7 +4,8 @@ load("CITEseq_bone_marrow_25antibody.RData")
 ls()
 bm
 head(bm@meta.data) # the metadata, including the cell-types in celltype.l2
- 
+table(bm$celltype.l2)
+
 #RNA data
 bm[["RNA"]]@counts[1:5,1:5] # the raw count data
 dim(bm[["RNA"]]@counts)
