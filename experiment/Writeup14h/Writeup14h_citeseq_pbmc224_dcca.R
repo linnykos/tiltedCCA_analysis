@@ -5,7 +5,7 @@ library(Seurat)
 set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
-n <- ncol(bm)
+n <- ncol(pbmc)
 
 membership_vec <- as.factor(pbmc@meta.data$celltype.l2)
 n <- length(membership_vec)
