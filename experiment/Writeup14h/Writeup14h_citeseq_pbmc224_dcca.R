@@ -35,7 +35,7 @@ Seurat::DefaultAssay(pbmc) <- "SCT"
 set.seed(10)
 pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:40)
 set.seed(10)
-pbmc <- Seurat::FindClusters(pbmc, resolution = 0.05)
+pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
 tab_vec <- table(pbmc$SCT_snn_res.0.25)
 round(tab_vec/n, 3)
 rm_idx <- names(tab_vec[tab_vec/n < 0.01])
