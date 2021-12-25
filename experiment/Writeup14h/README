@@ -1,0 +1,23 @@
+CITEseq_bone_marrow_25antibody.RData:
+ - 30672 cells for bone marrow, 17009 genes (2000 after filtering), 25 antibodies
+ - Preprocessed by Kevin (see /home/stat/kevinl1/project/Multiome_CCA/git/multiomicCCA_analysis/experiment/Writeup11/Writeup11_citeseq_pbmc25_preprocess.R)
+ - The data originally comes from the SeuratData package (i.e., run the following lines in R:
+====
+SeuratData::InstallData("bmcite")
+bm <- SeuratData::LoadData(ds = "bmcite")
+===
+ - See https://satijalab.org/seurat/articles/weighted_nearest_neighbor_analysis.html for more information or its corresponding paper (Comprehensive Integration of Single-Cell Data, Stuart, Butler, etc. Cell 2019)
+
+=======================
+=======================
+
+CITEseq_pbmc_224antibody.RData:
+ - [[Warning: This is a big dataset: 8.4 Gigabytes]]
+ - 161764 cells for PBMC, 20729 genes (5000 after filtering), 224 antibodies
+ - Preprocessed by Kevin (see /home/stat/kevinl1/project/Multiome_CCA/git/multiomicCCA_analysis/experiment/Writeup14h/Writeup14h_citeseq_pbmc228_preprocess.R)
+ - The data originally comes from https://atlas.fredhutch.org/nygc/multimodal-pbmc/ (which is where Antibody_Info.csv comes from also, a CSV that describes the 224 antibodies used)
+ - See its corresponding paper (Integrated analysis of multimodal single-cell data, Hao, Hao, etc. Cell, 2021) for more information.
+
+
+
+

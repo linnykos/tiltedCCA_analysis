@@ -41,4 +41,4 @@ head(pbmc@meta.data)
 set.seed(10)
 pbmc <- Seurat::RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
 
-save.image("../../../../out/Writeup14/Writeup14_citeseq_pbmc224_preprocessed.RData")
+save.image("../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_preprocessed.RData")
