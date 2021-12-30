@@ -1,41 +1,7 @@
 rm(list=ls())
 library(Seurat)
-load("../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca.RData")
-dcca_res$tilt_perc
-dcca_res2$tilt_perc
-
-png("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_dcca_scores.png",
-    height = 1200, width = 2500, units = "px", res = 300)
-par(mfrow = c(1,3), mar = c(4,4,4,0.5))
-multiomicCCA::plot_scores_heatmap.dcca(dcca_res2,
-                                       membership_vec = as.factor(pbmc$celltype.l2),
-                                       log_scale = T, scaling_power = 4)
-graphics.off()
-
-png("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_cca_scores.png",
-    height = 1200, width = 2500, units = "px", res = 300)
-par(mfrow = c(1,3), mar = c(4,4,4,0.5))
-multiomicCCA::plot_scores_heatmap.list(list(dcca_res2$score_1, dcca_res2$score_2),
-                                       main_vec = c("CCA scores 1", "CCA scores 2"),
-                                       membership_vec = as.factor(pbmc$celltype.l2),
-                                       log_scale = T, scaling_power = 4)
-graphics.off()
-
-png("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_svd.png",
-    height = 1200, width = 2500, units = "px", res = 300)
-par(mfrow = c(1,3), mar = c(4,4,4,0.5))
-multiomicCCA::plot_scores_heatmap.list(list(multiomicCCA:::.mult_mat_vec(dcca_res2$svd_1$u, dcca_res2$svd_1$d), 
-                                            multiomicCCA:::.mult_mat_vec(dcca_res2$svd_2$u, dcca_res2$svd_2$d)),
-                                       main_vec = c("SVD 1", "SVD 2"),
-                                       membership_vec = as.factor(pbmc$celltype.l2),
-                                       log_scale = T, scaling_power = 4)
-graphics.off()
-
-multiomicCCA:::.l2norm(dcca_res2$common_score[,1])
-multiomicCCA:::.l2norm(dcca_res2$distinct_score_1[,1])
-multiomicCCA:::.l2norm(dcca_res2$distinct_score_2[,1])
-
-############################
+load("../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca2.RData")
+dcca_res <- dcca_res2
 
 residual_mat_1 <- sapply(1:ncol(dcca_res2$distinct_score_1), function(j){
   df <- cbind(dcca_res$distinct_score_1[,j], dcca_res$common_score)
@@ -56,7 +22,7 @@ residual_mat_2 <- sapply(1:ncol(dcca_res$distinct_score_2), function(j){
 alignment_2 <- 1 - sum((residual_mat_2)^2)/sum((dcca_res$distinct_score_2)^2)
 
 #######################################
-dcca_res <- dcca_res2
+
 dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res)
 
 n <- nrow(pbmc@meta.data)
@@ -151,7 +117,7 @@ for(i in 1:length(reduction_vec)){
                              repel = TRUE, label.size = 2.5)
     plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC (Cite-seq):\n", main_vec[i]))
     plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc_", file_vec[i], ".png"),
+    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc2_", file_vec[i], ".png"),
                     plot1, device = "png", width = 6, height = 5, units = "in")
   }
 }

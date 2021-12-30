@@ -26,11 +26,12 @@ set.seed(10)
 pbmc <- Seurat::RunUMAP(pbmc, reduction = 'pca', dims = 1:40, assay = 'SCT',
                         reduction.name = 'rna.umap', reduction.key = 'rnaUMAP_')
 set.seed(10)
-pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca', dims = 1:50, assay = 'ADT',
+pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca', dims = 1:25, assay = 'ADT',
                         reduction.name = 'adt.umap', reduction.key = 'adtUMAP_')
 
 ############
 
+n <- ncol(pbmc)
 Seurat::DefaultAssay(pbmc) <- "SCT"
 set.seed(10)
 pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:40)
@@ -38,17 +39,17 @@ set.seed(10)
 pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
 tab_vec <- table(pbmc$SCT_snn_res.0.25)
 round(tab_vec/n, 3)
-rm_idx <- names(tab_vec[tab_vec/n < 0.01])
+rm_idx <- names(tab_vec[tab_vec/n < 0.02])
 pbmc$SCT_snn_res.0.25[pbmc$SCT_snn_res.0.25 %in% rm_idx] <- NA
 
 Seurat::DefaultAssay(pbmc) <- "ADT"
 set.seed(10)
-pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:50, reduction = "apca")
+pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:25, reduction = "apca")
 set.seed(10)
 pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
 tab_vec <- table(pbmc$ADT_snn_res.0.25)
 round(tab_vec/n, 3)
-rm_idx <- names(tab_vec[tab_vec/n < 0.01])
+rm_idx <- names(tab_vec[tab_vec/n < 0.02])
 pbmc$ADT_snn_res.0.25[pbmc$ADT_snn_res.0.25 %in% rm_idx] <- NA
 
 ############
@@ -60,7 +61,7 @@ plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
                          raster = F)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC\nCITE-Seq (RNA, Subset)"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_rna_umap_subset.png"),
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_v3_rna_umap_subset.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
 plot1 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
@@ -69,7 +70,7 @@ plot1 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
                          raster = F)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC\nCITE-Seq (Protein, Subset)"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_adt_umap_subset.png"),
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_v3_adt_umap_subset.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
 plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
@@ -78,7 +79,7 @@ plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
                          raster = F)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC\nCITE-Seq (RNA, Clustering)"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_rna_umap_clustering.png"),
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_v3_rna_umap_clustering.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
 plot1 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
@@ -87,7 +88,7 @@ plot1 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
                          raster = F)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC\nCITE-Seq (Protein, Clustering)"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_adt_umap_clustering.png"),
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_v3_adt_umap_clustering.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
 ###############
@@ -109,7 +110,7 @@ if(any(sd_vec <= 1e-6)){
 
 #########################
 
-rank_1 <- 40; rank_2 <- 50; nn <- 30
+rank_1 <- 40; rank_2 <- 25; nn <- 30
 set.seed(10)
 dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, 
                                       dims_1 = 1:rank_1, dims_2 = 1:rank_2,
@@ -127,12 +128,12 @@ dcca_res$tilt_perc
 
 save(pbmc, dcca_res, 
      rank_1, rank_2, nn, date_of_run, session_info,
-     file = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca.RData")
+     file = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca3.RData")
 
 dcca_res2 <- multiomicCCA:::fine_tuning(dcca_res, verbose = T)
 dcca_res2$tilt_perc
 
 save(pbmc, dcca_res, dcca_res2, 
      rank_1, rank_2, nn, date_of_run, session_info,
-     file = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca.RData")
+     file = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca3.RData")
 
