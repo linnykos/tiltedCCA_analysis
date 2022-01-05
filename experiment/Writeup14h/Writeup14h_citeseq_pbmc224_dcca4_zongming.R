@@ -70,12 +70,13 @@ if(any(sd_vec <= 1e-6)){
 
 #########################
 
-rank_1 <- 40; rank_2 <- 25; nn <- 30
+rank_1 <- 40; rank_2 <- 20; nn <- 30
 set.seed(10)
 dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, 
                                       dims_1 = 1:rank_1, dims_2 = 1:rank_2,
                                       center_1 = F, center_2 = F,
                                       scale_1 = F, scale_2 = F,
+                                      discretization_gridsize = 17,
                                       num_neigh = nn, 
                                       metacell_clustering_1 = factor(pbmc$SCT_snn_res.0.25),
                                       metacell_clustering_2 = factor(pbmc$ADT_snn_res.0.25),
@@ -91,11 +92,12 @@ save(pbmc, dcca_res,
      rank_1, rank_2, nn, date_of_run, session_info,
      file = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca4_zongming.RData")
 
-dcca2 <- multiomicCCA:::fine_tuning(dcca_res, 
+dcca_res2 <- multiomicCCA:::fine_tuning(dcca_res, 
                                     max_iter = 5,
                                     fix_tilt_perc = NA,
                                     temp_path = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca4_zongming_tmp.RData",
                                     verbose = T)
+dcca_res2$tilt_perc
 
 save(pbmc, dcca_res, dcca_res2, 
      rank_1, rank_2, nn, date_of_run, session_info,
