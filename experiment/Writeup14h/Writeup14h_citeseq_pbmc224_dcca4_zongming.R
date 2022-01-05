@@ -85,9 +85,19 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b,
 dcca_res$cca_obj
 dcca_res$df_percentage
 dcca_res$tilt_perc
+dim(dcca_res$target_subspace)
 
 save(pbmc, dcca_res, 
      rank_1, rank_2, nn, date_of_run, session_info,
      file = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca4_zongming.RData")
 
+dcca2 <- multiomicCCA:::fine_tuning(dcca_res, 
+                                    max_iter = 5,
+                                    fix_tilt_perc = NA,
+                                    temp_path = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca4_zongming_tmp.RData",
+                                    verbose = T)
+
+save(pbmc, dcca_res, dcca_res2, 
+     rank_1, rank_2, nn, date_of_run, session_info,
+     file = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca4_zongming.RData")
 
