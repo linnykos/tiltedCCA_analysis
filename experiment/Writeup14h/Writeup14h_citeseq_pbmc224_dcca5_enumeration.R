@@ -73,4 +73,5 @@ for(i in 1:length(discretization_gridsize)){
 
 save(pbmc, dcca_list, 
      rank_1, rank_2, nn, date_of_run, session_info,
+     discretization_gridsize,
      file = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca5_enumeration.RData")
