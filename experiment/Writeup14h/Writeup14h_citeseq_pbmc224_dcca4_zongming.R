@@ -70,13 +70,13 @@ if(any(sd_vec <= 1e-6)){
 
 #########################
 
-rank_1 <- 40; rank_2 <- 20; nn <- 30
+rank_1 <- 40; rank_2 <- 50; nn <- 30
 set.seed(10)
 dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, 
                                       dims_1 = 1:rank_1, dims_2 = 1:rank_2,
                                       center_1 = F, center_2 = F,
                                       scale_1 = F, scale_2 = F,
-                                      discretization_gridsize = 17,
+                                      discretization_gridsize = 11,
                                       num_neigh = nn, 
                                       metacell_clustering_1 = factor(pbmc$SCT_snn_res.0.25),
                                       metacell_clustering_2 = factor(pbmc$ADT_snn_res.0.25),

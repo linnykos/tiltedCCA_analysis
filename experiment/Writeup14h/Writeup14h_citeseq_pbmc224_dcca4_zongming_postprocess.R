@@ -2,6 +2,7 @@ rm(list=ls())
 library(Seurat)
 load("../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca4_zongming.RData")
 dcca_res$tilt_perc
+dcca_res <- dcca_res2
 
 png("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_dcca4_dcca_scores.png",
     height = 1200, width = 2500, units = "px", res = 300)
