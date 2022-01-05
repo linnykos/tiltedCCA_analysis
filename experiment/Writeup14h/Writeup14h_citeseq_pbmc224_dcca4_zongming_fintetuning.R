@@ -6,7 +6,7 @@ set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
-dcca2 <- multiomicCCA::fine_tuning(dcca_res, 
+dcca2 <- multiomicCCA:::fine_tuning(dcca_res, 
                                    max_iter = 5,
                                    fix_tilt_perc = NA,
                                    temp_path = "../../../../out/Writeup14h/Writeup14h_citeseq_pbmc224_dcca4_zongming_tmp.RData",
