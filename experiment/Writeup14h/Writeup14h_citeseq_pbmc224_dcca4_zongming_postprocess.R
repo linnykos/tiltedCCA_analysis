@@ -22,10 +22,24 @@ multiomicCCA::plot_scores_heatmap.list(list(dcca_res$score_1, dcca_res$score_2),
 graphics.off()
 
 png("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_dcca4_target_subspace.png",
-    height = 1200, width = 2500, units = "px", res = 300)
+    height = 1200, width = 1250, units = "px", res = 300)
 par(mfrow = c(1,3), mar = c(4,4,4,0.5))
 multiomicCCA::plot_scores_heatmap.list(list(dcca_res$target_subspace*sqrt(nrow(dcca_res$target_subspace))),
                                        main_vec = c("Target subspace"),
+                                       membership_vec = as.factor(pbmc$celltype.l2),
+                                       log_scale = T, scaling_power = 4)
+graphics.off()
+
+tmp <- multiomicCCA:::.svd_truncated(dcca_res$min_mat, K = length(dcca_res$cca_obj), 
+                                     symmetric = F, rescale = F, 
+                                     mean_vec = T, sd_vec = F, K_full_rank = F)
+n <- nrow(dcca_res$target_subspace)
+target_subspace2 <- multiomicCCA:::.mult_mat_vec(tmp$u, tmp$d)*sqrt(n)/tmp$d[1]
+png("../../../../out/figures/Writeup14h/Writeup14h_citeseq_pbmc224_dcca4_target_subspace2.png",
+    height = 1200, width = 1250, units = "px", res = 300)
+par(mfrow = c(1,3), mar = c(4,4,4,0.5))
+multiomicCCA::plot_scores_heatmap.list(list(target_subspace2),
+                                       main_vec = c("Target subspace (w/ sing. val)"),
                                        membership_vec = as.factor(pbmc$celltype.l2),
                                        log_scale = T, scaling_power = 4)
 graphics.off()
@@ -136,18 +150,28 @@ svd_tmp <- multiomicCCA:::.svd_truncated(mat = dcca_res$min_mat,
                                          K_full_rank = F)
 set.seed(10)
 umap_res <- Seurat::RunUMAP(multiomicCCA:::.mult_mat_vec(svd_tmp$u, svd_tmp$d), 
-                            metric = "cosine",
+                            metric = "euclidean",
                             assay = "SCT",
                             reduction.key = "umap1_")
 rownames(umap_res@cell.embeddings) <- rownames(pbmc@meta.data)
 pbmc[["min_embedding"]] <- Seurat::CreateDimReducObject(umap_res@cell.embeddings,
-                                                         assay = "SCT")
+                                                        assay = "SCT")
+
+set.seed(10)
+umap_res2 <- Seurat::RunUMAP(target_subspace2, 
+                            metric = "euclidean",
+                            assay = "SCT",
+                            reduction.key = "umap2_")
+rownames(umap_res2@cell.embeddings) <- rownames(pbmc@meta.data)
+pbmc[["min_embedding2"]] <- Seurat::CreateDimReducObject(umap_res2@cell.embeddings,
+                                                        assay = "SCT")
 
 
 ######################################
 
 anchor_name <- "rna.umap"
-other_names <- c("adt.umap", "dcca_common", "dcca_distinct1", "dcca_distinct2", "min_embedding")
+other_names <- c("adt.umap", "dcca_common", "dcca_distinct1", "dcca_distinct2", 
+                 "min_embedding", "min_embedding2")
 
 for(umap_name in other_names){
   print(umap_name)
@@ -168,9 +192,10 @@ main_vec <- c("(RNA)", "(ADT)",
               "(D-CCA, Common)", 
               paste0("(D-CCA, Distinct 1, Alignment: ", round(alignment_1, 2),")"), 
               paste0("(D-CCA, Distinct 2, Alignment: ", round(alignment_2, 2),")"),
-              "(Target min embedding)")
+              "(Target min embedding)",
+              "(Target min embedding, scaled)")
 file_vec <- c("rna", "adt", "dcca-common", "dcca-distinct1", "dcca-distinct2",
-              "target")
+              "target", "target-scaled")
 
 for(i in 1:length(reduction_vec)){
   for(j in 1:length(group_vec)){

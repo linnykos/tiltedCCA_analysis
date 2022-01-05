@@ -49,7 +49,7 @@ if(any(sd_vec <= 1e-6)){
 #########################
 
 rank_1 <- 40; rank_2 <- 50; nn <- 30
-discretization_gridsize <- seq(0, 1, length.out = 11)
+discretization_gridsize <- rev(seq(0, 1, length.out = 11))
 dcca_list <- vector("list", length = length(discretization_gridsize))
 for(i in 1:length(discretization_gridsize)){
   tilt <- discretization_gridsize[i]
