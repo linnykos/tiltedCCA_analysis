@@ -152,7 +152,63 @@ plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/TetCRSeqHD_totalvi_umap.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
+
+table(tettcr$donor, tettcr$disease)
+plot1 <- Seurat::DimPlot(tettcr, reduction = "umap.totalvi",
+                         cells.highlight = rownames(tettcr@meta.data)[which(tettcr$disease == "healthy")])
+plot1 <- plot1 + ggplot2::ggtitle(paste0("TetCR-SeqHD\n (TotalVI, Healthy)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/TetCRSeqHD_totalvi_umap_healthy.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+plot1 <- Seurat::DimPlot(tettcr, reduction = "umap.totalvi",
+                         cells.highlight = rownames(tettcr@meta.data)[which(tettcr$disease == "T1D")])
+plot1 <- plot1 + ggplot2::ggtitle(paste0("TetCR-SeqHD\n (TotalVI, Disease)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/TetCRSeqHD_totalvi_umap_disease.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+
 ##########################
+
+# consensus PCA
+n <- ncol(tettcr)
+svd_1 <- svd(tettcr[["pca"]]@cell.embeddings)
+embedding_1 <- multiomicCCA:::.mult_mat_vec(svd_1$u, svd_1$d/svd_1$d[1]*sqrt(n))
+svd_2 <- svd(tettcr[["apca"]]@cell.embeddings)
+embedding_2 <- multiomicCCA:::.mult_mat_vec(svd_2$u, svd_2$d/svd_2$d[1]*sqrt(n))
+embedding_all <- cbind(embedding_1, embedding_2)
+rownames(embedding_all) <- colnames(tettcr)
+pca_res <- stats::prcomp(embedding_all, center = TRUE, scale. = FALSE)
+consensus_mat <- pca_res$x[,1:30]
+
+set.seed(10)
+consensus_umap <- Seurat::RunUMAP(consensus_mat, 
+                                  reduction.key = "umapConsensusPCA_")
+tettcr[["consensus.umap"]] <- Seurat::CreateDimReducObject(consensus_umap@cell.embeddings)
+
+u_mat1 <- tettcr[["umap.rna"]]@cell.embeddings
+u_mat2 <- tettcr[["consensus.umap"]]@cell.embeddings
+tmp <- svd(t(u_mat1) %*% u_mat2)
+rotation_mat <- tmp$u %*% t(tmp$v)
+tmp <- u_mat2 %*% t(rotation_mat)
+rownames(tmp) <- rownames(tettcr@meta.data)
+colnames(tmp) <- colnames(consensus_umap@cell.embeddings)
+tettcr[["consensus.umap"]]@cell.embeddings <- tmp
+
+plot1 <- Seurat::DimPlot(tettcr, reduction = "consensus.umap",
+                         group.by = "celltype", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         cols = color_vec)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("TetCR-SeqHD\n (CD8+ T-cells, Consensus PCA)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14h/TetCRSeqHD_consensus_umap.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+
+
+
+###########################
 
 # make a heatmap
 rna_mat <- tettcr[["SCT"]]@scale.data

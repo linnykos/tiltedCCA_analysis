@@ -64,7 +64,7 @@ for(i in 1:length(discretization_gridsize)){
                                               metacell_clustering_1 = NA,
                                               metacell_clustering_2 = NA,
                                               fix_tilt_perc = tilt, 
-                                              enforce_boundary = T,
+                                              enforce_boundary = F,
                                               verbose = T)
   
   save(dcca_list,
