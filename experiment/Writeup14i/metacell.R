@@ -101,7 +101,7 @@ intersect_metacells <- function(metacell_clustering_1,
 .compute_metacells <- function(k, mat, row_indices){
   stopifnot(length(row_indices) == nrow(mat))
   
-  svd_res <- multiomicCCA:::.svd_truncated(mat, K = k, 
+  svd_res <- multiomicCCA:::.svd_truncated(mat, K = min(k, ncol(mat)), 
                                            symmetric = F, 
                                            rescale = F, 
                                            mean_vec = T, 
