@@ -73,15 +73,15 @@ kernel_mat_2 <- tmp$kernel_mat
 idx1 <- which(metacell_df$celltype == "CD4 Naive")
 idx2 <- which(metacell_df$celltype == "CD8 Naive")
 
-quantile(dist_mat_1[idx1, idx1])
-quantile(dist_mat_2[idx1, idx1])
+quantile(dist_mat_1[idx1, idx1]^2)
+quantile(dist_mat_2[idx1, idx1]^2)
 
-quantile(dist_mat_1[idx2, idx2])
-quantile(dist_mat_2[idx2, idx2])
+quantile(dist_mat_1[idx2, idx2]^2)
+quantile(dist_mat_2[idx2, idx2]^2)
 
-quantile(dist_mat_1[idx1, idx2])
-quantile(dist_mat_2[idx1, idx2])
+quantile(dist_mat_1[idx1, idx2]^2)
+quantile(dist_mat_2[idx1, idx2]^2)
 
-quantile(dist_mat_1[idx1, -c(idx1,idx2)])
-quantile(dist_mat_2[idx1, -c(idx1,idx2)])
+quantile(dist_mat_1[idx1, -c(idx1,idx2)]^2)
+quantile(dist_mat_2[idx1, -c(idx1,idx2)]^2)
 

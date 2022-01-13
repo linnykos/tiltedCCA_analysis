@@ -1,9 +1,7 @@
-form_kernel_matrix <- function(mat, K, 
-                               metacell_clustering, 
-                               clustering_hierarchy,
-                               symmetrize_func = c("max", "min", "average"),
-                               verbose = T){
-
+form_dist_matrix <- function(mat, K, 
+                             metacell_clustering, 
+                             verbose = T){
+  
   if(verbose) print("Computing low-dimensional embedding")
   svd_res <- multiomicCCA:::.svd_truncated(mat, K = K, symmetric = F, rescale = F, 
                                            mean_vec = T, sd_vec = F, K_full_rank = F)
@@ -14,76 +12,48 @@ form_kernel_matrix <- function(mat, K,
   
   if(verbose) print("Computing distance matrix")
   dist_mat <- as.matrix(stats::dist(avg_mat, method = "euclidean"))
-  
-  if(verbose) print("Computing bandwidth")
-  bandwidth_vec <- .compute_bandwidth(dist_mat, clustering_hierarchy)
-  kernel_mat <- matrix(NA, nrow = nrow(dist_mat), ncol = ncol(dist_mat))
-  
-  if(verbose) print("Computing kernel matrix")
-  for(i in 1:nrow(kernel_mat)){
-    kernel_mat[i,] <- exp(-dist_mat[i,]/bandwidth_vec[i])
-  }
-  
-  if(verbose) print("Symmeterizing kernel matrix")
-  if (symmetrize_func[1] == "max"){
-    kernel_mat <- pmax(kernel_mat, t(kernel_mat))
-  } else if(symmetrize_func[1] == "min"){
-    kernel_mat <- pmin(kernel_mat, t(kernel_mat))
-  } else {
-    kernel_mat <- (kernel_mat + t(kernel_mat))/2
-  }
-  
-  list(dist_mat = dist_mat, kernel_mat = kernel_mat)
+  dist_mat^2
 }
 
-compute_min_embedding <- function(kernel_mat_1, 
-                                  kernel_mat_2,
-                                  K = min(100, nrow(kernel_mat_1)),
-                                  entrywise_func = c("max", "min"),
+compute_min_embedding <- function(dist_mat_1, 
+                                  dist_mat_2,
+                                  sing_val_cutoff = 0.01,
                                   verbose = T){
   stopifnot(all(dim(kernel_mat_1) == dim(kernel_mat_2)))
   n <- nrow(kernel_mat_1)
   
   # entrywise-max
-  if(verbose) print("Computing entry-wise maximum")
-  if(entrywise_func[1] == "max"){
-    kernel_mat <- pmax(kernel_mat_1, kernel_mat_2)
-  } else {
-    kernel_mat <- pmin(kernel_mat_1, kernel_mat_2)
-  }
+  if(verbose) print("Computing entry-wise minimum")
+  dist_mat <- pmin(dist_mat_1, dist_mat_2)
   
   # projecting to become valid kernel matrix
-  if(verbose) print("Projecting into space of PSDs")
-  svd_res <- multiomicCCA:::.svd_truncated(kernel_mat, 
-                                           K = K, 
-                                           symmetric = F,
-                                           rescale = F, 
-                                           mean_vec = T, 
-                                           sd_vec = F, 
-                                           K_full_rank = F)
-  if(any(svd_res$d <= 0)){
-    idx <- which(svd_res$d <= 0)
-    svd_res$u <- svd_res$u[,-idx,drop = F]
-    svd_res$d <- svd_res$d[-idx]
-  }
-  kernel_mat <- tcrossprod(multiomicCCA:::.mult_mat_vec(svd_res$u, svd_res$d), svd_res$u)
+  if(verbose) print("Projecting into space of distance matries")
+  dist_mat <- .projection_to_edm_cone(dist_mat)
   
   # geometric centering
-  if(verbose) print("Centering kernel matrix")
+  if(verbose) print("Convering into gram matrix")
   centering_mat <- matrix(-1/n, nrow = n, ncol = n)
   diag(centering_mat) <- 1-1/n
-  kernel_mat <- centering_mat %*% kernel_mat %*% centering_mat
+  gram_mat <- -.5*centering_mat %*% dist_mat %*% centering_mat
   
   # compute embedding
   if(verbose) print("Computing final embedding")
-  svd_res <- multiomicCCA:::.svd_truncated(kernel_mat, 
-                                           K = K, 
+  svd_res <- multiomicCCA:::.svd_truncated(gram_mat, 
+                                           K = min(100, nrow(gram_mat)), 
                                            symmetric = F,
                                            rescale = F, 
-                                           mean_vec = T, 
+                                           mean_vec = F, 
                                            sd_vec = F, 
                                            K_full_rank = F)
-  dimred <- multiomicCCA:::.mult_mat_vec(svd_res$u, svd_res$d)
+  
+  spectrum_ratio <- abs(diff(svd_res$d))/svd_res$d[-1]
+  K <- which(spectrum_ratio <= sing_val_cutoff)[1]
+  if(length(K) == 0) {
+    K <- length(svd_res$d)
+  } 
+  dimred <- multiomicCCA:::.mult_mat_vec(svd_res$u[,1:K,drop=F], svd_res$d[1:K])
+  
+  list(dist_mat = dist_mat, dimred = dimred)
 }
 
 ###############################
@@ -96,24 +66,33 @@ compute_min_embedding <- function(kernel_mat_1,
   }))
 }
 
-.compute_bandwidth <- function(dist_mat, clustering_hierarchy){
-  tmp <- unlist(clustering_hierarchy); tmp <- tmp[!is.na(tmp)]
-  stopifnot(length(unique(tmp)) == length(tmp), 
-            all(tmp %% 1 == 0),
-            all(sort(tmp) == 1:nrow(dist_mat)),
-            nrow(dist_mat) == ncol(dist_mat))
-  bandwidth_vec <- rep(NA, max(tmp))
+# see "Equality relating Euclidean distance cone to positivie definite cone", Dattoro 2008
+.projection_to_edm_cone <- function(mat, iter_max = 100, tol = 1e-4){
+  stopifnot(is.matrix(mat), nrow(mat) == ncol(mat))
   
-  for(i in 1:nrow(dist_mat)){
-    k <- which(sapply(clustering_hierarchy, function(vec){i %in% vec}))
-    stopifnot(length(k) == 1)
+  n <- nrow(mat)
+  centering_mat <- matrix(-1/n, nrow = n, ncol = n)
+  diag(centering_mat) <- 1-1/n
+  
+  iter <- 1
+  prev_mat <- mat
+  
+  while(TRUE){
+    if(iter > 1 && sum(abs(prev_mat - mat)) <= tol) break()
+    prev_mat <- mat
     
-    bandwidth_vec[i] <- max(dist_mat[i, clustering_hierarchy[[k]]])
-    if(bandwidth_vec[i] == 0){
-      bandwidth_vec[i] <- min(dist_mat[i, -clustering_hierarchy[[k]]])/2
-    }
+    # project to symmetric hollow subspace
+    mat <- (mat + t(mat))/2
+    diag(mat) <- 0
+    
+    # project so that negative centered matrix is PSD
+    centered_mat <- centering_mat %*% mat %*% centering_mat
+    eigen_res <- eigen(centered_mat)
+    eigen_res$values[eigen_res$values < 0] <- 0
+    centered_mat <- tcrossprod(multiomicCCA:::.mult_mat_vec(eigen_res$vectors, eigen_res$values), eigen_res$vectors)
+    
+    mat <- mat - centered_mat
   }
   
-  stopifnot(all(!is.na(bandwidth_vec)))
-  bandwidth_vec
+  mat
 }

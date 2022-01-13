@@ -65,31 +65,16 @@ print(paste0(length(metacell_clustering), " number of metacells"))
 
 #########################
 
-tmp <- form_kernel_matrix(mat = mat_1, K = 30, 
-                          metacell_clustering = metacell_clustering, 
-                          clustering_hierarchy = clustering_hierarchy_1,
-                          symmetrize_func = "average")
-dist_mat_1 <- tmp$dist_mat
-kernel_mat_1 <- tmp$kernel_mat
+dist_mat_1 <- form_dist_matrix(mat = mat_1, K = 30, 
+                               metacell_clustering = metacell_clustering)
 
-tmp <- form_kernel_matrix(mat = mat_2, K = 18, 
-                          metacell_clustering = metacell_clustering, 
-                          clustering_hierarchy = clustering_hierarchy_2,
-                          symmetrize_func = "average")
-dist_mat_2 <- tmp$dist_mat
-kernel_mat_2 <- tmp$kernel_mat
+dist_mat_2 <- form_dist_matrix(mat = mat_2, K = 18, 
+                               metacell_clustering = metacell_clustering)
 
-min_embedding <- compute_min_embedding(kernel_mat_1 = kernel_mat_1, 
-                                       kernel_mat_2 = kernel_mat_2,
-                                       entrywise_func = "max",
-                                       K = 100)
-l2_vec <- apply(min_embedding, 2, multiomicCCA:::.l2norm)
-print(diff(l2_vec)/l2_vec[-1])
-target_embedding <- min_embedding
-for(i in 1:ncol(target_embedding)){
-  target_embedding[,i] <- target_embedding[,i]/l2_vec[i]
-}
-target_embedding <- target_embedding[,1:32]
+tmp <- compute_min_embedding(dist_mat_1 = dist_mat_1, 
+                                       dist_mat_2 = dist_mat_2)
+min_dist_mat <- tmp$dist_mat
+target_embedding <- tmp$dimred
 
 #########################
 
@@ -115,9 +100,11 @@ dcca_res2$tilt_perc
 
 save(bm, dcca_res, dcca_res2, 
      rank_1, rank_2, nn, date_of_run, session_info,
-     kernel_mat_1, kernel_mat_2,
-     min_embedding, target_embedding,
+     dist_mat_1, dist_mat_2,
+     metacell_clustering_1, 
+     metacell_clustering_2,
      metacell_clustering,
+     min_dist_mat, target_embedding,
      clustering_hierarchy_1,
      clustering_hierarchy_2,
      file = "../../../../out/Writeup14i/Writeup14i_citeseq_bm_dcca.RData")
