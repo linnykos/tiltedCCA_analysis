@@ -87,37 +87,11 @@ rownames(distinct2_umap@cell.embeddings) <- rownames(pbmc@meta.data)
 pbmc[["dcca_distinct2"]] <- Seurat::CreateDimReducObject(distinct2_umap@cell.embeddings,
                                                          assay = "ADT")
 
-#######################################
-
-svd_tmp <- multiomicCCA:::.svd_truncated(mat = dcca_res$min_mat, 
-                                         K = length(dcca_res$cca_obj),
-                                         symmetric = F, rescale = F,
-                                         mean_vec = T, sd_vec = F,
-                                         K_full_rank = F)
-set.seed(10)
-umap_res <- Seurat::RunUMAP(multiomicCCA:::.mult_mat_vec(svd_tmp$u, svd_tmp$d), 
-                            metric = "euclidean",
-                            assay = "SCT",
-                            reduction.key = "umap1_")
-rownames(umap_res@cell.embeddings) <- rownames(pbmc@meta.data)
-pbmc[["min_embedding"]] <- Seurat::CreateDimReducObject(umap_res@cell.embeddings,
-                                                        assay = "SCT")
-
-set.seed(10)
-umap_res2 <- Seurat::RunUMAP(target_subspace2, 
-                             metric = "euclidean",
-                             assay = "SCT",
-                             reduction.key = "umap2_")
-rownames(umap_res2@cell.embeddings) <- rownames(pbmc@meta.data)
-pbmc[["min_embedding2"]] <- Seurat::CreateDimReducObject(umap_res2@cell.embeddings,
-                                                         assay = "SCT")
-
 
 ######################################
 
 anchor_name <- "rna.umap"
-other_names <- c("adt.umap", "dcca_common", "dcca_distinct1", "dcca_distinct2", 
-                 "min_embedding", "min_embedding2")
+other_names <- c("adt.umap", "dcca_common", "dcca_distinct1", "dcca_distinct2")
 
 for(umap_name in other_names){
   print(umap_name)
@@ -137,11 +111,8 @@ group_vec <- c("celltype.l2")
 main_vec <- c("(RNA)", "(ADT)",
               "(D-CCA, Common)", 
               paste0("(D-CCA, Distinct 1, Alignment: ", round(alignment_1, 2),")"), 
-              paste0("(D-CCA, Distinct 2, Alignment: ", round(alignment_2, 2),")"),
-              "(Target min embedding)",
-              "(Target min embedding, scaled)")
-file_vec <- c("rna", "adt", "dcca-common", "dcca-distinct1", "dcca-distinct2",
-              "target", "target-scaled")
+              paste0("(D-CCA, Distinct 2, Alignment: ", round(alignment_2, 2),")"))
+file_vec <- c("rna", "adt", "dcca-common", "dcca-distinct1", "dcca-distinct2")
 
 for(i in 1:length(reduction_vec)){
   for(j in 1:length(group_vec)){
