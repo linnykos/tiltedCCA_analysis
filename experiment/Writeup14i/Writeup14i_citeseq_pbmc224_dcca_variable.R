@@ -1,5 +1,6 @@
 rm(list=ls())
 load("../../../../out/Writeup14i/Writeup14i_citeseq_pbmc224_dcca.RData")
+dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res2)
 
 set.seed(10)
 date_of_run <- Sys.time()
