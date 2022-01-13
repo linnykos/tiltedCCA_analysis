@@ -77,11 +77,9 @@ clustering_2 <- clustering_2[sapply(clustering_2, length) != 0]
 metacell_clustering_1 <- form_subclusters(mat = mat_1b, 
                                           clustering = clustering_1, 
                                           target_k = 120)
-length(which(sapply(metacell_clustering_1, length) > 5))
 metacell_clustering_2 <- form_subclusters(mat = mat_2b, 
                                           clustering = clustering_2, 
                                           target_k = 120)
-length(which(sapply(metacell_clustering_2, length) > 5))
 tmp <- intersect_metacells(metacell_clustering_1 = metacell_clustering_1,
                            metacell_clustering_2 = metacell_clustering_2,
                            n = ncol(pbmc))
@@ -104,10 +102,54 @@ min_embedding <- compute_min_embedding(kernel_mat_1 = kernel_mat_1,
                                        kernel_mat_2 = kernel_mat_2,
                                        entrywise_func = "max",
                                        K = 100)
+l2_vec <- apply(min_embedding, 2, multiomicCCA:::.l2norm)
 target_embedding <- min_embedding
 for(i in 1:ncol(target_embedding)){
-  target_embedding[,i] <- target_embedding[,i]/multiomicCCA:::.l2norm(target_embedding[,i])
+  target_embedding[,i] <- target_embedding[,i]/l2_vec[i]
 }
+target_embedding <- target_embedding[,1:36]
 
 #############################
+
+rank_1 <- 40; rank_2 <- 50; nn <- 30
+set.seed(10)
+dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, 
+                                      dims_1 = 1:rank_1, dims_2 = 1:rank_2,
+                                      center_1 = F, center_2 = F,
+                                      scale_1 = F, scale_2 = F,
+                                      discretization_gridsize = 11,
+                                      num_neigh = nn, 
+                                      metacell_clustering = metacell_clustering,
+                                      fix_tilt_perc = F, 
+                                      enforce_boundary = F,
+                                      target_embedding = target_embedding,
+                                      verbose = T)
+dcca_res$cca_obj
+dcca_res$df_percentage
+dcca_res$tilt_perc
+dim(dcca_res$target_embedding)
+
+save(pbmc, dcca_res, 
+     rank_1, rank_2, nn, date_of_run, session_info,
+     min_embedding, target_embedding,
+     metacell_clustering,
+     clustering_hierarchy_1,
+     clustering_hierarchy_2,
+     file = "../../../../out/Writeup14i/Writeup14i_citeseq_pbmc224_dcca.RData")
+
+dcca_res2 <- multiomicCCA:::fine_tuning(dcca_res, 
+                                        max_iter = 5,
+                                        fix_tilt_perc = NA,
+                                        temp_path = "../../../../out/Writeup14i/Writeup14i_citeseq_pbmc224_dcca_tmp.RData",
+                                        verbose = T)
+dcca_res2$tilt_perc
+
+save(pbmc, dcca_res, dcca_res2, 
+     rank_1, rank_2, nn, date_of_run, session_info,
+     min_embedding, target_embedding,
+     metacell_clustering,
+     clustering_hierarchy_1,
+     clustering_hierarchy_2,
+     file = "../../../../out/Writeup14i/Writeup14i_citeseq_pbmc224_dcca.RData")
+
 
