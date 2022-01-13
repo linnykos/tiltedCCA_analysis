@@ -33,7 +33,7 @@ form_kernel_matrix <- function(mat, K,
     kernel_mat <- (kernel_mat + t(kernel_mat))/2
   }
   
-  kernel_mat
+  list(dist_mat = dist_mat, kernel_mat = kernel_mat)
 }
 
 compute_min_embedding <- function(kernel_mat_1, 

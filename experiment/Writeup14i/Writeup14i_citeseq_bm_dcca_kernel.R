@@ -65,14 +65,19 @@ print(paste0(length(metacell_clustering), " number of metacells"))
 
 #########################
 
-kernel_mat_1 <- form_kernel_matrix(mat = mat_1, K = 30, 
-                                   metacell_clustering = metacell_clustering, 
-                                   clustering_hierarchy = clustering_hierarchy_1,
-                                   symmetrize_func = "average")
-kernel_mat_2 <- form_kernel_matrix(mat = mat_2, K = 18, 
-                                   metacell_clustering = metacell_clustering, 
-                                   clustering_hierarchy = clustering_hierarchy_2,
-                                   symmetrize_func = "average")
+tmp <- form_kernel_matrix(mat = mat_1, K = 30, 
+                          metacell_clustering = metacell_clustering, 
+                          clustering_hierarchy = clustering_hierarchy_1,
+                          symmetrize_func = "average")
+dist_mat_1 <- tmp$dist_mat
+kernel_mat_1 <- tmp$kernel_mat
+
+tmp <- form_kernel_matrix(mat = mat_2, K = 18, 
+                          metacell_clustering = metacell_clustering, 
+                          clustering_hierarchy = clustering_hierarchy_2,
+                          symmetrize_func = "average")
+dist_mat_2 <- tmp$dist_mat
+kernel_mat_2 <- tmp$kernel_mat
 
 min_embedding <- compute_min_embedding(kernel_mat_1 = kernel_mat_1, 
                                        kernel_mat_2 = kernel_mat_2,
@@ -110,8 +115,11 @@ dcca_res2$tilt_perc
 
 save(bm, dcca_res, dcca_res2, 
      rank_1, rank_2, nn, date_of_run, session_info,
+     kernel_mat_1, kernel_mat_2,
      min_embedding, target_embedding,
      metacell_clustering,
      clustering_hierarchy_1,
      clustering_hierarchy_2,
      file = "../../../../out/Writeup14i/Writeup14i_citeseq_bm_dcca.RData")
+
+
