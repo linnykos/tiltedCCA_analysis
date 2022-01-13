@@ -12,7 +12,7 @@ combn_mat <- utils::combn(length(uniq_celltype), 2)
 
 set.seed(10)
 Seurat::Idents(pbmc) <- "ADT_snn_res.0.25"
-Seurat::DefaultAssay(pbmc) <- "RNA"
+Seurat::DefaultAssay(pbmc) <- "ADT"
 de_list <- lapply(1:ncol(combn_mat), function(j){
   print(j)
   ident_1 <- uniq_celltype[combn_mat[1,j]]
