@@ -1,7 +1,7 @@
 form_dist_matrix <- function(mat, K, 
                              metacell_clustering, 
                              clustering_hierarchy = NA,
-                             regularization_quantile = 0.1,
+                             regularization_quantile = 0.5,
                              verbose = T){
   
   if(verbose) print("Computing low-dimensional embedding")
@@ -35,7 +35,9 @@ form_dist_matrix <- function(mat, K,
         idx_1 <- which(metacell_affiliation == large_1)
         idx_2 <- which(metacell_affiliation == large_2)
         
-        max_val <- stats::quantile(dist_mat[idx_1, idx_2], probs = regularization_quantile)
+        max_val <- stats::quantile(c(as.numeric(dist_mat[idx_1, idx_1]),
+                                     as.numeric(dist_mat[idx_2, idx_2])), 
+                                   probs = regularization_quantile)
         dist_mat[idx_1, idx_2] <- pmin(dist_mat[idx_1, idx_2], max_val)
         dist_mat[idx_2, idx_1] <- pmin(dist_mat[idx_2, idx_1], max_val)
       }

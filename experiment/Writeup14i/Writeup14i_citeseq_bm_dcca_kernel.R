@@ -67,12 +67,12 @@ metacell_clustering <- form_subclusters(mat_1 = mat_1b,
 dist_mat_1 <- form_dist_matrix(mat = mat_1, K = 30, 
                                metacell_clustering = metacell_clustering,
                                clustering_hierarchy = clustering_hierarchy_1,
-                               regularization_quantile = 0.1)
+                               regularization_quantile = 0.5)
 
 dist_mat_2 <- form_dist_matrix(mat = mat_2, K = 18, 
                                metacell_clustering = metacell_clustering,
                                clustering_hierarchy = clustering_hierarchy_2,
-                               regularization_quantile = 0.1)
+                               regularization_quantile = 0.5)
 
 tmp <- compute_min_embedding(dist_mat_1 = dist_mat_1, 
                              dist_mat_2 = dist_mat_2)
