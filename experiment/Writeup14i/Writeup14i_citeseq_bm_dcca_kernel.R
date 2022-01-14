@@ -43,38 +43,73 @@ if(any(sd_vec <= 1e-6)){
 clustering_1 <- lapply(levels(bm$RNA_snn_res.0.25), function(x){
   which(bm$RNA_snn_res.0.25 == x)
 })
+names(clustering_1) <- paste0("RNA_", levels(bm$RNA_snn_res.0.25))
 clustering_1 <- clustering_1[sapply(clustering_1, length) != 0]
 clustering_2 <- lapply(levels(bm$ADT_snn_res.0.25), function(x){
   which(bm$ADT_snn_res.0.25 == x)
 })
+names(clustering_2) <- paste0("ADT_", levels(bm$ADT_snn_res.0.25))
 clustering_2 <- clustering_2[sapply(clustering_2, length) != 0]
 
-metacell_clustering_1 <- form_subclusters(mat = mat_1b, 
-                                          clustering = clustering_1, 
-                                          target_k = 80)
-metacell_clustering_2 <- form_subclusters(mat = mat_2b, 
-                                          clustering = clustering_2, 
-                                          target_k = 80)
-tmp <- intersect_metacells(metacell_clustering_1 = metacell_clustering_1,
-                           metacell_clustering_2 = metacell_clustering_2,
-                           n = ncol(bm))
-metacell_clustering <- tmp$metacell_clustering
+tmp <- intersect_clustering(large_clustering_1 = clustering_1,
+                            large_clustering_2 = clustering_2,
+                            n = ncol(bm))
+large_clustering <- tmp$large_clustering
 clustering_hierarchy_1 <- tmp$clustering_hierarchy_1
 clustering_hierarchy_2 <- tmp$clustering_hierarchy_2
-print(paste0(length(metacell_clustering), " number of metacells"))
 
+metacell_clustering <- form_subclusters(mat_1 = mat_1b, 
+                                        mat_2 = mat_2b, 
+                                        large_clustering = large_clustering, 
+                                        target_k = 1000)
 #########################
 
 dist_mat_1 <- form_dist_matrix(mat = mat_1, K = 30, 
-                               metacell_clustering = metacell_clustering)
+                               metacell_clustering = metacell_clustering,
+                               clustering_hierarchy = clustering_hierarchy_1,
+                               regularization_quantile = 0.1)
 
 dist_mat_2 <- form_dist_matrix(mat = mat_2, K = 18, 
-                               metacell_clustering = metacell_clustering)
+                               metacell_clustering = metacell_clustering,
+                               clustering_hierarchy = clustering_hierarchy_2,
+                               regularization_quantile = 0.1)
 
 tmp <- compute_min_embedding(dist_mat_1 = dist_mat_1, 
-                                       dist_mat_2 = dist_mat_2)
+                             dist_mat_2 = dist_mat_2)
 min_dist_mat <- tmp$dist_mat
 target_embedding <- tmp$dimred
+l2_vec <- apply(target_embedding, 2, multiomicCCA:::.l2norm)
+target_embedding2 <- multiomicCCA:::.mult_mat_vec(target_embedding, 1/l2_vec)
+
+########################
+
+color_df <- data.frame(celltype = sort(unique(bm$celltype.l2)),
+                       color = scales::hue_pal()(length(unique(bm$celltype.l2))))
+metacell_df <- as.data.frame(t(sapply(metacell_clustering, function(vec){
+  celltype_tab <- table(bm$celltype.l2[vec])
+  celltype_name <- names(celltype_tab)[which.max(celltype_tab)]
+  col <- color_df[which(color_df$celltype == celltype_name), "color"]
+  
+  c(celltype = celltype_name, color = col)
+})))
+
+
+idx1 <- which(metacell_df$celltype == "CD4 Naive")
+idx2 <- which(metacell_df$celltype == "CD8 Naive")
+
+quantile(min_dist_mat[idx1, idx1])
+quantile(min_dist_mat[idx2, idx2])
+
+quantile(min_dist_mat[idx1, idx2])
+quantile(min_dist_mat[idx1, -c(idx1,idx2)])
+
+##
+
+quantile(dist_mat_1[idx1, idx1])
+quantile(dist_mat_1[idx2, idx2])
+
+quantile(dist_mat_1[idx1, idx2])
+quantile(dist_mat_1[idx1, -c(idx1,idx2)])
 
 #########################
 
@@ -84,12 +119,12 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b,
                                       dims_1 = 1:rank_1, dims_2 = 1:rank_2,
                                       center_1 = F, center_2 = F,
                                       scale_1 = F, scale_2 = F,
-                                      discretization_gridsize = 11,
+                                      discretization_gridsize = 21,
                                       num_neigh = nn, 
                                       metacell_clustering = metacell_clustering,
                                       fix_tilt_perc = F, 
                                       enforce_boundary = F,
-                                      target_embedding = target_embedding,
+                                      target_embedding = target_embedding2,
                                       verbose = T)
 dcca_res$cca_obj
 dcca_res$df_percentage
@@ -105,6 +140,7 @@ save(bm, dcca_res, dcca_res2,
      metacell_clustering_2,
      metacell_clustering,
      min_dist_mat, target_embedding,
+     target_embedding2,
      clustering_hierarchy_1,
      clustering_hierarchy_2,
      file = "../../../../out/Writeup14i/Writeup14i_citeseq_bm_dcca.RData")
