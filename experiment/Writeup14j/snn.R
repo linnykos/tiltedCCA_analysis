@@ -1,0 +1,70 @@
+form_snn_mat <- function(mat, 
+                         num_neigh,
+                         bool_intersect = T,
+                         bool_connect_isolated = T,
+                         verbose = T){
+  stopifnot(num_neigh > 1)
+  
+  if(verbose) print("Compute NNs")
+  n <- nrow(mat)
+  nn_mat <- RANN::nn2(mat, k = num_neigh)$nn.idx
+  if(all(nn_mat[,1] == 1:n)){
+    nn_mat <- nn_mat[,-1,drop = F]
+  }
+  
+  if(verbose) print("Forming NN matrix")
+  i_vec <- rep(1:n, times = ncol(nn_mat))
+  j_vec <- as.numeric(nn_mat)
+  
+  sparse_mat <- Matrix::sparseMatrix(i = i_vec,
+                                     j = j_vec,
+                                     x = rep(1, length(i_vec)),
+                                     dims = c(n,n),
+                                     repr = "C")
+  
+  if(bool_intersect) {
+    sparse_mat <- sparse_mat * Matrix::t(sparse_mat)
+  } else {
+    sparse_mat <- sparse_mat + Matrix::t(sparse_mat)
+    sparse_mat@x <- rep(1, length(sparse_mat@x))
+  }
+  
+  if(bool_connect_isolated){
+    if(verbose) print("Joining isolated nodes")
+    
+    deg_vec <- sparseMatrixStats::rowSums2(sparse_mat)
+    if(min(deg_vec) == 0) {
+      idx <- which(deg_vec == 0)
+      for(i in idx) sparse_mat[i,nn_mat[i,1]] <- 1
+      
+      sparse_mat <- sparse_mat + Matrix::t(sparse_mat)
+      sparse_mat@x <- rep(1, length(sparse_mat@x))
+    }
+  }
+  
+  sparse_mat
+}
+
+compute_laplacian_basis <- function(sparse_mat,
+                                    k = 50,
+                                    verbose = T){
+  if(verbose) print("Computing symmetrized Laplacians")
+  deg_vec <- sparseMatrixStats::rowSums2(sparse_mat)
+  deg_vec[deg_vec == 0] <- 1
+  diag_mat <- Matrix::Diagonal(x = 1/sqrt(deg_vec))
+  lap_mat <-  diag_mat %*% sparse_mat %*% diag_mat
+  
+  if(verbose) print("Converting to random walk Laplacian")
+  deg_vec <- sparseMatrixStats::rowSums2(lap_mat)
+  deg_vec[deg_vec == 0] <- 1
+  diag_mat <- Matrix::Diagonal(x = 1/deg_vec)
+  lap_mat <-  diag_mat %*% lap_mat
+  
+  if(verbose) print("Extracting basis")
+  eigen_res <- irlba::partial_eigen(lap_mat, n = k, symmetric = F)
+  dimred <- multiomicCCA:::.mult_mat_vec(eigen_res$vectors, eigen_res$values)
+  
+  dimred
+}
+
+

@@ -1,6 +1,6 @@
 trials <- 10000
 set.seed(10)
-d1 <- 5; d2 <- 5; c <- 1
+d1 <- 1; d2 <- 20; c <- 5
 mat <- matrix(runif(2*trials), ncol = 2, nrow = trials)
 mat <- rbind(mat, c(1,1), c(0,0))
 vec <- apply(mat, 1, function(x){
