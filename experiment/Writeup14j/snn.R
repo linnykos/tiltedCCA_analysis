@@ -1,9 +1,9 @@
 form_snn_mat <- function(mat, 
                          num_neigh,
                          bool_intersect = T,
-                         bool_connect_isolated = T,
+                         min_deg = 1,
                          verbose = T){
-  stopifnot(num_neigh > 1)
+  stopifnot(num_neigh >= min_deg, min_deg >= 0)
   
   if(verbose) print("Compute NNs")
   n <- nrow(mat)
@@ -29,13 +29,13 @@ form_snn_mat <- function(mat,
     sparse_mat@x <- rep(1, length(sparse_mat@x))
   }
   
-  if(bool_connect_isolated){
-    if(verbose) print("Joining isolated nodes")
-    
+  if(min_deg > 0){
     deg_vec <- sparseMatrixStats::rowSums2(sparse_mat)
-    if(min(deg_vec) == 0) {
-      idx <- which(deg_vec == 0)
-      for(i in idx) sparse_mat[i,nn_mat[i,1]] <- 1
+    if(min(deg_vec) < min_deg) {
+      idx <- which(deg_vec < min_deg)
+      if(verbose) print(paste0("Joining the ", length(idx), " nodes with too few neighbors"))
+     
+      for(i in idx) sparse_mat[i,nn_mat[i,1:min_deg]] <- 1
       
       sparse_mat <- sparse_mat + Matrix::t(sparse_mat)
       sparse_mat@x <- rep(1, length(sparse_mat@x))
