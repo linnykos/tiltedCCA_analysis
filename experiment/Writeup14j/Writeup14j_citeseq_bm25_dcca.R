@@ -38,36 +38,36 @@ snn_mat_1 <- tmp$snn_mat_1; snn_mat_2 <- tmp$snn_mat_2
 basis_1 <- multiomicCCA:::compute_laplacian_basis(snn_mat_1, k = 50, verbose = T)
 basis_2 <- multiomicCCA:::compute_laplacian_basis(snn_mat_2, k = 50, verbose = T)
 
-#########
-
-set.seed(10)
-umap_1 <- Seurat::RunUMAP(basis_1,
-                          metric = "euclidean")
-rownames(umap_1@cell.embeddings) <- rownames(bm@meta.data)
-set.seed(10)
-umap_2 <- Seurat::RunUMAP(basis_2,
-                          metric = "euclidean")
-rownames(umap_2@cell.embeddings) <- rownames(bm@meta.data)
-
-bm[["lapRnaUMAP"]] <- Seurat::CreateDimReducObject(umap_1@cell.embeddings,
-                                                   assay = "RNA")
-plot1 <- Seurat::DimPlot(bm, reduction = "lapRnaUMAP",
-                         group.by = "celltype.l2", label = TRUE,
-                         repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Cite-seq):\nLaplacian of SNN for RNA"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_rna_laplacian_snn_umap2.png"),
-                plot1, device = "png", width = 6, height = 5, units = "in")
-
-bm[["lapAdtUMAP"]] <- Seurat::CreateDimReducObject(umap_2@cell.embeddings,
-                                                   assay = "RNA")
-plot1 <- Seurat::DimPlot(bm, reduction = "lapAdtUMAP",
-                         group.by = "celltype.l2", label = TRUE,
-                         repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Cite-seq):\nLaplacian of SNN for ADT"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_adt_laplacian_snn_umap2.png"),
-                plot1, device = "png", width = 6, height = 5, units = "in")
+# #########
+# 
+# set.seed(10)
+# umap_1 <- Seurat::RunUMAP(basis_1,
+#                           metric = "euclidean")
+# rownames(umap_1@cell.embeddings) <- rownames(bm@meta.data)
+# set.seed(10)
+# umap_2 <- Seurat::RunUMAP(basis_2,
+#                           metric = "euclidean")
+# rownames(umap_2@cell.embeddings) <- rownames(bm@meta.data)
+# 
+# bm[["lapRnaUMAP"]] <- Seurat::CreateDimReducObject(umap_1@cell.embeddings,
+#                                                    assay = "RNA")
+# plot1 <- Seurat::DimPlot(bm, reduction = "lapRnaUMAP",
+#                          group.by = "celltype.l2", label = TRUE,
+#                          repel = TRUE, label.size = 2.5)
+# plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Cite-seq):\nLaplacian of SNN for RNA"))
+# plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+# ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_rna_laplacian_snn_umap2.png"),
+#                 plot1, device = "png", width = 6, height = 5, units = "in")
+# 
+# bm[["lapAdtUMAP"]] <- Seurat::CreateDimReducObject(umap_2@cell.embeddings,
+#                                                    assay = "RNA")
+# plot1 <- Seurat::DimPlot(bm, reduction = "lapAdtUMAP",
+#                          group.by = "celltype.l2", label = TRUE,
+#                          repel = TRUE, label.size = 2.5)
+# plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Cite-seq):\nLaplacian of SNN for ADT"))
+# plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+# ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_adt_laplacian_snn_umap2.png"),
+#                 plot1, device = "png", width = 6, height = 5, units = "in")
 
 ###################
 
@@ -95,42 +95,42 @@ common_mat <- multiomicCCA:::common_neighborhood(snn_mat_1 = snn_mat_1,
 quantile(sparseMatrixStats::rowSums2(common_mat))
 common_basis <- multiomicCCA:::compute_laplacian_basis(common_mat, k = 50, verbose = T)
 
-set.seed(10)
-common_umap <- Seurat::RunUMAP(common_basis,
-                          metric = "euclidean")
-rownames(common_umap@cell.embeddings) <- rownames(bm@meta.data)
-bm[["lapComUMAP"]] <- Seurat::CreateDimReducObject(common_umap@cell.embeddings,
-                                                   assay = "RNA")
-plot1 <- Seurat::DimPlot(bm, reduction = "lapComUMAP",
-                         group.by = "celltype.l2", label = TRUE,
-                         repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Cite-seq):\nLaplacian of SNN for Common"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_common_laplacian_snn_umap2.png"),
-                plot1, device = "png", width = 6, height = 5, units = "in")
-
-
-png("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_laplacian_scores.png",
-    height = 1200, width = 2500, units = "px", res = 300)
-par(mfrow = c(1,3), mar = c(4,4,4,0.5))
-multiomicCCA::plot_scores_heatmap.list(list(basis_1, basis_2, common_basis),
-                                       main_vec = c("RNA basis", "ADT basis", "Common basis"),
-                                       membership_vec = as.factor(bm$celltype.l2),
-                                       log_scale = T, scaling_power = 4)
-graphics.off()
-tmp <- list(basis_1, basis_2, common_basis)
-for(i in 1:length(tmp)){
-  l2_vec <- apply(tmp[[i]], 2, multiomicCCA:::.l2norm)
-  tmp[[i]] <- multiomicCCA:::.mult_mat_vec(tmp[[i]], 1/l2_vec)
-}
-png("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_laplacian_scores2.png",
-    height = 1200, width = 2500, units = "px", res = 300)
-par(mfrow = c(1,3), mar = c(4,4,4,0.5))
-multiomicCCA::plot_scores_heatmap.list(tmp,
-                                       main_vec = c("RNA basis\n(Normalized)", "ADT basis\n(Normalized)", "Common basis\n(Normalized)"),
-                                       membership_vec = as.factor(bm$celltype.l2),
-                                       log_scale = T, scaling_power = 4)
-graphics.off()
+# set.seed(10)
+# common_umap <- Seurat::RunUMAP(common_basis,
+#                           metric = "euclidean")
+# rownames(common_umap@cell.embeddings) <- rownames(bm@meta.data)
+# bm[["lapComUMAP"]] <- Seurat::CreateDimReducObject(common_umap@cell.embeddings,
+#                                                    assay = "RNA")
+# plot1 <- Seurat::DimPlot(bm, reduction = "lapComUMAP",
+#                          group.by = "celltype.l2", label = TRUE,
+#                          repel = TRUE, label.size = 2.5)
+# plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Cite-seq):\nLaplacian of SNN for Common"))
+# plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+# ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_common_laplacian_snn_umap2.png"),
+#                 plot1, device = "png", width = 6, height = 5, units = "in")
+# 
+# 
+# png("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_laplacian_scores.png",
+#     height = 1200, width = 2500, units = "px", res = 300)
+# par(mfrow = c(1,3), mar = c(4,4,4,0.5))
+# multiomicCCA::plot_scores_heatmap.list(list(basis_1, basis_2, common_basis),
+#                                        main_vec = c("RNA basis", "ADT basis", "Common basis"),
+#                                        membership_vec = as.factor(bm$celltype.l2),
+#                                        log_scale = T, scaling_power = 4)
+# graphics.off()
+# tmp <- list(basis_1, basis_2, common_basis)
+# for(i in 1:length(tmp)){
+#   l2_vec <- apply(tmp[[i]], 2, multiomicCCA:::.l2norm)
+#   tmp[[i]] <- multiomicCCA:::.mult_mat_vec(tmp[[i]], 1/l2_vec)
+# }
+# png("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_laplacian_scores2.png",
+#     height = 1200, width = 2500, units = "px", res = 300)
+# par(mfrow = c(1,3), mar = c(4,4,4,0.5))
+# multiomicCCA::plot_scores_heatmap.list(tmp,
+#                                        main_vec = c("RNA basis\n(Normalized)", "ADT basis\n(Normalized)", "Common basis\n(Normalized)"),
+#                                        membership_vec = as.factor(bm$celltype.l2),
+#                                        log_scale = T, scaling_power = 4)
+# graphics.off()
 
 #############################
 
@@ -148,7 +148,9 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b,
 dcca_res$tilt_perc
 save.image("../../../../out/Writeup14j/Writeup14j_citeseq_bm25_dcca.RData")
 
-dcca_res2 <- multiomicCCA:::fine_tuning(dcca_res, verbose = T)
+dcca_res2 <- multiomicCCA:::fine_tuning(dcca_res, 
+                                        temp_path = "../../../../out/Writeup14j/Writeup14j_citeseq_bm25_dcca_tmp.RData",
+                                        verbose = T)
 dcca_res2$tilt_perc
 
 save.image("../../../../out/Writeup14j/Writeup14j_citeseq_bm25_dcca.RData")
