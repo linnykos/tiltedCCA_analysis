@@ -1,12 +1,43 @@
 kl_selection <- function(snn_mat_1, snn_mat_2,
                          clustering_1, clustering_2,
-                         num_neigh = 30){
+                         num_neigh = 30,
+                         verbose = T){
   if(any(table(clustering_1) == 0)) clustering_1 <- factor(clustering_1)
   if(any(table(clustering_2) == 0)) clustering_2 <- factor(clustering_2)
   
+  nn_list <- .kl_selection_nn(clustering_1 = clustering_1, 
+                              clustering_2 = clustering_2,
+                              num_neigh = num_neigh,
+                              snn_mat_1 = snn_mat_1, 
+                              snn_mat_2 = snn_mat_2,
+                              verbose = verbose)
+  
+  i_vec <- rep(1:n, times = sapply(nn_list, length))
+  j_vec <- unlist(nn_list)
+  
+  sparse_mat <- Matrix::sparseMatrix(i = i_vec,
+                                     j = j_vec,
+                                     x = rep(1, length(i_vec)),
+                                     dims = c(n,n),
+                                     repr = "C")
+  sparse_mat <- sparse_mat + Matrix::t(sparse_mat)
+  sparse_mat@x <- rep(1, length(sparse_mat@x))
+  
+  rownames(sparse_mat) <- rownames(snn_mat_1)
+  colnames(sparse_mat) <- rownames(snn_mat_1)
+  sparse_mat
+}
+
+#######################
+
+.kl_selection_nn <- function(clustering_1, clustering_2,
+                             num_neigh,
+                             snn_mat_1, snn_mat_2,
+                             verbose = T){
   n <- nrow(snn_mat_1)
   
   nn_list <- lapply(1:n, function(i){
+    if(verbose && n > 10 && i %% floor(n/10) == 0) cat('*')
     nn_1 <- multiomicCCA:::.nonzero_col(snn_mat_1, 
                                         col_idx = i,
                                         bool_value = F)
@@ -26,31 +57,34 @@ kl_selection <- function(snn_mat_1, snn_mat_2,
       idx_df <- idx_df[-na_idx,]
     }
     idx_all <- idx_df$idx
+    stopifnot(length(idx_all) >= num_neigh)
     
     obs_tab <- table(clustering_1[idx_all], clustering_2[idx_all])
     obs_tab <- .remove_all_zeros_rowcol(obs_tab)
     
-    desired_tab <- .kl_selection_lp(num_neigh = num_neigh,
-                                    obs_tab = obs_tab,
-                                    prior_1 = prior_1[names(prior_1) %in% rownames(obs_tab)],
-                                    prior_2 = prior_2[names(prior_2) %in% colnames(obs_tab)])
-    
-    .select_kl_cells(desired_tab = desired_tab,
-                     idx_df = idx_df)
+    if(all(dim(obs_tab) == c(1,1))){
+      sample(idx_df$idx, num_neigh)
+    } else {
+      desired_tab <- .kl_selection_lp(num_neigh = num_neigh,
+                                      obs_tab = obs_tab,
+                                      prior_1 = prior_1[names(prior_1) %in% rownames(obs_tab)],
+                                      prior_2 = prior_2[names(prior_2) %in% colnames(obs_tab)])
+      
+      .select_kl_cells(desired_tab = desired_tab,
+                       idx_df = idx_df)
+    }
   })
   
   names(nn_list) <- rownames(snn_mat_1)
   nn_list
 }
 
-#######################
-
 .remove_all_zeros_rowcol <- function(mat){
   stopifnot(is.matrix(mat), all(mat >= 0))
   
   row_idx <- which(matrixStats::rowSums2(mat) > 0)
   col_idx <- which(matrixStats::colSums2(mat) > 0)
-  mat[row_idx, col_idx]
+  mat[row_idx, col_idx, drop = F]
 }
 
 .kl_selection_lp <- function(num_neigh,
