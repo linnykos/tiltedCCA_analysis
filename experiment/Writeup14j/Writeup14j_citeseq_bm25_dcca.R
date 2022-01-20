@@ -134,6 +134,7 @@ graphics.off()
 
 #############################
 
+print("Starting Tilted CCA")
 set.seed(10)
 dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, 
                                       dims_1 = 1:rank_1, dims_2 = 1:rank_2,
@@ -144,6 +145,9 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b,
                                       enforce_boundary = F,
                                       target_dimred = common_basis,
                                       verbose = T)
+dcca_res$tilt_perc
+save.image("../../../../out/Writeup14j/Writeup14j_citeseq_bm25_dcca.RData")
+
 dcca_res2 <- multiomicCCA:::fine_tuning(dcca_res, verbose = T)
 dcca_res2$tilt_perc
 
