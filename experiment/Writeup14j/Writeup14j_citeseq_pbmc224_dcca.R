@@ -26,7 +26,7 @@ set.seed(10)
 pbmc <- Seurat::RunUMAP(pbmc, reduction = 'pca', dims = 1:40, assay = 'SCT',
                         reduction.name = 'rna.umap', reduction.key = 'rnaUMAP_')
 set.seed(10)
-pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca', dims = 1:50, assay = 'ADT',
+pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca', dims = 1:25, assay = 'ADT',
                         reduction.name = 'adt.umap', reduction.key = 'adtUMAP_')
 
 ############
@@ -39,7 +39,7 @@ set.seed(10)
 pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
 Seurat::DefaultAssay(pbmc) <- "ADT"
 set.seed(10)
-pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:50, reduction = "apca")
+pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:25, reduction = "apca")
 set.seed(10)
 pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
 
@@ -101,7 +101,7 @@ if(any(sd_vec <= 1e-6)){
 
 #########################
 
-rank_1 <- 40; rank_2 <- 50; nn <- 30
+rank_1 <- 40; rank_2 <- 25; nn <- 30
 dims_1 <- 1:rank_1; dims_2 <- 1:rank_2
 
 svd_1 <- multiomicCCA:::.svd_truncated(mat_1, K = rank_1, symmetric = F, rescale = F, 
@@ -198,7 +198,7 @@ dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b,
                                       scale_1 = F, scale_2 = F,
                                       fix_tilt_perc = F, 
                                       enforce_boundary = F,
-                                      discretization_gridsize = 9,
+                                      discretization_gridsize = 7,
                                       target_dimred = common_basis,
                                       verbose = T)
 save.image("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca.RData")
