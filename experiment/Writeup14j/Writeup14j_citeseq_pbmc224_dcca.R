@@ -172,7 +172,7 @@ png("../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_laplacian_sco
 par(mfrow = c(1,3), mar = c(4,4,4,0.5))
 multiomicCCA::plot_scores_heatmap.list(list(basis_1, basis_2, common_basis),
                                        main_vec = c("RNA basis", "ADT basis", "Common basis"),
-                                       membership_vec = as.factor(bm$celltype.l2),
+                                       membership_vec = as.factor(pbmc$celltype.l2),
                                        log_scale = T, scaling_power = 4)
 graphics.off()
 save.image("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca.RData")
