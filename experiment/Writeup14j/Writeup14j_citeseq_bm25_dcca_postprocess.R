@@ -1,7 +1,8 @@
 rm(list=ls())
 library(Seurat)
 load("../../../../out/Writeup14j/Writeup14j_citeseq_bm25_dcca.RData")
-dcca_res <- dcca_res2
+load("../../../../out/Writeup14j/Writeup14j_citeseq_bm25_dcca_tmp.RData")
+dcca_res <- res
 
 ############################
 
@@ -24,7 +25,7 @@ residual_mat_2 <- sapply(1:ncol(dcca_res$distinct_score_2), function(j){
 alignment_2 <- 1 - sum((residual_mat_2)^2)/sum((dcca_res$distinct_score_2)^2)
 
 #######################################
-dcca_res <- dcca_res
+class(dcca_res) <- "dcca"
 dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res)
 
 n <- nrow(bm@meta.data)
@@ -120,7 +121,7 @@ for(i in 1:length(reduction_vec)){
                              repel = TRUE, label.size = 2.5)
     plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Cite-seq):\n", main_vec[i]))
     plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_dcca_", file_vec[i], ".png"),
+    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_dcca_", file_vec[i], "2.png"),
                     plot1, device = "png", width = 6, height = 5, units = "in")
   }
 }

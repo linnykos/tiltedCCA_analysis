@@ -93,7 +93,7 @@ common_mat <- multiomicCCA:::common_neighborhood(snn_mat_1 = snn_mat_1,
                                                  num_neigh = 30,
                                                  verbose = T)
 quantile(sparseMatrixStats::rowSums2(common_mat))
-common_basis <- multiomicCCA:::compute_laplacian_basis(common_mat, k = 50, verbose = T)
+common_basis <- multiomicCCA:::compute_laplacian_basis(common_mat, k = 20, verbose = T)
 
 # set.seed(10)
 # common_umap <- Seurat::RunUMAP(common_basis,
