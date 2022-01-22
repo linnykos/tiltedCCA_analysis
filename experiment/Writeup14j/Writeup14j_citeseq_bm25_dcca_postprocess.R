@@ -1,10 +1,17 @@
 rm(list=ls())
 library(Seurat)
 load("../../../../out/Writeup14j/Writeup14j_citeseq_bm25_dcca.RData")
-load("../../../../out/Writeup14j/Writeup14j_citeseq_bm25_dcca_tmp.RData")
-dcca_res <- res
+dcca_res <- dcca_res2
 
 ############################
+
+png("../../../../out/figures/Writeup14j/Writeup14j_citeseq_bm25_tiltedcca_scores.png",
+    height = 1200, width = 2500, units = "px", res = 300)
+par(mfrow = c(1,3), mar = c(4,4,4,0.5))
+multiomicCCA:::plot_scores_heatmap.dcca(dcca_res2,
+                                  membership_vec = as.factor(bm$celltype.l2),
+                                  log_scale = T, scaling_power = 4)
+graphics.off()
 
 residual_mat_1 <- sapply(1:ncol(dcca_res$distinct_score_1), function(j){
   df <- cbind(dcca_res$distinct_score_1[,j], dcca_res$common_score)
@@ -25,7 +32,6 @@ residual_mat_2 <- sapply(1:ncol(dcca_res$distinct_score_2), function(j){
 alignment_2 <- 1 - sum((residual_mat_2)^2)/sum((dcca_res$distinct_score_2)^2)
 
 #######################################
-class(dcca_res) <- "dcca"
 dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res)
 
 n <- nrow(bm@meta.data)
@@ -51,7 +57,7 @@ common_umap <- Seurat::RunUMAP(cbind(dimred_1, dimred_2),
                                reduction.key = "umapCommon_")
 rownames(common_umap@cell.embeddings) <- rownames(bm@meta.data)
 bm[["dcca_common"]] <- Seurat::CreateDimReducObject(common_umap@cell.embeddings, 
-                                                      assay = "RNA")
+                                                    assay = "RNA")
 
 #######################################
 
@@ -68,7 +74,7 @@ distinct1_umap <- Seurat::RunUMAP(dimred_1,
                                   reduction.key = "umapDistinct1_")
 rownames(distinct1_umap@cell.embeddings) <- rownames(bm@meta.data)
 bm[["dcca_distinct1"]] <- Seurat::CreateDimReducObject(distinct1_umap@cell.embeddings, 
-                                                         assay = "RNA")
+                                                       assay = "RNA")
 
 #######################################
 
@@ -85,7 +91,7 @@ distinct2_umap <- Seurat::RunUMAP(dimred_2,
                                   reduction.key = "umapDistinct2_")
 rownames(distinct2_umap@cell.embeddings) <- rownames(bm@meta.data)
 bm[["dcca_distinct2"]] <- Seurat::CreateDimReducObject(distinct2_umap@cell.embeddings,
-                                                         assay = "ADT")
+                                                       assay = "ADT")
 
 
 ######################################

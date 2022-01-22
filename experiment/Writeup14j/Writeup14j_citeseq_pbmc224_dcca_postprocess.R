@@ -1,7 +1,9 @@
 rm(list=ls())
 library(Seurat)
 load("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca.RData")
-dcca_res <- dcca_res2
+load("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca_tmp.RData")
+dcca_res <- res
+class(dcca_res) <- "dcca"
 
 ############################
 
@@ -138,7 +140,91 @@ for(i in 1:length(reduction_vec)){
                              repel = TRUE, label.size = 2.5)
     plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC (Cite-seq):\n", main_vec[i]))
     plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_dcca_", file_vec[i], ".png"),
+    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_dcca_", file_vec[i], "2.png"),
                     plot1, device = "png", width = 6, height = 5, units = "in")
   }
 }
+
+########################################3
+
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
+                         group.by = "celltype.l2", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         raster = F)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC\nCITE-Seq (RNA, Subset)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_rna_umap_subset.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
+                         group.by = "celltype.l2", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         raster = F)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC\nCITE-Seq (Protein, Subset)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_adt_umap_subset.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
+                         group.by = "SCT_snn_res.0.25", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         raster = F)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC\nCITE-Seq (RNA, Clustering)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_rna_umap_clustering.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
+                         group.by = "ADT_snn_res.0.25", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         raster = F)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC\nCITE-Seq (Protein, Clustering)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_adt_umap_clustering.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+#############
+
+set.seed(10)
+umap_1 <- Seurat::RunUMAP(basis_1,
+                          metric = "euclidean")
+rownames(umap_1@cell.embeddings) <- rownames(pbmc@meta.data)
+set.seed(10)
+umap_2 <- Seurat::RunUMAP(basis_2,
+                          metric = "euclidean")
+rownames(umap_2@cell.embeddings) <- rownames(pbmc@meta.data)
+
+pbmc[["lapRnaUMAP"]] <- Seurat::CreateDimReducObject(umap_1@cell.embeddings,
+                                                   assay = "SCT")
+plot1 <- Seurat::DimPlot(pbmc, reduction = "lapRnaUMAP",
+                         group.by = "celltype.l2", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC (Cite-seq):\nLaplacian of SNN for RNA"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_rna_laplacian_snn_umap.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+pbmc[["lapAdtUMAP"]] <- Seurat::CreateDimReducObject(umap_2@cell.embeddings,
+                                                   assay = "SCT")
+plot1 <- Seurat::DimPlot(pbmc, reduction = "lapAdtUMAP",
+                         group.by = "celltype.l2", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC (Cite-seq):\nLaplacian of SNN for ADT"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_adt_laplacian_snn_umap.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+set.seed(10)
+common_umap <- Seurat::RunUMAP(common_basis,
+                               metric = "euclidean")
+rownames(common_umap@cell.embeddings) <- rownames(pbmc@meta.data)
+pbmc[["lapComUMAP"]] <- Seurat::CreateDimReducObject(common_umap@cell.embeddings,
+                                                   assay = "SCT")
+plot1 <- Seurat::DimPlot(pbmc, reduction = "lapComUMAP",
+                         group.by = "celltype.l2", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC (Cite-seq):\nLaplacian of SNN for Common"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_common_laplacian_snn_umap.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")

@@ -2,7 +2,11 @@ rm(list=ls())
 load("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca.RData")
 load("../../../../out/Writeup14i/Writeup14i_citeseq_pbmc224_dcca_variable_full_de.RData")
 source("../Writeup14f/gene_exploration.R")
-dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res2)
+load("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca_tmp.RData")
+dcca_res <- res
+class(dcca_res) <- "dcca"
+
+dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res)
 
 summary_mat <- compute_variable_summary(mat = mat_2b, 
                                         common_mat = dcca_decomp$common_mat_2,
@@ -58,3 +62,18 @@ for(x_val in xaxt_vec[major]){
 points(log10(summary_mat[,"kl_div"]), summary_mat[,"r_squared"], pch = 16,
        col = rgb(0.5, 0.5, 0.5, 1))
 graphics.off()
+
+
+########### ## ggrepel version of the plot
+df <- as.data.frame(summary_mat)
+df$Name <- rownames(df)
+p1 <- ggplot2::ggplot(df, ggplot2::aes(x = kl_div, y = r_squared))
+p1 <- p1 + ggplot2::geom_point()
+p1 <- p1 + ggplot2::scale_x_log10()
+# p1 <- p1 + ggplot2::xlim(1, max(df$kl_div))
+p1 <- p1 + ggplot2::ylim(0, 1)
+p1 <- p1 + ggrepel::geom_text_repel(data = df, ggplot2::aes(label = Name))
+p1 <- p1 + Seurat::NoLegend()
+ggplot2::ggsave(filename = "../../../../out/figures/Writeup14j/Writeup14j_citeseq_pbmc224_adt_exploration2.png",
+                p1, device = "png", width = 5, height = 5, units = "in")
+
