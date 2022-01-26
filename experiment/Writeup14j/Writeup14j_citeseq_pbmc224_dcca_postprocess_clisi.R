@@ -1,5 +1,8 @@
 rm(list=ls())
 load("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca.RData")
+load("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca_tmp.RData")
+dcca_res2 <- res
+class(dcca_res2) <- "dcca"
 
 library(Seurat); library(Signac)
 library(multiomicCCA)

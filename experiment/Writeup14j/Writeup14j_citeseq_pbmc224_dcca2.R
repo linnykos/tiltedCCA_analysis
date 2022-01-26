@@ -105,7 +105,7 @@ multiomicCCA::plot_scores_heatmap.list(list(basis_1, basis_2, common_basis),
                                        membership_vec = as.factor(pbmc$celltype.l2),
                                        log_scale = T, scaling_power = 4)
 graphics.off()
-save.image("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca.RData")
+save.image("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca2.RData")
 
 set.seed(10)
 dcca_res <- multiomicCCA::dcca_factor(mat_1b, mat_2b, 
