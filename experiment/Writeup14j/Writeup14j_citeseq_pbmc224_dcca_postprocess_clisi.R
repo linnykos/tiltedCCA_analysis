@@ -18,6 +18,8 @@ rna_frnn <- multiomicCCA::construct_frnn(dcca_res2,
                                          normalization_type = "cosine_itself")
 save(rna_frnn, 
      file = "../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_clisi.RData")
+print(dim(rna_frnn$c_g))
+print(rna_frnn$c_g[1:5,1:5])
 
 print("Working on ADT graph")
 set.seed(10)
