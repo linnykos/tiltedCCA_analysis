@@ -46,7 +46,10 @@ for(cutoff in cutoff_vec){
   # compute new ADT PCA
   print("Computing ADT PCA")
   Seurat::DefaultAssay(pbmc2) <- "ADT"
-  pbmc2[["ADT"]]@scale.data <- pbmc2[["ADT"]]@scale.data[-which(rownames(pbmc2) %in% adt_names),]
+  if(length(adt_names) > 0){
+    pbmc2[["ADT"]]@scale.data <- pbmc2[["ADT"]]@scale.data[-which(rownames(pbmc2) %in% adt_names),]
+  }
+  print(dim(pbmc2[["ADT"]]@scale.data))
   pbmc2 <- Seurat::RunPCA(
     pbmc2, 
     reduction.name = 'apca',
