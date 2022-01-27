@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -N pbmc224_dcca_clisi
+#$ -N pbmc224_clisi
 #$ -j y
 #$ -o ../../../../out/Writeup14j/qsub/
 #$ -l m_mem_free=200G
