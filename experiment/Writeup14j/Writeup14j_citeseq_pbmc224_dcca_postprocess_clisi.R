@@ -4,8 +4,8 @@ load("../../../../out/Writeup14j/Writeup14j_citeseq_pbmc224_dcca.RData")
 # dcca_res2 <- res
 # class(dcca_res2) <- "dcca"
 # 
-# library(Seurat); library(Signac)
-# library(multiomicCCA)
+library(Seurat); library(Signac)
+library(multiomicCCA)
 # 
 # dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res2)
 # 
