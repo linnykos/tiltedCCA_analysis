@@ -29,7 +29,7 @@ summary_mat[,"kl_div"] <- -log10(summary_mat[,"kl_div"])
 
 ##################
 
-cutoff_vec <- seq(1, .75, by = -0.05)
+cutoff_vec <- seq(.7, .5, by = -0.05)
 
 for(cutoff in cutoff_vec){
   print(paste0("Working on cutoff ", cutoff))
