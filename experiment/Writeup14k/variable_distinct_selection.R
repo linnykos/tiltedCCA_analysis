@@ -3,23 +3,17 @@ variable_distinct_selection <- function(dcca_res,
                                         max_variables = 10,
                                         cor_threshold = 0.9,
                                         verbose = T){
-  stopifnot(length(names(significance_vec)) == length(significance_vec),
-            all(sort(significance_vec) == sort(rownames(dcca_res$svd_1$v))) ||
-              all(sort(significance_vec) == sort(rownames(dcca_res$svd_2$v))))
+  stopifnot(length(names(significance_vec)) == length(significance_vec))
   
   if(verbose) print("Extracting relevant matrices")
   reference_mat <- dcca_res$common_score
-  l2_vec <- apply(reference_mat, 2, .l2norm)
-  reference_mat <- .mult_mat_vec(reference_mat, 1/l2_vec)
-  
-  decomp_res <- dcca_decomposition(dcca_res)
-  if(all(sort(variable_significance) == sort(rownames(dcca_res$svd_1$v)))){
-    distinct_mat <- decomp_res$distinct_mat_1
+  decomp_res <- multiomicCCA::dcca_decomposition(dcca_res)
+  if(length(significance_vec) == nrow(dcca_res$svd_1$v) && 
+     all(sort(significance_vec) == sort(rownames(dcca_res$svd_1$v)))){
+    distinct_mat <- tcrossprod(multiomicCCA:::.mult_mat_vec(dcca_res$svd_1$u, dcca_res$svd_1$d), dcca_res$svd_1$v)
   } else {
-    distinct_mat <- decomp_res$distinct_mat_2
+    distinct_mat <- tcrossprod(multiomicCCA:::.mult_mat_vec(dcca_res$svd_2$u, dcca_res$svd_2$d), dcca_res$svd_2$v)
   }
-  l2_vec <- apply(distinct_mat, 2, .l2norm)
-  distinct_mat <- .mult_mat_vec(distinct_mat, 1/l2_vec)
   
   n <- nrow(distinct_mat)
   
@@ -30,7 +24,7 @@ variable_distinct_selection <- function(dcca_res,
     if(verbose) print("Selecting variable")
     cor_vec <- sapply(1:ncol(distinct_mat), function(i){
       .variable_correlation(x_mat = reference_mat, 
-                            y_mat = distinct_mat[,i])
+                            y_vec = distinct_mat[,i])
     })
     candidate_var <- colnames(distinct_mat)[which(cor_vec <= cor_threshold)]
     if(verbose) print(paste0(length(candidate_var), " eligble variables"))
