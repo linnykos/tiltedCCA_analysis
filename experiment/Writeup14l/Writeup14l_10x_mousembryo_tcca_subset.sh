@@ -1,5 +1,5 @@
 #!/bin/bash
-#$ -N 10x_mouse_tcca_subset
+#$ -N mouse_10x_tcca_subset
 #$ -j y
 #$ -o ../../../../out/Writeup14l/qsub/
 #$ -l m_mem_free=100G
