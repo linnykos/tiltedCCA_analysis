@@ -2,7 +2,7 @@ rm(list=ls())
 load("../../../../out/Writeup14l/Writeup14l_10x_greenleaf_preprocess.RData")
 
 library(Seurat)
-library(Sig)
+library(Signac)
 library(tiltedCCA)
 
 set.seed(10)
