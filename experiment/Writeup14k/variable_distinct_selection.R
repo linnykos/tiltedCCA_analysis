@@ -17,7 +17,9 @@ variable_distinct_selection <- function(dcca_res,
   
   n <- nrow(distinct_mat)
   
+  candidate_list <- vector("list", length = max_variables)
   selected_variables <- numeric(0)
+  
   while(length(selected_variables) < max_variables){
     if(verbose) print(paste0("On iteration: ", length(selected_variables)+1))
     
@@ -27,6 +29,8 @@ variable_distinct_selection <- function(dcca_res,
                             y_vec = distinct_mat[,i])
     })
     candidate_var <- colnames(distinct_mat)[which(cor_vec <= cor_threshold)]
+    candidate_list[[length(selected_variables)+1]] <- candidate_var
+    
     if(verbose) print(paste0(length(candidate_var), " eligble variables"))
     if(length(candidate_var) == 0) break()
     idx <- candidate_var[which.max(significance_vec[candidate_var])]
@@ -36,7 +40,8 @@ variable_distinct_selection <- function(dcca_res,
     if(ncol(distinct_mat) == 0) break()
   }
   
-  selected_variables
+  list(selected_variables = selected_variables,
+       candidate_list = candidate_list)
 }
 
 .variable_correlation <- function(x_mat, y_vec){

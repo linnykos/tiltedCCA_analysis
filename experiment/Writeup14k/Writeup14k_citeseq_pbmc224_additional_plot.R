@@ -250,7 +250,27 @@ ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14k/Writeup14k
                 plot1, device = "png", width = 4.5, height = 5, units = "in")
 
 
-                                                          
+Seurat::DefaultAssay(pbmc) <- "ADT"
+plot1 <- Seurat::FeaturePlot(pbmc, 
+                             features = "CD69",
+                             slot = "scale.data",
+                             cols = c("lightgrey", "darkgreen"),
+                             reduction = "consensus.umap")
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC (Cite-seq):\nConsensus PCA, CD69 (antibody)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14k/Writeup14k_citeseq_pbmc224_consensuspca_cd69_antibody.png"),
+                plot1, device = "png", width = 4.5, height = 5, units = "in")
+Seurat::DefaultAssay(pbmc) <- "SCT"
+plot1 <- Seurat::FeaturePlot(pbmc, 
+                             features = "CD69",
+                             slot = "scale.data",
+                             cols = c("lightgrey", "deepskyblue3"),
+                             reduction = "consensus.umap")
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human PBMC (Cite-seq):\nConsensus PCA, CD69 (gene)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14k/Writeup14k_citeseq_pbmc224_consensuspca_cd69_gene.png"),
+                plot1, device = "png", width = 4.5, height = 5, units = "in")
+
 
 
 ##################################

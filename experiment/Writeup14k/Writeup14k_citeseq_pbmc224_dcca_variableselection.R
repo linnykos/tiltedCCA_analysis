@@ -11,7 +11,12 @@ dcca_decomp <- multiomicCCA::dcca_decomposition(dcca_res)
 summary_mat <- compute_variable_summary(mat = mat_2b, 
                                         common_mat = dcca_decomp$common_mat_2,
                                         metacell_clustering = NA)
-colnames(summary_mat) <- c("r_squared", "p_value")
+summary_mat <- data.frame(summary_mat)
+summary_mat <- cbind(summary_mat, NA)
+colnames(summary_mat) <- c("r_squared", "p_value", "celltype")
+uniq_celltype <- as.character(sort(unique(pbmc$celltype.l2)))
+names(de_list) <- uniq_celltype
+
 for(i in 1:nrow(summary_mat)){
   gene_name <- rownames(summary_mat)[i]
   
@@ -26,8 +31,10 @@ for(i in 1:nrow(summary_mat)){
   })
   
   summary_mat[i,"p_value"] <- min(celltype_pval)
+  summary_mat[i,"celltype"] <- uniq_celltype[which.min(celltype_pval)]
 }
 summary_mat[,"p_value"] <- -log10(summary_mat[,"p_value"])
+summary_mat[order(rownames(summary_mat)),]
 
 ######################
 
@@ -130,11 +137,12 @@ for(i in 1:length(antibody_list)){
 
 #################################
 
-antibody_vec <- variable_distinct_selection(dcca_res2,
-                                            significance_vec = summary_mat[,"p_value"], #larger is more significant
-                                            max_variables = 10,
-                                            cor_threshold = 0.9,
-                                            verbose = T)
+var_selection_res <- variable_distinct_selection(dcca_res2,
+                                                 significance_vec = summary_mat[,"p_value"], #larger is more significant
+                                                 max_variables = 10,
+                                                 cor_threshold = 0.9,
+                                                 verbose = T)
+antibody_vec <- var_selection_res$selected_variables
 summary_mat[antibody_vec,]
 
 df <- as.data.frame(summary_mat)
@@ -181,6 +189,7 @@ nrow_val <- ceiling(sqrt(length(antibody_vec)))
 ncol_val <- ceiling(length(antibody_vec)/nrow_val)
 plot1 <- Seurat::FeaturePlot(pbmc, 
                              reduction = "adt.umap",
+                             slot = "scale.data",
                              features = antibody_vec,
                              ncol = ncol_val)
 
@@ -342,7 +351,7 @@ plot(g, vertex.size = 3, vertex.label = "", vertex.color = igraph::V(g)$color )
 graphics.off()
 
 col_vec <- sapply(names(igraph::V(g)), function(i){
-  if(i %in% antibody_vec) "black" else "white"
+  if(i %in% antibody_vec) "deepskyblue2" else "white"
 })
 igraph::V(g)$color <- col_vec
 png("../../../../out/figures/Writeup14k/Writeup14k_citeseq_pbmc224_adt_correlation_graph_selected.png",
@@ -351,3 +360,44 @@ par(mar = rep(0.5,4))
 set.seed(10)
 plot(g, vertex.size = 3, vertex.label = "", vertex.color = igraph::V(g)$color )
 graphics.off()
+
+####
+
+x_vec <- summary_mat[,"r_squared"]^4
+color_palette <- grDevices::colorRampPalette(c("white", 2))(20)
+seq_vec <- seq(min(x_vec), max(x_vec), length.out = 20)
+col_vec_r2 <- sapply(names(igraph::V(g)), function(i){
+  val <- x_vec[i]
+  idx <- which.min(abs(seq_vec - val))
+  color_palette[idx]
+})
+x_vec <- summary_mat[,"p_value"]
+color_palette <- grDevices::colorRampPalette(c("white", 2))(20)
+seq_vec <- seq(min(x_vec), max(x_vec), length.out = 20)
+col_vec_pval <- sapply(names(igraph::V(g)), function(i){
+  val <- x_vec[i]
+  idx <- which.min(abs(seq_vec - val))
+  color_palette[idx]
+})
+
+for(iter in 1:4){
+  col_vec_r2_tmp <- col_vec_r2; col_vec_pval_tmp <- col_vec_pval
+  col_vec_r2_tmp[which(!names(col_vec_r2) %in% var_selection_res$candidate_list[[iter]])]<- "gray"
+  col_vec_pval_tmp[which(!names(col_vec_pval) %in% var_selection_res$candidate_list[[iter]])]<- "gray"
+  
+  igraph::V(g)$color <- col_vec_r2_tmp
+  png(paste0("../../../../out/figures/Writeup14k/Writeup14k_citeseq_pbmc224_adt_correlation_graph_rsquared_iter", iter, ".png"),
+      height = 2500, width = 2500, units = "px", res = 300)
+  par(mar = rep(0.5,4))
+  set.seed(10)
+  plot(g, vertex.size = 3, vertex.label = "", vertex.color = igraph::V(g)$color )
+  graphics.off()
+  
+  igraph::V(g)$color <- col_vec_pval_tmp
+  png(paste0("../../../../out/figures/Writeup14k/Writeup14k_citeseq_pbmc224_adt_correlation_graph_pvalue_iter", iter, ".png"),
+      height = 2500, width = 2500, units = "px", res = 300)
+  par(mar = rep(0.5,4))
+  set.seed(10)
+  plot(g, vertex.size = 3, vertex.label = "", vertex.color = igraph::V(g)$color )
+  graphics.off()
+}

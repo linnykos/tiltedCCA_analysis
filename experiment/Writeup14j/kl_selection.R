@@ -1,7 +1,7 @@
-kl_selection <- function(snn_mat_1, snn_mat_2,
-                         clustering_1, clustering_2,
-                         num_neigh = 30,
-                         verbose = T){
+common_snn <- function(snn_mat_1, snn_mat_2,
+                       clustering_1, clustering_2,
+                       num_neigh = 30,
+                       verbose = T){
   if(any(table(clustering_1) == 0)) clustering_1 <- factor(clustering_1)
   if(any(table(clustering_2) == 0)) clustering_2 <- factor(clustering_2)
   
