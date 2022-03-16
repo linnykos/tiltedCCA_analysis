@@ -73,8 +73,8 @@ multiSVD_obj <- tiltedCCA:::fine_tuning(input_obj = multiSVD_obj,
                                         verbose = 1)
 multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
                                                     verbose = 1,
-                                                    modality_1 = T,
-                                                    modality_2 = F)
+                                                    bool_modality_1_full = T,
+                                                    bool_modality_2_full = F)
 
 save(multiSVD_obj, greenleaf,
      date_of_run, session_info,

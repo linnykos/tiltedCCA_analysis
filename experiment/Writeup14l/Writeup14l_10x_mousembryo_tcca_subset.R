@@ -62,7 +62,9 @@ multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
 multiSVD_obj <- tiltedCCA:::fine_tuning(input_obj = multiSVD_obj,
                                         verbose = 1)
 multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
-                                                    verbose = 1)
+                                                    verbose = 1,
+                                                    bool_modality_1_full = T,
+                                                    bool_modality_2_full = F)
 
 
 #################################
