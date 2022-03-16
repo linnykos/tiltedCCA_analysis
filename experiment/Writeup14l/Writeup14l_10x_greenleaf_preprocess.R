@@ -103,3 +103,53 @@ p3 <- Seurat::DimPlot(greenleaf, reduction = "umap.wnn", group.by = "celltype",
                       label = TRUE, label.size = 2.5, repel = TRUE) + ggplot2::ggtitle("Greenleaf: WNN")
 p1 + p2 + p3 & Seurat::NoLegend() & ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5))
 graphics.off()
+
+############################################################
+
+library(dplyr)
+
+# look at the gene activity matrix
+Sys.setenv("VROOM_CONNECTION_SIZE" = 200000000)
+mat <- readr::read_delim("~/nzhanglab/data/GSE162170_cortical_multiome/GSE162170_multiome_atac_gene_activities.tsv.gz",
+                         delim = "\t")
+## fix egregious error: the first column stores the gene names,
+## but this makes all the columns offset by one
+colname_vec <- colnames(mat)
+rowname_vec <- dplyr::pull(mat, colname_vec[1])
+mat <- mat[,-1]
+last_vec <- dplyr::pull(mat, colname_vec[length(colname_vec)])
+mat <- mat[,-ncol(mat)]
+names(mat) <- colname_vec[1:ncol(mat)]
+last_mat <- t(sapply(last_vec, function(x){
+  as.numeric(strsplit(x, split = "\t")[[1]])
+}))
+colnames(last_mat) <- colname_vec[ncol(mat)+(1:2)]
+rownames(last_mat) <- NULL
+mat2 <- tibble::add_column(mat, last_mat[,1])
+mat2 <- tibble::add_column(mat2, last_mat[,2])
+names(mat2) <- colname_vec
+
+colname_vec <- colnames(mat2)
+sparse_mat_list <- lapply(1:length(colname_vec), function(i){
+  if(i %% 100 == 0) print(paste0(i, " out of ", length(colname_vec)))
+  Matrix::Matrix(dplyr::pull(mat2, colname_vec[i]), sparse = T)
+})
+
+len_vec <- sapply(sparse_mat_list, function(x){length(x@x)})
+total_len <- sum(len_vec)
+i_vec <- unlist(lapply(sparse_mat_list, function(x){x@i}))
+j_vec <- unlist(lapply(1:length(sparse_mat_list), function(j){
+  rep(j, length(sparse_mat_list[[j]]@i))
+}))
+x_vec <- unlist(lapply(sparse_mat_list, function(x){x@x}))
+
+mat3 <- Matrix::sparseMatrix(i = i_vec+1,
+                             j = j_vec,
+                             x = x_vec,
+                             dims = c(length(rowname_vec), length(colname_vec)))
+rownames(mat3) <- rowname_vec
+colnames(mat3) <- colname_vec
+
+mat <- mat3
+save(mat,
+     file = "~/nzhanglab/data/GSE162170_cortical_multiome/GSE162170_multiome_atac_gene_activities.RData")

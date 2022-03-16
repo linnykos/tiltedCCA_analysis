@@ -109,7 +109,8 @@ fate_vec <- sapply(1:length(cell_idx), function(k){
   i <- cell_idx[k]
   nn_idx <- tiltedCCA:::.nonzero_col(mat = snn_mat, col_idx = i, bool_value = F)
   nn_idx <- intersect(nn_idx, cell_idx)
-  nn_idx <- unique(c(nn_idx, i))
+  if(length(nn_idx) == 0) return(NA)
+  # nn_idx <- unique(c(nn_idx, i))
   cell_rank <- pseudotime_rank[i]
   nn_rank <- pseudotime_rank[nn_idx]
   nn_val <- nn_rank-cell_rank
