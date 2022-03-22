@@ -9,6 +9,7 @@ set.seed(10)
 mbrain <- Seurat::FindClusters(mbrain,
                                graph.name = "wsnn", algorithm = 3, 
                                resolution = 2)
+lineage_order <- as.character(c(25,4,14,0,3,6,1,2,5,19,11))
 
 plot1 <- Seurat::DimPlot(mbrain, reduction = "common_tcca",
                          group.by = "seurat_clusters", label = TRUE,
@@ -18,7 +19,7 @@ plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14l/Writeup14l_10x_mouseembryo_subset_seuratWNNcluster.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
-lineage_order <- as.character(c(25,4,14,0,3,6,1,2,5,19,11))
+
 cell_names <- colnames(mbrain)[which(mbrain$seurat_clusters %in% lineage_order)]
 plot1 <- Seurat::DimPlot(mbrain, reduction = "common_tcca",
                          cells.highlight = cell_names)
@@ -87,69 +88,7 @@ snn_mat <- tiltedCCA:::.form_snn_mat(mat = dimred,
                                      tol = 1e-4,
                                      verbose = 0)
 
-##################################
 
-rna_common <- multiSVD_obj$common_mat_1
-multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 1)
-svd_1 <- tiltedCCA:::.get_SVD(multiSVD_obj)
-multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
-svd_2 <- tiltedCCA:::.get_SVD(multiSVD_obj)
-tmp <- crossprod(svd_2$u, svd_1$u)
-svd_tmp <- svd(tmp)
-rotation_mat <- tcrossprod(svd_tmp$u, svd_tmp$v)
-atac_pred <- tcrossprod(tiltedCCA:::.mult_mat_vec(svd_2$u %*% rotation_mat, svd_1$d), svd_1$v)
-n <- nrow(rna_common)
-
-pseudotime_rank <- mbrain$pseudotime_rank
-cell_idx <- which(!is.na(pseudotime_rank))
-
-fate_vec <- sapply(1:length(cell_idx), function(k){
-  if(k %% floor(length(cell_idx)/10) == 0) cat('*')
-  
-  i <- cell_idx[k]
-  nn_idx <- tiltedCCA:::.nonzero_col(mat = snn_mat, col_idx = i, bool_value = F)
-  nn_idx <- intersect(nn_idx, cell_idx)
-  if(length(nn_idx) == 0) return(NA)
-  # nn_idx <- unique(c(nn_idx, i))
-  cell_rank <- pseudotime_rank[i]
-  nn_rank <- pseudotime_rank[nn_idx]
-  nn_val <- nn_rank-cell_rank
-  nn_val <- nn_val/max(abs(nn_val))
-  
-  fit_vec <- sapply(nn_idx, function(j){
-    df <- data.frame(rna = rna_common[j,],
-                     atac = atac_pred[i,])
-    lm_res <- stats::lm(rna ~ atac, data = df)
-    summary(lm_res)$r.squared
-  })
-  nn_val[which.max(fit_vec)]
-})
-
-fate_vec_full <- rep(NA, n)
-fate_vec_full[which(!is.na(pseudotime_rank))] <- fate_vec
-quantile(fate_vec_full, probs = seq(0,1,length.out=11), na.rm = T)
-quantile(fate_vec_full, probs = c(0.01,.99), na.rm = T)
-idx <- which(!is.na(fate_vec_full))
-fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/2)
-col_spacing <- c(seq(-1,0,length.out=21),seq(0,1,length.out=21)[-1])
-col_palette <- c(grDevices::colorRampPalette(c(2, "white"))(21),
-                 grDevices::colorRampPalette(c("white", 3))(21)[-1])
-col_vec <- sapply(fate_vec_full, function(val){
-  if(is.na(val)) return(NA)
-  col_palette[which.min(abs(val - col_spacing))]
-})
-
-png("../../../../out/figures/Writeup14l/Writeup14l_10x_mouseembryo_subset_fateDirection_everythingAtac2commonRna.png",
-    height = 3000, width = 3000, units = "px", res = 300)
-umap_mat <- mbrain[["common_tcca"]]@cell.embeddings
-plot(umap_mat[,1], umap_mat[,2], asp = T,
-     xlab = "common_tcca_1", ylab = "common_tcca_2",
-     main = "Fate direction (Nearby common RNA's\npredicted by everything ATAC)",
-     pch = 16, col = rgb(0.5,0.5,0.5,0.5), cex = 1.2)
-idx <- which(!is.na(col_vec))
-points(umap_mat[idx,1], umap_mat[idx,2],
-       pch = 16, col = col_vec[idx], cex = 1)
-graphics.off()
 
 ###############################3
 
@@ -208,7 +147,7 @@ graphics.off()
 ##########################
 
 Seurat::DefaultAssay(mbrain) <- "SCT"
-mat_1 <- Matrix::t(mbrain[["SCT"]]@data[Seurat::VariableFeatures(object = greenleaf),])
+mat_1 <- Matrix::t(mbrain[["SCT"]]@data[Seurat::VariableFeatures(object = mbrain),])
 sd_vec <- sparseMatrixStats::colSds(mat_1)
 if(any(sd_vec <= 1e-6)){
   mat_1 <- mat_1[,-which(sd_vec <= 1e-6)]
@@ -223,36 +162,15 @@ svd_tmp <- svd(tmp)
 rotation_mat <- tcrossprod(svd_tmp$u, svd_tmp$v)
 atac_pred <- tcrossprod(tiltedCCA:::.mult_mat_vec(svd_2$u %*% rotation_mat, svd_1$d), svd_1$v)
 
-pseudotime_rank <- mbrain$pseudotime_rank
-cell_idx <- which(!is.na(pseudotime_rank))
+fate_res <- .compute_fate_direction(mat_firsttime = atac_pred,
+                                    mat_secondtime = mat_1,
+                                    pseudotime_rank = mbrain$pseudotime_rank,
+                                    snn_mat = snn_mat,
+                                    verbose = 1)
 
-fate_vec <- sapply(1:length(cell_idx), function(k){
-  if(k %% floor(length(cell_idx)/10) == 0) cat('*')
-  
-  i <- cell_idx[k]
-  nn_idx <- tiltedCCA:::.nonzero_col(mat = snn_mat, col_idx = i, bool_value = F)
-  nn_idx <- intersect(nn_idx, cell_idx)
-  nn_idx <- unique(c(nn_idx, i))
-  cell_rank <- pseudotime_rank[i]
-  nn_rank <- pseudotime_rank[nn_idx]
-  nn_val <- nn_rank-cell_rank
-  nn_val <- nn_val/max(abs(nn_val))
-  
-  fit_vec <- sapply(nn_idx, function(j){
-    df <- data.frame(rna = mat_1[j,],
-                     atac = atac_pred[i,])
-    lm_res <- stats::lm(rna ~ atac, data = df)
-    summary(lm_res)$r.squared
-  })
-  nn_val[which.max(fit_vec)]
-})
-
-fate_vec_full <- rep(NA, n)
-fate_vec_full[which(!is.na(pseudotime_rank))] <- fate_vec
-quantile(fate_vec_full, probs = seq(0,1,length.out=11), na.rm = T)
-quantile(fate_vec_full, probs = c(0.01,.99), na.rm = T)
+fate_vec_full <- fate_res$fate_vec
 idx <- which(!is.na(fate_vec_full))
-fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/2)
+fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/4)
 col_spacing <- c(seq(-1,0,length.out=21),seq(0,1,length.out=21)[-1])
 col_palette <- c(grDevices::colorRampPalette(c(2, "white"))(21),
                  grDevices::colorRampPalette(c("white", 3))(21)[-1])
@@ -285,33 +203,13 @@ if(any(sd_vec <= 1e-6)){
   mat_1 <- mat_1[,-which(sd_vec <= 1e-6)]
 }
 mat_1 <- scale(mat_1)
-cell_idx <- which(!is.na(pseudotime_rank))
 
-fate_vec <- sapply(1:length(cell_idx), function(k){
-  if(k %% floor(length(cell_idx)/10) == 0) cat('*')
-  
-  i <- cell_idx[k]
-  nn_idx <- tiltedCCA:::.nonzero_col(mat = snn_mat, col_idx = i, bool_value = F)
-  nn_idx <- intersect(nn_idx, cell_idx)
-  nn_idx <- unique(c(nn_idx, i))
-  cell_rank <- pseudotime_rank[i]
-  nn_rank <- pseudotime_rank[nn_idx]
-  nn_val <- nn_rank-cell_rank
-  nn_val <- nn_val/max(abs(nn_val))
-  
-  fit_vec <- sapply(nn_idx, function(j){
-    df <- data.frame(common = rna_common[i,],
-                     everything = mat_1[j,])
-    lm_res <- stats::lm(everything ~ common, data = df)
-    summary(lm_res)$r.squared
-  })
-  nn_val[which.max(fit_vec)]
-})
-
-fate_vec_full <- rep(NA, n)
-fate_vec_full[which(!is.na(pseudotime_rank))] <- fate_vec
-quantile(fate_vec_full, probs = seq(0,1,length.out=11), na.rm = T)
-quantile(fate_vec_full, probs = c(0.01,.99), na.rm = T)
+fate_res <- .compute_fate_direction(mat_firsttime = rna_common,
+                                    mat_secondtime = mat_1,
+                                    pseudotime_rank = mbrain$pseudotime_rank,
+                                    snn_mat = snn_mat,
+                                    verbose = 1)
+fate_vec_full <- fate_res$fate_vec
 idx <- which(!is.na(fate_vec_full))
 fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/4)
 col_spacing <- c(seq(-1,0,length.out=21),seq(0,1,length.out=21)[-1])
@@ -332,4 +230,91 @@ plot(umap_mat[,1], umap_mat[,2], asp = T,
 idx <- which(!is.na(col_vec))
 points(umap_mat[idx,1], umap_mat[idx,2],
        pch = 16, col = col_vec[idx], cex = 1)
+graphics.off()
+
+######################################################
+
+rna_common <- multiSVD_obj$common_mat_1
+multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 1)
+svd_1 <- tiltedCCA:::.get_SVD(multiSVD_obj)
+multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
+svd_2 <- tiltedCCA:::.get_SVD(multiSVD_obj)
+tmp <- crossprod(svd_2$u, svd_1$u)
+svd_tmp <- svd(tmp)
+rotation_mat <- tcrossprod(svd_tmp$u, svd_tmp$v)
+atac_pred <- tcrossprod(tiltedCCA:::.mult_mat_vec(svd_2$u %*% rotation_mat, svd_1$d), svd_1$v)
+
+fate_res <- .compute_fate_direction(mat_firsttime = atac_pred,
+                                    mat_secondtime = rna_common,
+                                    pseudotime_rank = mbrain$pseudotime_rank,
+                                    snn_mat = snn_mat,
+                                    verbose = 1)
+fate_vec_full <- fate_res$fate_vec
+idx <- which(!is.na(fate_vec_full))
+fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/2)
+col_spacing <- c(seq(-1,0,length.out=21),seq(0,1,length.out=21)[-1])
+col_palette <- c(grDevices::colorRampPalette(c(2, "white"))(21),
+                 grDevices::colorRampPalette(c("white", 3))(21)[-1])
+col_vec <- sapply(fate_vec_full, function(val){
+  if(is.na(val)) return(NA)
+  col_palette[which.min(abs(val - col_spacing))]
+})
+
+png("../../../../out/figures/Writeup14l/Writeup14l_10x_mouseembryo_subset_fateDirection_everythingAtac2commonRna.png",
+    height = 3000, width = 3000, units = "px", res = 300)
+umap_mat <- mbrain[["common_tcca"]]@cell.embeddings
+plot(umap_mat[,1], umap_mat[,2], asp = T,
+     xlab = "common_tcca_1", ylab = "common_tcca_2",
+     main = "Fate direction (Nearby common RNA's\npredicted by everything ATAC)",
+     pch = 16, col = rgb(0.5,0.5,0.5,0.5), cex = 1.2)
+idx <- which(!is.na(col_vec))
+points(umap_mat[idx,1], umap_mat[idx,2],
+       pch = 16, col = col_vec[idx], cex = 1)
+graphics.off()
+
+mbrain$tmp <- fate_res$r2_org
+idx <- which(!is.na(fate_res$r2_org))
+mbrain$tmp[idx] <- rank(mbrain$tmp[idx])
+plot2 <-Seurat::FeaturePlot(mbrain, feature = "tmp",
+                            reduction = "common_tcca")
+plot2 <- plot2 + ggplot2::ggtitle(paste0("Mouse Embryo (10x, RNA+ATAC)\nRank"))
+plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14l/tmp.png"),
+                plot2, device = "png", width = 5, height = 5, units = "in")
+
+idx <- which(mbrain$seurat_clusters == "25")
+med_val <- median(fate_res$r2_org[idx])
+idx2 <- idx[order(abs(fate_res$r2_org[idx] - med_val), decreasing = F)[1:2]]
+png("../../../../out/figures/Writeup14l/Writeup14l_10x_mouseembryo_everythingAtac2commonRna_radialGlia.png",
+    height = 2000, width = 4000, res = 300, units = "px")
+par(mfrow = c(1,2))
+plot(atac_pred[idx2[1],], rna_common[idx2[1],], col = rgb(0.5,0.5,0.5,0.5), pch = 16,
+     xlab = "ATAC", ylab = "Common RNA", main = paste0("A radial glia cell, Seurat cluster 25:\nCell ", idx2[1], " R2: ", round(fate_res$r2_org[idx2[1]], 2)))
+plot(atac_pred[idx2[2],], rna_common[idx2[2],], col = rgb(0.5,0.5,0.5,0.5), pch = 16,
+     xlab = "ATAC", ylab = "Common RNA", main = paste0("A radial glia cell, Seurat cluster 25:\nCell ", idx2[2], " R2: ", round(fate_res$r2_org[idx2[2]], 2)))
+graphics.off()
+
+idx <- which(mbrain$seurat_clusters == "11")
+med_val <- median(fate_res$r2_org[idx])
+idx2 <- idx[order(abs(fate_res$r2_org[idx] - med_val), decreasing = F)[1:2]]
+png("../../../../out/figures/Writeup14l/Writeup14l_10x_mouseembryo_everythingAtac2commonRna_glun.png",
+    height = 2000, width = 4000, res = 300, units = "px")
+par(mfrow = c(1,2))
+plot(atac_pred[idx2[1],], rna_common[idx2[1],], col = rgb(0.5,0.5,0.5,0.5), pch = 16,
+     xlab = "ATAC", ylab = "Common RNA", main = paste0("Glutamatergic, Seurat cluster 11:\nCell ", idx2[1], " R2: ", round(fate_res$r2_org[idx2[1]], 2)))
+plot(atac_pred[idx2[2],], rna_common[idx2[2],], col = rgb(0.5,0.5,0.5,0.5), pch = 16,
+     xlab = "ATAC", ylab = "Common RNA", main = paste0("Glutamatergic, Seurat cluster 11:\nCell ", idx2[2], " R2: ", round(fate_res$r2_org[idx2[2]], 2)))
+graphics.off()
+
+
+idx <- which(mbrain$seurat_clusters == "3")
+med_val <- median(fate_res$r2_org[idx])
+idx2 <- idx[order(abs(fate_res$r2_org[idx] - med_val), decreasing = F)[1:2]]
+png("../../../../out/figures/Writeup14l/Writeup14l_10x_mouseembryo_everythingAtac2commonRna_neuroblast.png",
+    height = 2000, width = 4000, res = 300, units = "px")
+par(mfrow = c(1,2))
+plot(atac_pred[idx2[1],], rna_common[idx2[1],], col = rgb(0.5,0.5,0.5,0.5), pch = 16,
+     xlab = "ATAC", ylab = "Common RNA", main = paste0("Neuroblast, Seurat cluster 3:\nCell ", idx2[1], " R2: ", round(fate_res$r2_org[idx2[1]], 2)))
+plot(atac_pred[idx2[2],], rna_common[idx2[2],], col = rgb(0.5,0.5,0.5,0.5), pch = 16,
+     xlab = "ATAC", ylab = "Common RNA", main = paste0("Neuroblast, Seurat cluster 3:\nCell ", idx2[2], " R2: ", round(fate_res$r2_org[idx2[2]], 2)))
 graphics.off()

@@ -97,39 +97,18 @@ snn_mat <- tiltedCCA:::.form_snn_mat(mat = dimred,
 
 ###############################
 
-pseudotime_rank <- greenleaf$pseudotime_rank
 rna_common <- multiSVD_obj$common_mat_1
 n <- nrow(rna_common)
 Seurat::DefaultAssay(greenleaf) <- "SCT"
 mat_1 <- Matrix::t(greenleaf[["SCT"]]@data[Seurat::VariableFeatures(object = greenleaf),])
 mat_1 <- scale(mat_1)
-cell_idx <- which(!is.na(pseudotime_rank))
 
-fate_vec <- sapply(1:length(cell_idx), function(k){
-  if(k %% floor(length(cell_idx)/10) == 0) cat('*')
-  
-  i <- cell_idx[k]
-  nn_idx <- tiltedCCA:::.nonzero_col(mat = snn_mat, col_idx = i, bool_value = F)
-  nn_idx <- intersect(nn_idx, cell_idx)
-  nn_idx <- unique(c(nn_idx, i))
-  cell_rank <- pseudotime_rank[i]
-  nn_rank <- pseudotime_rank[nn_idx]
-  nn_val <- nn_rank-cell_rank
-  nn_val <- nn_val/max(abs(nn_val))
-  
-  fit_vec <- sapply(nn_idx, function(j){
-    df <- data.frame(common = rna_common[i,],
-                     everything = mat_1[j,])
-    lm_res <- stats::lm(everything ~ common, data = df)
-    summary(lm_res)$r.squared
-  })
-  nn_val[which.max(fit_vec)]
-})
-
-fate_vec_full <- rep(NA, n)
-fate_vec_full[which(!is.na(pseudotime_rank))] <- fate_vec
-quantile(fate_vec_full, probs = seq(0,1,length.out=11), na.rm = T)
-quantile(fate_vec_full, probs = c(0.01,.99), na.rm = T)
+fate_res <- .compute_fate_direction(mat_firsttime = rna_common,
+                                    mat_secondtime = mat_1,
+                                    pseudotime_rank = greenleaf$pseudotime_rank,
+                                    snn_mat = snn_mat,
+                                    verbose = 1)
+fate_vec_full <- fate_res$fate_vec
 idx <- which(!is.na(fate_vec_full))
 fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/4)
 col_spacing <- c(seq(-1,0,length.out=21),seq(0,1,length.out=21)[-1])
@@ -153,31 +132,6 @@ points(umap_mat[idx,1], umap_mat[idx,2],
 graphics.off()
 
 
-fate_vec_full <- rep(NA, n)
-fate_vec_full[which(!is.na(pseudotime_rank))] <- fate_vec
-quantile(fate_vec_full, probs = seq(0,1,length.out=11), na.rm = T)
-quantile(fate_vec_full, probs = c(0.01,.99), na.rm = T)
-idx <- which(!is.na(fate_vec_full))
-fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/2)
-col_spacing <- c(seq(-1,0,length.out=21),seq(0,1,length.out=21)[-1])
-col_palette <- c(grDevices::colorRampPalette(c(2, "white"))(21),
-                 grDevices::colorRampPalette(c("white", 3))(21)[-1])
-col_vec <- sapply(fate_vec_full, function(val){
-  if(is.na(val)) return(NA)
-  col_palette[which.min(abs(val - col_spacing))]
-})
-
-png("../../../../out/figures/Writeup14l/Writeup14l_10x_greenleaf2_fateDirection2.png",
-    height = 3000, width = 3000, units = "px", res = 300)
-umap_mat <- greenleaf[["common_tcca"]]@cell.embeddings
-plot(umap_mat[,1], umap_mat[,2], asp = T,
-     xlab = "common_tcca_1", ylab = "common_tcca_2",
-     main = "Fate direction (Nearby RNA expression\nregressed onto cell's common RNA)",
-     pch = 16, col = rgb(0.5,0.5,0.5,0.5))
-idx <- which(!is.na(col_vec))
-points(umap_mat[idx,1], umap_mat[idx,2],
-       pch = 16, col = col_vec[idx], cex = 0.5)
-graphics.off()
 
 #########################################
 
@@ -260,34 +214,12 @@ rotation_mat <- tcrossprod(svd_tmp$u, svd_tmp$v)
 tmp <- common_score %*% crossprod(score_2[,1:k], svd_2$u) %*% rotation_mat/n
 atac_pred <-  tcrossprod(tiltedCCA:::.mult_mat_vec(tmp, svd_1$d), svd_1$v)
 
-cell_idx <- which(!is.na(pseudotime_rank))
-snn_1 <- multiSVD_obj$snn_list$snn_1
-
-fate_vec <- sapply(1:length(cell_idx), function(k){
-  if(k %% floor(length(cell_idx)/10) == 0) cat('*')
-  
-  i <- cell_idx[k]
-  nn_idx <- tiltedCCA:::.nonzero_col(mat = snn_1, col_idx = i, bool_value = F)
-  nn_idx <- intersect(nn_idx, cell_idx)
-  if(length(nn_idx) == 0) return(NA)
-  cell_rank <- pseudotime_rank[i]
-  nn_rank <- pseudotime_rank[nn_idx]
-  nn_val <- nn_rank-cell_rank
-  nn_val <- nn_val/max(abs(nn_val))
-  
-  fit_vec <- sapply(nn_idx, function(j){
-    df <- data.frame(rna = mat_1[j,],
-                     atac = atac_pred[i,])
-    lm_res <- stats::lm(rna ~ atac, data = df)
-    summary(lm_res)$r.squared
-  })
-  nn_val[which.max(fit_vec)]
-})
-
-fate_vec_full <- rep(NA, n)
-fate_vec_full[which(!is.na(pseudotime_rank))] <- fate_vec
-quantile(fate_vec_full, probs = seq(0,1,length.out=11), na.rm = T)
-quantile(fate_vec_full, probs = c(0.01,.99), na.rm = T)
+fate_res <- .compute_fate_direction(mat_firsttime = atac_pred,
+                                    mat_secondtime = mat_1,
+                                    pseudotime_rank = greenleaf$pseudotime_rank,
+                                    snn_mat = snn_mat,
+                                    verbose = 1)
+fate_vec_full <- fate_res$fate_vec
 idx <- which(!is.na(fate_vec_full))
 fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/4)
 col_spacing <- c(seq(-1,0,length.out=21),seq(0,1,length.out=21)[-1])
@@ -392,36 +324,14 @@ svd_tmp <- svd(tmp)
 rotation_mat <- tcrossprod(svd_tmp$u, svd_tmp$v)
 atac_pred <- tcrossprod(tiltedCCA:::.mult_mat_vec(svd_2$u %*% rotation_mat, svd_1$d), svd_1$v)
 
-pseudotime_rank <- greenleaf$pseudotime_rank
-cell_idx <- which(!is.na(pseudotime_rank))
-
-fate_vec <- sapply(1:length(cell_idx), function(k){
-  if(k %% floor(length(cell_idx)/10) == 0) cat('*')
-  
-  i <- cell_idx[k]
-  nn_idx <- tiltedCCA:::.nonzero_col(mat = snn_mat, col_idx = i, bool_value = F)
-  nn_idx <- intersect(nn_idx, cell_idx)
-  nn_idx <- unique(c(nn_idx, i))
-  cell_rank <- pseudotime_rank[i]
-  nn_rank <- pseudotime_rank[nn_idx]
-  nn_val <- nn_rank-cell_rank
-  nn_val <- nn_val/max(abs(nn_val))
-  
-  fit_vec <- sapply(nn_idx, function(j){
-    df <- data.frame(rna = mat_1[j,],
-                     atac = atac_pred[i,])
-    lm_res <- stats::lm(rna ~ atac, data = df)
-    summary(lm_res)$r.squared
-  })
-  nn_val[which.max(fit_vec)]
-})
-
-fate_vec_full <- rep(NA, n)
-fate_vec_full[which(!is.na(pseudotime_rank))] <- fate_vec
-quantile(fate_vec_full, probs = seq(0,1,length.out=11), na.rm = T)
-quantile(fate_vec_full, probs = c(0.01,.99), na.rm = T)
-fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/2)
+fate_res <- .compute_fate_direction(mat_firsttime = atac_pred,
+                                    mat_secondtime = mat_1,
+                                    pseudotime_rank = greenleaf$pseudotime_rank,
+                                    snn_mat = snn_mat,
+                                    verbose = 1)
+fate_vec_full <- fate_res$fate_vec
 idx <- which(!is.na(fate_vec_full))
+fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/4)
 col_spacing <- c(seq(-1,0,length.out=21),seq(0,1,length.out=21)[-1])
 col_palette <- c(grDevices::colorRampPalette(c(2, "white"))(21),
                  grDevices::colorRampPalette(c("white", 3))(21)[-1])
@@ -453,37 +363,14 @@ tmp <- crossprod(svd_2$u, svd_1$u)
 svd_tmp <- svd(tmp)
 rotation_mat <- tcrossprod(svd_tmp$u, svd_tmp$v)
 atac_pred <- tcrossprod(tiltedCCA:::.mult_mat_vec(svd_2$u %*% rotation_mat, svd_1$d), svd_1$v)
-n <- nrow(rna_common)
 
-pseudotime_rank <- greenleaf$pseudotime_rank
-cell_idx <- which(!is.na(pseudotime_rank))
-
-fate_vec <- sapply(1:length(cell_idx), function(k){
-  if(k %% floor(length(cell_idx)/10) == 0) cat('*')
-  
-  i <- cell_idx[k]
-  nn_idx <- tiltedCCA:::.nonzero_col(mat = snn_mat, col_idx = i, bool_value = F)
-  nn_idx <- intersect(nn_idx, cell_idx)
-  nn_idx <- unique(c(nn_idx, i))
-  cell_rank <- pseudotime_rank[i]
-  nn_rank <- pseudotime_rank[nn_idx]
-  nn_val <- nn_rank-cell_rank
-  nn_val <- nn_val/max(abs(nn_val))
-  
-  fit_vec <- sapply(nn_idx, function(j){
-    df <- data.frame(rna = rna_common[j,],
-                     atac = atac_pred[i,])
-    lm_res <- stats::lm(rna ~ atac, data = df)
-    summary(lm_res)$r.squared
-  })
-  nn_val[which.max(fit_vec)]
-})
-
-
-fate_vec_full <- rep(NA, n)
-fate_vec_full[which(!is.na(pseudotime_rank))] <- fate_vec
-quantile(fate_vec_full, probs = seq(0,1,length.out=11), na.rm = T)
-quantile(fate_vec_full, probs = c(0.01,.99), na.rm = T)
+fate_res <- .compute_fate_direction(mat_firsttime = atac_pred,
+                                    mat_secondtime = rna_common,
+                                    pseudotime_rank = greenleaf$pseudotime_rank,
+                                    snn_mat = snn_mat,
+                                    verbose = 1)
+fate_vec_full <- fate_res$fate_vec
+idx <- which(!is.na(fate_vec_full))
 fate_vec_full[idx] <- sign(fate_vec_full[idx])*abs(fate_vec_full[idx])^(1/4)
 idx <- which(!is.na(fate_vec_full))
 col_spacing <- c(seq(-1,0,length.out=21),seq(0,1,length.out=21)[-1])
