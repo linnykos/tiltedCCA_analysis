@@ -61,7 +61,7 @@ plot1 <-Seurat::DimPlot(tmp, reduction = "common_laplacian",
                         repel = TRUE, label.size = 2.5)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nCommon Laplacian"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14m/Writeup14m_10x_greenleaf_umap_common-laplacian.png"),
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14m/Writeup14m_10x_greenleaf_geneactivity_umap_common-laplacian.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
 
@@ -78,7 +78,7 @@ multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
 
 save(multiSVD_obj, greenleaf,
      date_of_run, session_info,
-     file = "../../../../out/Writeup14m/Writeup14m_10x_greenleaf_tcca.RData")
+     file = "../../../../out/Writeup14m/Writeup14m_10x_greenleaf_geneactivity_tcca.RData")
 
 #################################
 
@@ -106,4 +106,4 @@ greenleaf[["distinct2_tcca"]] <- tiltedCCA:::create_SeuratDim(input_obj = multiS
 
 save(multiSVD_obj, greenleaf,
      date_of_run, session_info,
-     file = "../../../../out/Writeup14m/Writeup14m_10x_greenleaf_tcca.RData")
+     file = "../../../../out/Writeup14m/Writeup14m_10x_greenleaf_geneactivity_tcca.RData")

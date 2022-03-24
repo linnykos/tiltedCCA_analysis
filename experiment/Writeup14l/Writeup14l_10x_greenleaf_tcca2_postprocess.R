@@ -421,3 +421,60 @@ plot3 <- cowplot::plot_grid(plot1, plot2, ncol = 2)
 ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14l/Writeup14l_10x_greenleaf2_umap_everythingAtacCommonRnaAlignment.png"),
                 plot3, device = "png", width = 10, height = 5, units = "in")
 
+#########################
+
+rna_common <- multiSVD_obj$common_mat_1
+Seurat::DefaultAssay(greenleaf) <- "SCT"
+mat_1 <- Matrix::t(greenleaf[["SCT"]]@data[Seurat::VariableFeatures(object = greenleaf),])
+mat_1 <- scale(mat_1)
+n <- nrow(rna_common)
+alignment_vec <- sapply(1:n, function(i){
+  mean(abs(rna_common[i,]/mat_1[i,]))
+})
+
+greenleaf$alignment <- alignment_vec
+plot1 <-Seurat::FeaturePlot(greenleaf, feature = "alignment",
+                            reduction = "common_tcca")
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nCommon to observed RNA ratio"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+
+greenleaf$alignment <- rank(alignment_vec)
+plot2 <-Seurat::FeaturePlot(greenleaf, feature = "alignment",
+                            reduction = "common_tcca")
+plot2 <- plot2 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nRank"))
+plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+
+plot3 <- cowplot::plot_grid(plot1, plot2, ncol = 2)
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14l/Writeup14l_10x_greenleaf2_umap_commonratio.png"),
+                plot3, device = "png", width = 10, height = 5, units = "in")
+
+
+# rna_common <- multiSVD_obj$tcca_obj$common_score
+# rna_distinct <- multiSVD_obj$tcca_obj$distinct_score_1
+rna_common <- multiSVD_obj$common_mat_1
+rna_distinct <- multiSVD_obj$distinct_mat_1
+n <- nrow(rna_common)
+alignment_vec <- sapply(1:n, function(i){
+  vec1 <- rna_common[i,]
+  vec2 <- rna_common[i,]+rna_distinct[i,]
+  vec1 <- scale(vec1); vec2 <- scale(vec2)
+  stats::cor(vec1, vec2)
+})
+
+greenleaf$alignment <- alignment_vec
+plot1 <-Seurat::FeaturePlot(greenleaf, feature = "alignment",
+                            reduction = "common_tcca")
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nCommon to Common+Distinct correlation"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+
+greenleaf$alignment <- rank(alignment_vec)
+plot2 <-Seurat::FeaturePlot(greenleaf, feature = "alignment",
+                            reduction = "common_tcca")
+plot2 <- plot2 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nRank"))
+plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+
+plot3 <- cowplot::plot_grid(plot1, plot2, ncol = 2)
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14l/Writeup14l_10x_greenleaf2_umap_commonCorrelationEverything.png"),
+                plot3, device = "png", width = 10, height = 5, units = "in")
+
+
