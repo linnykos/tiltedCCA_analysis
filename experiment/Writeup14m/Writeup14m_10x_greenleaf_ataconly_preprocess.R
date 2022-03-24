@@ -6,6 +6,7 @@ library(dplyr)
 
 # look at the gene activity matrix
 Sys.setenv("VROOM_CONNECTION_SIZE" = 200000000)
+print("Starting reading in matrix")
 mat <- readr::read_delim("~/nzhanglab/data/GSE162170_cortical_multiome/GSE162170_atac_counts.tsv.gz",
                          delim = "\t")
 print(dim(mat))
