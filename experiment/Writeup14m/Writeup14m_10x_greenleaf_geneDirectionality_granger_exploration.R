@@ -1,6 +1,19 @@
 rm(list=ls())
 load("../../out/experiment/Writeup14m/Writeup14m_10x_greenleaf_geneactivity_grangerTest.RData")
 
+j <- 10
+res <- .shape_constrained_fit_search(rna_common2[,j],
+                                     grid_vec = round(seq(0,nrow(rna_common2),length.out=7)[-c(1,7)]),
+                                     metric = 2)
+par(mar = c(0.5, 0.5, 2, 0.5))
+plot(rna_common2[,j], pch = 16, col = rgb(0.5, 0.5, 0.5, 0.5),
+     main = res$type)
+lines(res$fit, col = 2, lwd = 5)
+
+#####################
+#####################
+#####################
+
 n <- nrow(rna_common2)
 concave_fit <- .shape_constrained_fit(rna_common2[,1],
                                       grid_vec = seq(0,n,length.out=5)[-c(1,5)],
@@ -32,7 +45,7 @@ res_list <- list(concave_fit, convex_fit,
                  vexcave_fit, cavevex_fit)
 par(mar = c(0.5, 0.5, 0.5, 0.5))
 plot(rna_common2[,1], pch = 16, col = rgb(0.5, 0.5, 0.5, 0.5))
-for(i in 1:length(res_list)){
+for(i in 1:2){
   lines(res_list[[i]], lwd = 5, col = i)
 }
 

@@ -1,20 +1,41 @@
 .shape_constrained_fit_search <- function(vec, 
                                           grid_vec,
                                           metric){
-  fit_list <- lapply(c("concave", "convex", "decreasing", "increasing"), 
-                     function(setting){
-                       .shape_constrained_fit(vec = vec,
-                                              grid_vec = grid_vec,
-                                              metric = metric,
-                                              setting = setting)
-                     })
+  setting_vec <- c("concave", "convex", "decreasing", "increasing",
+                   "concave-convex", "convex-concave")
+  fit_list <- lapply(setting_vec, function(setting){
+    .shape_constrained_fit(vec = vec,
+                           grid_vec = grid_vec,
+                           metric = metric,
+                           setting = setting)
+  })
+  names(fit_list) <- setting_vec
   mse_vec <- sapply(fit_list, function(fit_vec){
     .error_metric(metric = metric,
                   vec1 = fit_vec,
                   vec2 = vec)
   })
+  names(mse_vec) <- setting_vec
   
+  bool <- .substantial_unimodal(vec = fit_list[["concave"]],
+                                threshold_perc = 0.1)
+  if(!bool) mse_vec["concave"] <- NA
+  bool <- .substantial_unimodal(vec = fit_list[["convex"]],
+                                threshold_perc = 0.1)
+  if(!bool) mse_vec["convex"] <- NA
   
+  bool <- .substantial_twounimodal(vec = fit_list[["concave-convex"]],
+                                   threshold_num_changes = 10,
+                                   threshold_perc = 0.1)
+  if(!bool) mse_vec["concave-convex"] <- NA
+  bool <- .substantial_twounimodal(vec = fit_list[["convex-concave"]],
+                                   threshold_num_changes = 10,
+                                   threshold_perc = 0.1)
+  if(!bool) mse_vec["convex-concave"] <- NA
+  
+  idx <- which.min(mse_vec)
+  list(fit = fit_list[[idx]],
+       type = names(fit_list)[idx])
 }
 
 .shape_constrained_fit <- function(vec,
@@ -97,4 +118,36 @@
   negative_region <- range(which(sign_vec < 0))
   
   diff(positive_region) > threshold_val & diff(negative_region) > threshold_val
+}
+
+.substantial_twounimodal <- function(vec, 
+                                     threshold_num_changes, # default: 10
+                                     threshold_perc){ # default: 0.1
+  n <- length(vec)
+  threshold_val <- threshold_perc * n
+  
+  # first determine what's in the middle
+  sign_vec <- sign(diff(vec))
+  positive_region <- range(which(sign_vec > 0))
+  negative_region <- range(which(sign_vec < 0))
+  
+  if(positive_region[1] > negative_region[1] & positive_region[2] < negative_region[2]){
+    negative_region_1 <- range(which(sign_vec[1:positive_region[1]] < 0))
+    negative_region_2 <- range(which(sign_vec[positive_region[2]:n] < 0))
+    
+    bool1 <- diff(positive_region) > threshold_val & diff(negative_region_1) > threshold_val & diff(negative_region_2) > threshold_val
+    bool2 <- length(positive_region) > threshold_num_changes &  length(negative_region_1) > threshold_num_changes &  length(negative_region_2) > threshold_num_changes
+    return(bool1 & bool2)
+    
+  } else if(negative_region[1] > positive_region[1] & negative_region[2] < positive_region[2]){
+    positive_region_1 <- range(which(sign_vec[1:negative_region[1]] > 0))
+    positive_region_2 <- range(which(sign_vec[negative_region[2]:n] > 0))
+    
+    bool1 <- diff(negative_region) > threshold_val & diff(positive_region_1) > threshold_val & diff(positive_region_2) > threshold_val
+    bool2 <- length(negative_region) > threshold_num_changes &  length(positive_region_1) > threshold_num_changes &  length(positive_region_2) > threshold_num_changes
+    return(bool1 & bool2)
+    
+  } else {
+    return(FALSE)
+  }
 }
