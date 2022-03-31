@@ -34,8 +34,12 @@
   if(!bool) mse_vec["convex-concave"] <- NA
   
   idx <- which.min(mse_vec)
+  flat_mse <- .error_metric(metric = metric,
+                            vec1 = vec,
+                            vec2 = rep(mean(vec), length(vec)))
   list(fit = fit_list[[idx]],
-       type = names(fit_list)[idx])
+       type = names(fit_list)[idx],
+       quality = abs(mse_vec[idx] - flat_mse)/flat_mse)
 }
 
 .shape_constrained_fit <- function(vec,
@@ -128,6 +132,7 @@
   
   # first determine what's in the middle
   sign_vec <- sign(diff(vec))
+  if(!any(sign_vec == "1") | !any(sign_vec == "-1")) return(FALSE)
   positive_region <- range(which(sign_vec > 0))
   negative_region <- range(which(sign_vec < 0))
   
