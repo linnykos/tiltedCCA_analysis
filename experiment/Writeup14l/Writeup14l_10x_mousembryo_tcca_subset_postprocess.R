@@ -373,5 +373,39 @@ plot3 <- cowplot::plot_grid(plot1, plot2, ncol = 2)
 ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14l/Writeup14l_10x_mouseembryo_subset_commonCorrelationDistinct_smoothed.png"),
                 plot3, device = "png", width = 10, height = 5, units = "in")
 
+###########################
+
+rna_common <- multiSVD_obj$common_mat_1
+rna_distinct <- multiSVD_obj$distinct_mat_1
+n <- nrow(rna_common)
+alignment_vec <- sapply(1:n, function(i){
+  df <- data.frame(common = rna_common[i,],
+                   distinct = rna_distinct[i,])
+  lm_res <- stats::lm(distinct ~ common, data = df)
+  1-tiltedCCA:::.l2norm(lm_res$residuals)/tiltedCCA:::.l2norm(rna_distinct[i,])
+})
+quantile(alignment_vec)
+
+alignment_vec_smoothed <- sapply(1:n, function(i){
+  idx <- c(tiltedCCA:::.nonzero_col(snn_mat, col_idx = i, bool_value = F), i)
+  mean(alignment_vec[idx])
+})
+
+mbrain$alignment <- alignment_vec_smoothed
+plot1 <-Seurat::FeaturePlot(mbrain, feature = "alignment",
+                            reduction = "common_tcca")
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse Embryo (10x, RNA+ATAC)\nDistinct resid. (predict using Common, Smoothed)"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+
+mbrain$alignment <- rank(alignment_vec_smoothed)
+plot2 <-Seurat::FeaturePlot(mbrain, feature = "alignment",
+                            reduction = "common_tcca")
+plot2 <- plot2 + ggplot2::ggtitle(paste0("Mouse Embryo (10x, RNA+ATAC)\nRank"))
+plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+
+plot3 <- cowplot::plot_grid(plot1, plot2, ncol = 2)
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14l/Writeup14l_10x_mouseembryo_subset_RNADistinctResidualsByRNACommon.png"),
+                plot3, device = "png", width = 10, height = 5, units = "in")
+
 
 
