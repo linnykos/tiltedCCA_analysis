@@ -106,10 +106,10 @@ multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
                                          latent_k = 20,
-                                         num_neigh = 150,
+                                         num_neigh = 30,
                                          bool_cosine = T,
                                          bool_intersect = F,
-                                         min_deg = 150,
+                                         min_deg = 30,
                                          verbose = 2)
 
 multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
