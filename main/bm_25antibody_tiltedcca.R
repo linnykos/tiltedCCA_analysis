@@ -143,7 +143,7 @@ bm[["distinct2_tcca"]] <- tiltedCCA:::create_SeuratDim(input_obj = multiSVD_obj,
 
 save(multiSVD_obj, bm,
      date_of_run, session_info,
-     file = "../../../out/main/citeseq_bm25.RData")
+     file = "../../../out/main/citeseq_bm25_tcca.RData")
 
 ##########
 
