@@ -83,18 +83,20 @@ pbmc <- Seurat::ScaleData(pbmc, features = Seurat::VariableFeatures(object = pbm
 
 # see directions on https://satijalab.org/seurat/articles/multimodal_reference_mapping.html
 # load PBMC reference
-reference <- SeuratDisk::LoadH5Seurat("~/project/tiltedCCA/data/pbmc_multimodal.h5seurat")
+reference <- SeuratDisk::LoadH5Seurat("~/project/tiltedCCA/data/10x_PBMC_RNA-ATAC/pbmc_multimodal.h5seurat")
 
-DefaultAssay(pbmc) <- "SCT"
-
+Seurat::DefaultAssay(reference) <- "SCT"
+Seurat::DefaultAssay(pbmc) <- "SCT"
 set.seed(10)
 # transfer cell type labels from reference to query
+# see https://github.com/satijalab/seurat/issues/3989
 transfer_anchors <- Seurat::FindTransferAnchors(
   reference = reference,
   query = pbmc,
   normalization.method = "SCT",
   reference.reduction = "spca",
-  dims = 1:50
+  dims = 1:50,
+  recompute.residuals = FALSE
 )
 
 set.seed(10)
@@ -116,13 +118,46 @@ Seurat::Idents(pbmc) <- "predicted.id"
 ############################
 
 set.seed(10)
-pbmc <- Seurat::FindMultiModalNeighbors(pbmc, reduction.list = list("pca", "lsi"), dims.list = list(1:50, 2:50))
-pbmc <- Seurat::RunUMAP(pbmc, nn.name = "weighted.nn", reduction.name = "wnn.umap", reduction.key = "wnnUMAP_")
+pbmc <- Seurat::FindMultiModalNeighbors(pbmc, 
+                                        reduction.list = list("pca", "lsi"), 
+                                        dims.list = list(1:50, 2:50))
+set.seed(10)
+pbmc <- Seurat::RunUMAP(pbmc, nn.name = "weighted.nn", 
+                        reduction.name = "wnn.umap", 
+                        reduction.key = "wnnUMAP_")
 
 ###############################
 
 save(pbmc, date_of_run, session_info,
      file = "../../../out/main/10x_pbmc_preprocessed.RData")
 
+###################
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "umap.rna",
+                         group.by = "predicted.id", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         raster=FALSE)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (10x, RNA+ATAC)\nRNA UMAP"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_pbmc_rna-umap.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+plot2 <- Seurat::DimPlot(pbmc, reduction = "umap.atac",
+                         group.by = "predicted.id", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         raster=FALSE)
+plot2 <- plot2 + ggplot2::ggtitle(paste0("PBMC (10x, RNA+ATAC)\nATAC UMAP"))
+plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_pbmc_atac-umap.png"),
+                plot2, device = "png", width = 6, height = 5, units = "in")
+
+plot3 <- Seurat::DimPlot(pbmc, reduction = "wnn.umap",
+                         group.by = "predicted.id", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         raster=FALSE)
+plot3 <- plot3 + ggplot2::ggtitle(paste0("PBMC (10x, RNA+ATAC)\nWNN UMAP"))
+plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_pbmc_wnn-umap.png"),
+                plot3, device = "png", width = 6, height = 5, units = "in")
 
 

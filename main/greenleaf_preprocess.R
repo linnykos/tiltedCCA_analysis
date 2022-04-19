@@ -191,7 +191,7 @@ plot1 <- Seurat::DimPlot(greenleaf, reduction = "umap",
                          repel = TRUE, label.size = 2.5)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nRNA UMAP"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/greenleaf_rna-umap.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_rna-umap.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
 plot2 <- Seurat::DimPlot(greenleaf, reduction = "umap.atac",
@@ -199,7 +199,7 @@ plot2 <- Seurat::DimPlot(greenleaf, reduction = "umap.atac",
                          repel = TRUE, label.size = 2.5)
 plot2 <- plot2 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nATAC UMAP"))
 plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/greenleaf_atac-umap.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_atac-umap.png"),
                 plot2, device = "png", width = 6, height = 5, units = "in")
 
 plot3 <- Seurat::DimPlot(greenleaf, reduction = "umap.wnn",
@@ -207,7 +207,7 @@ plot3 <- Seurat::DimPlot(greenleaf, reduction = "umap.wnn",
                          repel = TRUE, label.size = 2.5)
 plot3 <- plot3 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nWNN UMAP"))
 plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/greenleaf_wnn-umap.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_wnn-umap.png"),
                 plot3, device = "png", width = 6, height = 5, units = "in")
 
 plot4 <- Seurat::DimPlot(greenleaf, reduction = "umap.geneActivity",
@@ -215,7 +215,7 @@ plot4 <- Seurat::DimPlot(greenleaf, reduction = "umap.geneActivity",
                          repel = TRUE, label.size = 2.5)
 plot4 <- plot4 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nGene Activity UMAP"))
 plot4 <- plot4 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/greenleaf_geneActivity-umap.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_geneActivity-umap.png"),
                 plot4, device = "png", width = 6, height = 5, units = "in")
 
 ###################
@@ -224,6 +224,6 @@ date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
 save(greenleaf, date_of_run, session_info,
-     file = "../../../out/main/greenleaf_preprocessed.RData")
+     file = "../../../out/main/10x_greenleaf_preprocessed.RData")
 
 
