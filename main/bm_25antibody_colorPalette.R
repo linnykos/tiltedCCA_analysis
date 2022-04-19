@@ -27,3 +27,6 @@ col_palette <- c(
   "Prog_RBC" = rgb(220, 113, 250, maxColorValue = 255),
   "Treg" = rgb(243, 123, 89, maxColorValue = 255)
 )
+
+plot(1:length(col_palette), pch = 16, col = col_palette, cex = 5)
+

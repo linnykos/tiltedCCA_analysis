@@ -26,19 +26,14 @@ pbmc[["wnn.umap"]] <- NULL
 ##########################################
 
 Seurat::DefaultAssay(pbmc) <- "SCT"
-pbmc <- Seurat::ScaleData(pbmc) 
-pbmc <- Seurat::RunPCA(pbmc, verbose = F)
 set.seed(10)
-pbmc <- Seurat::RunUMAP(pbmc, reduction = 'pca', dims = 1:40, assay = 'RNA',
+pbmc <- Seurat::RunUMAP(pbmc, reduction = 'pca', dims = 1:40, assay = 'SCT',
                         reduction.name = 'rna.umap', reduction.key = 'rnaUMAP_')
 set.seed(10)
-pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:40)
+pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:40, reduction = "pca")
 pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
 
 Seurat::DefaultAssay(pbmc) <- "ADT"
-pbmc <- Seurat::ScaleData(pbmc)
-pbmc[["ADT"]]@var.features <- rownames(pbmc)
-pbmc <- Seurat::RunPCA(pbmc, reduction.name = 'apca', verbose = F)
 set.seed(10)
 pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca', dims = 1:25, assay = 'ADT',
                         reduction.name = 'adt.umap', reduction.key = 'adtUMAP_')
@@ -80,9 +75,9 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_sub
 #########
 
 Seurat::DefaultAssay(pbmc) <- "SCT"
-mat_1 <- Matrix::t(pbmc[["SCT"]]@data[Seurat::VariableFeatures(object = pbmc),])
+mat_1 <- Matrix::t(pbmc[["SCT"]]@scale.data)
 Seurat::DefaultAssay(pbmc) <- "ADT"
-mat_2 <- Matrix::t(pbmc[["ADT"]]@data)
+mat_2 <- Matrix::t(pbmc[["ADT"]]@scale.data)
 
 mat_1b <- mat_1
 sd_vec <- sparseMatrixStats::colSds(mat_1b)
@@ -114,11 +109,11 @@ multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
-                                         latent_k = 20,
-                                         num_neigh = 100,
+                                         latent_k = 50,
+                                         num_neigh = 60,
                                          bool_cosine = T,
                                          bool_intersect = F,
-                                         min_deg = 100,
+                                         min_deg = 30,
                                          verbose = 2)
 
 multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
