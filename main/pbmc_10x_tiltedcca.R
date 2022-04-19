@@ -68,7 +68,7 @@ multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
                                             verbose = 1)
 multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            large_clustering_1 = as.factor(pbmc$SCT_snn_res.0.25), 
-                                           large_clustering_2 = as.factor(pbmc$ADT_snn_res.0.25), 
+                                           large_clustering_2 = as.factor(pbmc$ATAC_snn_res.0.25), 
                                            num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,

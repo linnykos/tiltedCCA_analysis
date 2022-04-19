@@ -37,6 +37,7 @@ pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
 
 Seurat::DefaultAssay(pbmc) <- "ADT"
 pbmc <- Seurat::ScaleData(pbmc)
+pbmc[["ADT"]]@var.features <- rownames(pbmc)
 pbmc <- Seurat::RunPCA(pbmc, reduction.name = 'apca', verbose = F)
 set.seed(10)
 pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca', dims = 1:25, assay = 'ADT',
