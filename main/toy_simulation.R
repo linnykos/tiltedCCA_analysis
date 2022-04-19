@@ -314,3 +314,27 @@ for(i in 1:length(xseq)){
 }
 graphics.off()
 
+tmp4 <- tmp3
+set.seed(10)
+samp_idx <- cbind(sample(1:n), sample(1:n))
+zz <- samp_idx[,1] != samp_idx[,2]
+samp_idx <- samp_idx[zz,]
+for(k in 1:nrow(samp_idx)){
+  i <- samp_idx[k,1]; j <- samp_idx[k,2]
+  tmp4[i,j] <- -tmp4[i,j]+1
+  tmp4[j,i] <- -tmp4[j,i]+1
+}
+png("../../out/figures/main/toy_simulation_Attmpted-SNN.png", 
+    height = 2500, width = 2500, res = 500, units = "px")
+par(mar = c(0.5, 0.5, 0.5, 0.5))
+image(tiltedCCA:::.rotate(tmp4), asp = T,
+      col = c(rgb(0.9, 0.9, 0.9), 2),
+      breaks = c(-.5, .5, 1.5),
+      xlab = "", ylab = "", xaxt = "n", yaxt = "n", bty = "n")
+for(i in 1:length(xseq)){
+  lines(rep(xseq[i], 2), range(xseq), lwd = 2)
+}
+for(i in 1:length(xseq)){
+  lines(range(xseq), rep(xseq[i], 2), lwd = 2)
+}
+graphics.off()
