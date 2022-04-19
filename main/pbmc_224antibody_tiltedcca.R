@@ -114,11 +114,11 @@ multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
-                                         latent_k = 50,
-                                         num_neigh = 60,
+                                         latent_k = 20,
+                                         num_neigh = 100,
                                          bool_cosine = T,
                                          bool_intersect = F,
-                                         min_deg = 30,
+                                         min_deg = 100,
                                          verbose = 2)
 
 multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
@@ -160,4 +160,4 @@ pbmc[["distinct2_tcca"]] <- tiltedCCA:::create_SeuratDim(input_obj = multiSVD_ob
 
 save(multiSVD_obj, pbmc,
      date_of_run, session_info,
-     file = "../../../out/main/citeseq_bm25_tcca.RData")
+     file = "../../../out/main/citeseq_pbmc224_tiltedcca.RData")
