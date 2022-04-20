@@ -129,7 +129,13 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_uma
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
 multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
+                                      discretization_gridsize = 11,
                                       verbose = 1)
+
+save(multiSVD_obj, pbmc,
+     date_of_run, session_info,
+     file = "../../../out/main/citeseq_pbmc224_tiltedcca.RData")
+
 multiSVD_obj <- tiltedCCA:::fine_tuning(input_obj = multiSVD_obj,
                                         verbose = 1)
 multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
