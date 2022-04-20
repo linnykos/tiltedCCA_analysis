@@ -17,6 +17,7 @@ celltype_l3[celltype_l3 %in% c("Prog_B 1", "Prog_B 2")] <- "Prog_B"
 celltype_l3[celltype_l3 %in% c("Prog_Mk", "Plasmablast", "LMPP", "Treg")] <- NA
 
 bm$celltype.l3 <- celltype_l3
+print("Working on RNA")
 gene_de_list <- tiltedCCA:::differential_expression(seurat_obj = bm,
                                                     assay = "RNA",
                                                     idents = "celltype.l3",
@@ -28,6 +29,7 @@ save(gene_de_list, bm,
 
 ########
 
+print("Working on ADT")
 adt_de_list <- tiltedCCA:::differential_expression(seurat_obj = bm,
                                                     assay = "ADT",
                                                     idents = "celltype.l3",
