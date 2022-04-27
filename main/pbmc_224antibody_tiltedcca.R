@@ -106,35 +106,17 @@ multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
 multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            large_clustering_1 = as.factor(pbmc$SCT_snn_res.0.25), 
                                            large_clustering_2 = as.factor(pbmc$ADT_snn_res.0.25), 
-                                           num_metacells = NULL,
+                                           num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
-                                         latent_k = 50,
-                                         num_neigh = 60,
+                                         latent_k = 30,
+                                         num_neigh = 30,
                                          bool_cosine = T,
                                          bool_intersect = F,
                                          min_deg = 30,
                                          verbose = 2)
-tmp <- pbmc; tmp_mat <- multiSVD_obj$laplacian_list$common_laplacian
-colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
-set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)
-tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap@cell.embeddings,
-                                                          assay = "SCT")
-plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
-                         group.by = "celltype.l2", label = TRUE,
-                         repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nCommon Laplacian"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_umap_common-laplacian.png"),
-                plot1, device = "png", width = 6, height = 5, units = "in")
-
 multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
-                                      discretization_gridsize = 11,
                                       verbose = 1)
-
-save(multiSVD_obj, pbmc,
-     date_of_run, session_info,
-     file = "../../../out/main/citeseq_pbmc224_tiltedcca.RData")
 
 multiSVD_obj <- tiltedCCA:::fine_tuning(input_obj = multiSVD_obj,
                                         verbose = 1)

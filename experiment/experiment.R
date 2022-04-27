@@ -3,87 +3,11 @@ load("../../../out/main/citeseq_pbmc224_tiltedcca.RData")
 
 library(Seurat); library(Signac)
 
-input_obj <- multiSVD_obj
-
-input_obj <- tiltedCCA:::.set_defaultAssay(input_obj, assay = 1)
-svd_1 <- tiltedCCA:::.get_SVD(input_obj)
-input_obj <- tiltedCCA:::.set_defaultAssay(input_obj, assay = 2)
-svd_2 <- tiltedCCA:::.get_SVD(input_obj)
-
-n <- nrow(svd_1$u)
-metacell_clustering_list <- tiltedCCA:::.get_metacell(input_obj,
-                                                      resolution = "cell", 
-                                                      type = "list", 
-                                                      what = "metacell_clustering")
-averaging_mat <- tiltedCCA:::.generate_averaging_matrix(metacell_clustering_list = metacell_clustering_list,
-                                                        n = n)
-
-target_dimred <- tiltedCCA:::.get_Laplacian(input_obj, bool_common = T)
-param <- tiltedCCA:::.get_param(input_obj)
-snn_bool_cosine <- param$snn_bool_cosine
-snn_bool_intersect <- param$snn_bool_intersect
-snn_k <- param$snn_latent_k
-snn_min_deg <- param$snn_min_deg
-snn_num_neigh <- param$snn_num_neigh
-
-cca_res <- tiltedCCA:::.cca(svd_1, svd_2, dims_1 = NA, dims_2 = NA, return_scores = F)
-
-###########
-
-full_rank <- length(cca_res$obj_vec)
-n <- nrow(svd_1$u)
-tmp <- tiltedCCA:::.compute_unnormalized_scores(svd_1, svd_2, cca_res)
-score_1 <- tmp$score_1; score_2 <- tmp$score_2
-stopifnot(ncol(score_1) == length(svd_1$d), ncol(score_2) == length(svd_2$d),
-          nrow(score_1) == nrow(score_2))
-obj_vec <- cca_res$obj_vec
-
-##########
-
-rank_c <- min(ncol(score_1), ncol(score_2))
-stopifnot(all(sapply(1:rank_c, function(k){
-  val <- score_1[,k] %*% score_2[,k]; val >= 0 
-}))) # ensures score matrices contain pair of acute vectors
-
-basis_list <- lapply(1:rank_c, function(k){
-  tiltedCCA:::.representation_2d(score_1[,k], score_2[,k])
-})
-
-circle_list <- lapply(1:rank_c, function(k){
-  vec1 <- basis_list[[k]]$rep1
-  vec2 <- basis_list[[k]]$rep2
-  tiltedCCA:::.construct_circle(vec1, vec2)
-})
-
-###############
-
-r <- length(basis_list)
-enforce_boundary <- F
-
-percentage <- multiSVD_obj$tcca_obj$tilt_perc
-radian_vec <- sapply(1:r, function(k){
-  tiltedCCA:::.compute_radian(circle = circle_list[[k]],
-                              enforce_boundary = enforce_boundary,
-                              percentage_val = percentage[k], 
-                              vec1 = basis_list[[k]]$rep1,
-                              vec2 = basis_list[[k]]$rep2)
-})
-
-common_representation <- sapply(1:r, function(k){
-  tiltedCCA:::.position_from_circle(circle_list[[k]], radian_vec[k])
-})
-
-common_score <- sapply(1:r, function(k){
-  basis_list[[k]]$basis_mat %*% common_representation[,k]
-})
-
-common_mat <- tiltedCCA:::.convert_common_score_to_mat(common_score,
-                                                       score_1,
-                                                       score_2,
-                                                       svd_1,
-                                                       svd_2)
-
-############################################
+common_mat <- tiltedCCA:::.convert_common_score_to_mat(common_score = multiSVD_obj$tcca_obj$common_score,
+                                                       score_1 = multiSVD_obj$cca_obj$score_1,
+                                                       score_2 = multiSVD_obj$cca_obj$score_2,
+                                                       svd_1 = multiSVD_obj$svd_1,
+                                                       svd_2 = multiSVD_obj$svd_2)
 
 set.seed(10)
 seurat_umap <- Seurat::RunUMAP(common_mat, 
@@ -91,7 +15,7 @@ seurat_umap <- Seurat::RunUMAP(common_mat,
 rownames(seurat_umap@cell.embeddings) <- rownames(score_1)
 
 pbmc[["tmp"]] <- Seurat::CreateDimReducObject(seurat_umap@cell.embeddings,
-                             assay = "SCT")
+                                              assay = "SCT")
 
 plot1 <- Seurat::DimPlot(pbmc, reduction = "tmp",
                          group.by = "celltype.l2", label = TRUE,
@@ -99,6 +23,119 @@ plot1 <- Seurat::DimPlot(pbmc, reduction = "tmp",
                          raster=FALSE)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nCommon subspace"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_tcca-umap_common_tmp.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/Writeup14n/citeseq_pbmc224_tcca-umap_common_version1.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
+
+############################################
+
+multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
+                                                    verbose = 1,
+                                                    bool_modality_1_full = F,
+                                                    bool_modality_2_full = F)
+multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 1)
+dimred_1 <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = T, what = "common_dimred")
+multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
+dimred_2 <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = T, what = "common_dimred")
+dimred <- cbind(dimred_1, dimred_2)
+
+set.seed(10)
+seurat_umap <- Seurat::RunUMAP(dimred, 
+                               assay = "SCT")
+rownames(seurat_umap@cell.embeddings) <- rownames(score_1)
+
+pbmc[["tmp"]] <- Seurat::CreateDimReducObject(seurat_umap@cell.embeddings,
+                                              assay = "SCT")
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "tmp",
+                         group.by = "celltype.l2", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         raster=FALSE)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nCommon subspace"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/Writeup14n/citeseq_pbmc224_tcca-umap_common_version2.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+#####################################
+
+multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 1)
+dimred_1b <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = T, what = "common_mat")
+multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
+dimred_2b <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = T, what = "common_mat")
+dimredb <- cbind(dimred_1b, dimred_2b)
+
+
+
+set.seed(10)
+seurat_umap <- Seurat::RunUMAP(dimredb, 
+                               assay = "SCT")
+rownames(seurat_umap@cell.embeddings) <- rownames(score_1)
+
+pbmc[["tmp"]] <- Seurat::CreateDimReducObject(seurat_umap@cell.embeddings,
+                                              assay = "SCT")
+plot1 <- Seurat::DimPlot(pbmc, reduction = "tmp",
+                         group.by = "celltype.l2", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         raster=FALSE)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nCommon subspace"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/Writeup14n/citeseq_pbmc224_tcca-umap_common_version3.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+##################
+
+tmp <- multiSVD_obj$common_mat_1
+param <- tiltedCCA:::.get_param(multiSVD_obj)
+normalize_row <- param$svd_normalize_row
+normalize_singular_value <- param$svd_normalize_singular_value
+recenter <- param$svd_recenter_1
+rescale <- param$svd_rescale_1
+center <- param$svd_center_1
+dims <- param$svd_dims_1; dims <- dims - min(dims) + 1
+dims <- pmin(dims, ncol(tmp))
+scale <- param$svd_scale_1
+
+dimred_tmp <- tiltedCCA:::.get_Dimred(input_obj = multiSVD_obj, 
+                                      normalize_singular_value = normalize_singular_value,
+                                      center = center,
+                                      dims = dims,
+                                      scale = scale)
+
+if(normalize_row){
+  l2_vec <- apply(dimred_tmp, 1, function(x){tiltedCCA:::.l2norm(x)})
+  l2_vec[l2_vec <= 1e-4] <- 1e-4
+  dimred_tmp <- tiltedCCA:::.mult_vec_mat(1/l2_vec, dimred_tmp)
+}
+
+###
+
+multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 1)
+zz <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "common_mat")
+yy <- tiltedCCA:::.get_Dimred(input_obj = zz, 
+                              normalize_singular_value = normalize_singular_value,
+                              center = center,
+                              dims = dims,
+                              scale = scale) # this is the problematic part...
+
+yy2 <- tiltedCCA:::.get_Dimred(input_obj = zz, 
+                              normalize_singular_value = normalize_singular_value,
+                              center = F,
+                              dims = dims,
+                              scale = F)
+yy3b <- tiltedCCA:::.get_SVD(input_obj = multiSVD_obj, 
+                            center = center,
+                            dims = dims,
+                            scale = scale)
+n <- nrow(yy3b$u)
+if(normalize_singular_value) yy3b$d <- yy3b$d*sqrt(n)/yy3b$d[1]
+yy4b <- tiltedCCA:::.mult_mat_vec(yy3b$u, yy3b$d)
+
+##
+
+yy3 <- tiltedCCA:::.get_SVD(input_obj = zz, 
+                            center = center,
+                            dims = dims,
+                            scale = scale)
+n <- nrow(yy3$u)
+if(normalize_singular_value) yy3$d <- yy3$d*sqrt(n)/yy3$d[1]
+yy4 <- tiltedCCA:::.mult_mat_vec(yy3$u, yy3$d)
 
