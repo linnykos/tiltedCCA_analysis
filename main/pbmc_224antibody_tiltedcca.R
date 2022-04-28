@@ -9,67 +9,39 @@ set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
-membership_vec <- as.factor(pbmc$celltype.l2)
-n <- length(membership_vec)
-set.seed(10)
-idx <- tiltedCCA::construct_celltype_subsample(membership_vec, 
-                                               min_subsample_cell = 5000)
-keep_vec <- rep(0, n)
-names(keep_vec) <- rownames(pbmc@meta.data)
-keep_vec[idx] <- 1
+keep_vec <- rep(1, ncol(pbmc))
+keep_vec[which(pbmc$celltype.l2 == "Doublet")] <- 0
 pbmc$keep <- keep_vec
 pbmc <- subset(pbmc, keep == 1)
-pbmc[["rna.umap"]] <- NULL
-pbmc[["adt.umap"]] <- NULL
-pbmc[["wnn.umap"]] <- NULL
 
 ##########################################
 
 Seurat::DefaultAssay(pbmc) <- "SCT"
-set.seed(10)
-pbmc <- Seurat::RunUMAP(pbmc, reduction = 'pca', dims = 1:40, assay = 'SCT',
-                        reduction.name = 'rna.umap', reduction.key = 'rnaUMAP_')
 set.seed(10)
 pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:40, reduction = "pca")
 pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
 
 Seurat::DefaultAssay(pbmc) <- "ADT"
 set.seed(10)
-pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca', dims = 1:25, assay = 'ADT',
-                        reduction.name = 'adt.umap', reduction.key = 'adtUMAP_')
-set.seed(10)
 pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:25, reduction = "apca")
 pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
 
-
-plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
-                         group.by = "celltype.l2", label = TRUE,
-                         repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nSubset, RNA UMAP"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_subset_rna-umap.png"),
-                plot1, device = "png", width = 6.5, height = 5, units = "in")
 plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
                          group.by = "SCT_snn_res.0.25", label = TRUE,
-                         repel = TRUE, label.size = 2.5)
+                         repel = TRUE, label.size = 2.5,
+                         raster = F)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nSubset, RNA clustering"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_subset_rna-clustering.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_rna-clustering.png"),
                 plot1, device = "png", width = 6.5, height = 5, units = "in")
 
 plot1 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
-                         group.by = "celltype.l2", label = TRUE,
-                         repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nSubset, ADT UMAP"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_subset_adt-umap.png"),
-                plot1, device = "png", width = 6.5, height = 5, units = "in")
-plot1 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
                          group.by = "ADT_snn_res.0.25", label = TRUE,
-                         repel = TRUE, label.size = 2.5)
+                         repel = TRUE, label.size = 2.5,
+                         raster = F)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nSubset, ADT clustering"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_subset_adt-clustering.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_adt-clustering.png"),
                 plot1, device = "png", width = 6.5, height = 5, units = "in")
 
 #########

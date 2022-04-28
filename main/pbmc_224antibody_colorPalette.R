@@ -17,18 +17,17 @@ col_palette <- c(
   "cDC1" = rgb(255, 97, 201, maxColorValue = 255),
   "cDC2" = rgb(255, 98, 188, maxColorValue = 255),
   "dnT" = rgb(142, 171, 0, maxColorValue = 255),
-  "Doublet" = ,
-  "Eryth" = ,
+  "Eryth" = rgb(134, 75, 30, maxColorValue = 255),
   "gdT" = rgb(133, 173, 0, maxColorValue = 255),
   "HSPC" = rgb(247, 99, 224, maxColorValue = 255),
-  "ILC" = ,
+  "ILC" = rgb(104, 56, 21, maxColorValue = 255),
   "MAIT" = rgb(149, 169, 0, maxColorValue = 255),
   "NK" = rgb(0.6, 0.6, 0.6),
-  "NK Proliferating" = ,
+  "NK Proliferating" = rgb(0.75, 0.75, 0.75),
   "NK_CD56bright" = rgb(0.7, 0.7, 0.7),
   "pDC" = rgb(255, 101, 174, maxColorValue = 255),
   "Plasmablast" = rgb(1, 191, 196, maxColorValue = 255),
-  "Platelet" = ,
+  "Platelet" = rgb(108, 47, 0, maxColorValue = 255),
   "Treg" = rgb(243, 123, 89, maxColorValue = 255)
 )
 
