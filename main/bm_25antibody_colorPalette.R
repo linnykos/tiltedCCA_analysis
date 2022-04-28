@@ -28,5 +28,5 @@ col_palette <- c(
   "Treg" = rgb(243, 123, 89, maxColorValue = 255)
 )
 
-plot(1:length(col_palette), pch = 16, col = col_palette, cex = 5)
+# plot(1:length(col_palette), pch = 16, col = col_palette, cex = 5)
 
