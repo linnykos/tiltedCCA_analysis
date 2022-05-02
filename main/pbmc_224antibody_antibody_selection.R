@@ -35,7 +35,7 @@ set.seed(10)
 variable_selection_res <- tiltedCCA:::postprocess_variable_selection(
   input_obj = multiSVD_obj,
   logpval_vec = logpval_vec,
-  cor_threshold = 0.4,
+  cor_threshold = 0.45,
   input_assay = 2,
   max_variables = 10,
   min_subsample_cell = 5000,
@@ -54,13 +54,14 @@ adt_mat2 <- adt_mat2[variable_selection_res$selected_variables,]
 pbmc[["ADT2"]] <- Seurat::CreateAssayObject(counts = adt_mat2)
 pbmc[["ADT2"]]@data <- adt_mat2
 pbmc[["ADT2"]]@scale.data <- adt_mat2
-pbmc[["ADT2"]]@var.features <-  variable_selection_res$selected_variables
+pbmc[["ADT2"]]@var.features <- variable_selection_res$selected_variables
 
 Seurat::DefaultAssay(pbmc) <- "ADT2"
 pbmc <- Seurat::RunPCA(pbmc, reduction.name = 'apca2', npcs = 10, verbose = F)
 
 set.seed(10)
-pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca2', dims = 1:9, assay = 'ADT2',
+pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca2', dims = 1:(ncol(pbmc[["apca2"]]@cell.embeddings)-1), 
+                        assay = 'ADT2',
                         reduction.name = 'adt2.umap', reduction.key = 'adt2UMAP_')
 
 set.seed(10)
