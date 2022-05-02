@@ -50,7 +50,8 @@ save(pbmc, date_of_run, session_info,
 plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
                          group.by = "celltype.l2", label = TRUE,
                          repel = TRUE, label.size = 2.5,
-                         raster=FALSE)
+                         cols = col_palette,
+                         raster = FALSE)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nRNA UMAP"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_rna-umap.png"),
@@ -59,7 +60,8 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_rna
 plot2 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
                          group.by = "celltype.l2", label = TRUE,
                          repel = TRUE, label.size = 2.5,
-                         raster=FALSE)
+                         cols = col_palette,
+                         raster = FALSE)
 plot2 <- plot2 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nADT UMAP"))
 plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_adt-umap.png"),
@@ -68,8 +70,47 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_adt
 plot3 <- Seurat::DimPlot(pbmc, reduction = "wnn.umap",
                          group.by = "celltype.l2", label = TRUE,
                          repel = TRUE, label.size = 2.5,
-                         raster=FALSE)
+                         cols = col_palette,
+                         raster = FALSE)
 plot3 <- plot3 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nWNN UMAP"))
 plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_wnn-umap.png"),
                 plot3, device = "png", width = 6, height = 5, units = "in")
+
+#############
+
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
+                         group.by = "celltype.l2", 
+                         cols = col_palette,
+                         raster = FALSE)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_rna-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot2 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
+                         group.by = "celltype.l2", 
+                         cols = col_palette,
+                         raster = FALSE)
+plot2 <- plot2 + Seurat::NoLegend() + Seurat::NoAxes()
+plot2 <- plot2 + ggplot2::ggtitle("")
+plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_adt-umap_cleaned.png"),
+                plot2, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot3 <- Seurat::DimPlot(pbmc, reduction = "wnn.umap",
+                         group.by = "celltype.l2", 
+                         cols = col_palette,
+                         raster = FALSE)
+plot3 <- plot3 + Seurat::NoLegend() + Seurat::NoAxes()
+plot3 <- plot3 + ggplot2::ggtitle("")
+plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_wnn-umap_cleaned.png"),
+                plot3, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+
