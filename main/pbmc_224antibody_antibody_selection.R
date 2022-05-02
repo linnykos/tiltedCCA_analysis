@@ -35,7 +35,7 @@ set.seed(10)
 variable_selection_res <- tiltedCCA:::postprocess_variable_selection(
   input_obj = multiSVD_obj,
   logpval_vec = logpval_vec,
-  cor_threshold = 0.45,
+  cor_threshold = 0.9,
   input_assay = 2,
   max_variables = 10,
   min_subsample_cell = 5000,
@@ -134,9 +134,11 @@ multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(multiSVD_obj,
 multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 1)
 reference_dimred <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "common_dimred")
 multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
+common_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "common_mat")
 distinct_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "distinct_mat")
+adt_mat <- common_mat + distinct_mat
 
-rsquare_vec <- sapply(1:ncol(distinct_mat), function(j){
+rsquare_vec <- sapply(1:ncol(adt_mat), function(j){
   tiltedCCA:::.linear_regression(bool_include_intercept = T,
                                  bool_center_x = T,
                                  bool_center_y = T,
@@ -144,9 +146,9 @@ rsquare_vec <- sapply(1:ncol(distinct_mat), function(j){
                                  bool_scale_y = T,
                                  return_type = "r_squared", 
                                  x_mat = reference_dimred,
-                                 y_vec = distinct_mat[,j])
+                                 y_vec = adt_mat[,j])
 })
-names(rsquare_vec) <- colnames(distinct_mat)
+names(rsquare_vec) <- colnames(adt_mat)
 rsquare_vec[variable_selection_res$selected_variables]
 
 # rsquare_vec <- tiltedCCA:::postprocess_alignment(input_obj = multiSVD_obj,
