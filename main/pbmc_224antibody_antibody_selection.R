@@ -35,7 +35,7 @@ set.seed(10)
 variable_selection_res <- tiltedCCA:::postprocess_variable_selection(
   input_obj = multiSVD_obj,
   logpval_vec = logpval_vec,
-  cor_threshold = 0.5,
+  cor_threshold = 0.4,
   input_assay = 2,
   max_variables = 10,
   min_subsample_cell = 5000,
@@ -85,7 +85,7 @@ plot2 <- Seurat::DimPlot(pbmc, reduction = "adt2.umap",
                          repel = TRUE, label.size = 2.5,
                          cols = col_palette,
                          raster = FALSE)
-plot2 <- plot2 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nADT: Selected antibodies"))
+plot2 <- plot2 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nADT: Selected antibodies, Thres: ", variable_selection_res$cor_threshold))
 plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_varSelect_adt-umap.png"),
                 plot2, device = "png", width = 6, height = 5, units = "in")
@@ -95,7 +95,7 @@ plot3 <- Seurat::DimPlot(pbmc, reduction = "wnn2.umap",
                          repel = TRUE, label.size = 2.5,
                          cols = col_palette,
                          raster = FALSE)
-plot3 <- plot3 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nWNN: Selected antibodies"))
+plot3 <- plot3 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nWNN: Selected antibodies, Thres: ", variable_selection_res$cor_threshold))
 plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_varSelect_wnn-umap.png"),
                 plot3, device = "png", width = 6, height = 5, units = "in")
