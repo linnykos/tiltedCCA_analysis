@@ -57,7 +57,9 @@ pbmc[["ADT2"]]@scale.data <- adt_mat2
 pbmc[["ADT2"]]@var.features <- variable_selection_res$selected_variables
 
 Seurat::DefaultAssay(pbmc) <- "ADT2"
-pbmc <- Seurat::RunPCA(pbmc, reduction.name = 'apca2', npcs = 10, verbose = F)
+pbmc <- Seurat::RunPCA(pbmc, reduction.name = 'apca2', 
+                       npcs = length(variable_selection_res$selected_variables), 
+                       verbose = F)
 
 set.seed(10)
 pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca2', dims = 1:(ncol(pbmc[["apca2"]]@cell.embeddings)-1), 
@@ -67,7 +69,7 @@ pbmc <- Seurat::RunUMAP(pbmc, reduction = 'apca2', dims = 1:(ncol(pbmc[["apca2"]
 set.seed(10)
 pbmc <- Seurat::FindMultiModalNeighbors(pbmc, 
                                         reduction.list = list("pca", "apca2"),
-                                        dims.list = list(1:40, 1:9), 
+                                        dims.list = list(1:40, 1:(ncol(pbmc[["apca2"]]@cell.embeddings)-1)), 
                                         modality.weight.name = "RNA.weight",
                                         weighted.nn.name = "weighted.nn2")
 set.seed(10)
