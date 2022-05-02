@@ -46,7 +46,7 @@ multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
 distinct_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "distinct_mat")
 
 rsquare_vec <- sapply(1:ncol(distinct_mat), function(j){
-  print(j)
+  if(j %% floor(ncol(distinct_mat)/10) == 0) cat('*')
   tiltedCCA:::.linear_regression(bool_include_intercept = T,
                                  bool_center_x = T,
                                  bool_center_y = T,

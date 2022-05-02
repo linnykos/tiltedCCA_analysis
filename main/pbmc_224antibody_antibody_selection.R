@@ -35,7 +35,7 @@ set.seed(10)
 variable_selection_res <- tiltedCCA:::postprocess_variable_selection(
   input_obj = multiSVD_obj,
   logpval_vec = logpval_vec,
-  cor_threshold = 0.75,
+  cor_threshold = 0.6,
   input_assay = 2,
   max_variables = 10,
   min_subsample_cell = 5000,
@@ -134,7 +134,6 @@ multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
 distinct_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "distinct_mat")
 
 rsquare_vec <- sapply(1:ncol(distinct_mat), function(j){
-  print(j)
   tiltedCCA:::.linear_regression(bool_include_intercept = T,
                                  bool_center_x = T,
                                  bool_center_y = T,
