@@ -35,7 +35,7 @@ set.seed(10)
 variable_selection_res <- tiltedCCA:::postprocess_variable_selection(
   input_obj = multiSVD_obj,
   logpval_vec = logpval_vec,
-  cor_threshold = 0.6,
+  cor_threshold = 0.5,
   input_assay = 2,
   max_variables = 10,
   min_subsample_cell = 5000,
