@@ -35,7 +35,7 @@ set.seed(10)
 variable_selection_res <- tiltedCCA:::postprocess_variable_selection(
   input_obj = multiSVD_obj,
   logpval_vec = logpval_vec,
-  cor_threshold = 0.9,
+  cor_threshold = 0.95,
   input_assay = 2,
   max_variables = 10,
   min_subsample_cell = 5000,
@@ -150,17 +150,6 @@ rsquare_vec <- sapply(1:ncol(adt_mat), function(j){
 })
 names(rsquare_vec) <- colnames(adt_mat)
 rsquare_vec[variable_selection_res$selected_variables]
-
-# rsquare_vec <- tiltedCCA:::postprocess_alignment(input_obj = multiSVD_obj,
-#                                                  bool_use_denoised = T,
-#                                                  seurat_obj = pbmc,
-#                                                  input_assay = 2,
-#                                                  min_subsample_cell = NULL,
-#                                                  seurat_assay = "SCT",
-#                                                  seurat_celltype_variable = "celltype.l2",
-#                                                  seurat_slot = "data",
-#                                                  verbose = 2)
-# all(names(logpval_vec) == names(rsquare_vec))
 
 png("../../../out/figures/main/citeseq_pbmc224_differential_protein.png",
     height = 3500, width = 2500, res = 500, units = "px")
