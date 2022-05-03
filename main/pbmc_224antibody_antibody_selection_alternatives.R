@@ -66,9 +66,9 @@ panel_2 <- names(rsquare_vec)[order(rsquare_vec, decreasing = F)[1:10]]
 # Third panel: Select the 10 antibodies using the proposed strategy, but only consider the deviation from the RNA subspace
 verbose <- 1
 reference_dimred <- tiltedCCA:::.mult_mat_vec(multiSVD_obj$svd_1$u, multiSVD_obj$svd_1$d)
-input_obj <- tiltedCCA:::.set_defaultAssay(input_obj, assay = 2)
-common_mat <- tiltedCCA:::.get_tCCAobj(input_obj, apply_postDimred = F, what = "common_mat")
-distinct_mat <- tiltedCCA:::.get_tCCAobj(input_obj, apply_postDimred = F, what = "distinct_mat")
+multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
+common_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "common_mat")
+distinct_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "distinct_mat")
 adt_mat <- common_mat + distinct_mat
 logpval_vec <- logpval_vec[colnames(adt_mat)]
 
