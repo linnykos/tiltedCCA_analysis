@@ -54,11 +54,11 @@ adt_mat2 <- adt_mat2[variable_selection_res$selected_variables,]
 pbmc[["ADT2"]] <- Seurat::CreateAssayObject(counts = adt_mat2)
 pbmc[["ADT2"]]@data <- adt_mat2
 pbmc[["ADT2"]]@scale.data <- adt_mat2
-pbmc[["ADT2"]]@var.features <- variable_selection_res$selected_variables
+pbmc[["ADT2"]]@var.features <- rownames(adt_mat2)
 
 Seurat::DefaultAssay(pbmc) <- "ADT2"
 pbmc <- Seurat::RunPCA(pbmc, reduction.name = 'apca2', 
-                       npcs = length(variable_selection_res$selected_variables), 
+                       npcs = nrow(adt_mat2), 
                        verbose = F)
 
 set.seed(10)
