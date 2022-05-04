@@ -81,7 +81,8 @@ pbmc <- Seurat::RunUMAP(pbmc, nn.name = "weighted.nn2",
 svd_1 <- multiSVD_obj$svd_1
 consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = NULL, mat_2 = adt_mat2,
                                            dims_1 = NULL, dims_2 = 1:ncol(adt_mat2),
-                                           dims_consensus = max(ncol(svd_1$u), ncol(adt_mat2)))
+                                           dims_consensus = max(ncol(svd_1$u), ncol(adt_mat2)),
+                                           svd_1 = svd_1)
 pbmc[["consensusPCA"]] <- Seurat::CreateDimReducObject(consensus_pca$dimred_consensus, 
                                                        assay = "SCT")
 

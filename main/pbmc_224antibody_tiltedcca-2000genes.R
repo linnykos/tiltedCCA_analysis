@@ -23,7 +23,8 @@ pbmc[["rna.umap"]] <- NULL
 set.seed(10)
 pbmc <- Seurat::RunPCA(pbmc, verbose = FALSE)
 set.seed(10)
-pbmc <- Seurat::RunUMAP(pbmc, dims = 1:40)
+pbmc <- Seurat::RunUMAP(pbmc, dims = 1:40, assay = 'SCT',
+                        reduction.name = 'rna.umap', reduction.key = 'rnaUMAP_')
 
 ##########################################
 
