@@ -77,7 +77,23 @@ pbmc <- Seurat::RunUMAP(pbmc, nn.name = "weighted.nn2",
                         reduction.name = "wnn2.umap", 
                         reduction.key = "wnn2UMAP_")
 
-save(variable_selection_res, pbmc, logpval_vec,
+
+svd_1 <- multiSVD_obj$svd_1
+consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = NULL, mat_2 = adt_mat2,
+                                           dims_1 = NULL, dims_2 = 1:ncol(adt_mat2),
+                                           dims_consensus = max(ncol(svd_1$u), ncol(adt_mat2)))
+pbmc[["consensusPCA"]] <- Seurat::CreateDimReducObject(consensus_pca$dimred_consensus, 
+                                                       assay = "SCT")
+
+set.seed(10)
+umap_res <- Seurat::RunUMAP(consensus_pca$dimred_consensus)
+umap_mat <- umap_res@cell.embeddings
+rownames(umap_mat) <- colnames(pbmc)
+pbmc[["consensusUMAP"]] <- Seurat::CreateDimReducObject(umap_mat, assay = "SCT")
+
+save(variable_selection_res, pbmc, 
+     logpval_vec, 
+     consensus_pca,
      date_of_run, session_info,
      file = "../../../out/main/citeseq_pbmc224_varSelect.RData")
 
@@ -103,6 +119,16 @@ plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_varSelect_wnn-umap.png"),
                 plot3, device = "png", width = 6, height = 5, units = "in")
 
+plot3 <- Seurat::DimPlot(pbmc, reduction = "consensusUMAP",
+                         group.by = "celltype.l2", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         cols = col_palette,
+                         raster = FALSE)
+plot3 <- plot3 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nConsensusPCA: Selected antibodies, Thres: ", variable_selection_res$cor_threshold))
+plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_varSelect_consensusPCA-umap.png"),
+                plot3, device = "png", width = 6, height = 5, units = "in")
+
 ####
 
 plot2 <- Seurat::DimPlot(pbmc, reduction = "adt2.umap",
@@ -125,32 +151,21 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_var
                 plot3, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
 
+plot3 <- Seurat::DimPlot(pbmc, reduction = "consensusUMAP",
+                         group.by = "celltype.l2",
+                         cols = col_palette,
+                         raster = FALSE)
+plot3 <- plot3 + Seurat::NoLegend() + Seurat::NoAxes()
+plot3 <- plot3 + ggplot2::ggtitle("")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_varSelect_consensusPCA-umap_cleaned.png"),
+                plot3, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+
 ################################
 
-multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(multiSVD_obj, 
-                                                    bool_modality_1_full = F,
-                                                    bool_modality_2_full = F,
-                                                    verbose = 0)
-multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 1)
-reference_dimred <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "common_dimred")
-multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
-common_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "common_mat")
-distinct_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "distinct_mat")
-adt_mat <- common_mat + distinct_mat
-
-rsquare_vec <- sapply(1:ncol(adt_mat), function(j){
-  tiltedCCA:::.linear_regression(bool_include_intercept = T,
-                                 bool_center_x = T,
-                                 bool_center_y = T,
-                                 bool_scale_x = T,
-                                 bool_scale_y = T,
-                                 return_type = "r_squared", 
-                                 x_mat = reference_dimred,
-                                 y_vec = adt_mat[,j])
-})
-names(rsquare_vec) <- colnames(adt_mat)
-rsquare_vec[variable_selection_res$selected_variables]
-
+rsquare_vec <- variable_selection_res$cor_vec_intial
+rsquare_vec <- rsquare_vec[names(logpval_vec)]
 png("../../../out/figures/main/citeseq_pbmc224_differential_protein.png",
     height = 3500, width = 2500, res = 500, units = "px")
 par(mar = c(5,5,4,1))

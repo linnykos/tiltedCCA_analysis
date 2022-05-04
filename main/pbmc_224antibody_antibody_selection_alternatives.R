@@ -81,7 +81,7 @@ idx <- tiltedCCA:::construct_celltype_subsample(membership_vec,
 reference_dimred <- reference_dimred[idx,]
 adt_mat <- adt_mat[idx,]
 
-cor_threshold <- 0.9
+cor_threshold <- 0.85
 max_variables <- 10
 n <- nrow(adt_mat)
 candidate_list <- vector("list", length = max_variables)
@@ -128,7 +128,7 @@ save(pbmc, panel_list,
      file = "../../../out/main/citeseq_pbmc224_varSelect_alternatives.RData")
 
 #################
-
+svd_1 <- multiSVD_obj$svd_1
 for(i in 1:3){
   print(paste0("Working on custom panel ", i))
   assay_name <- paste0("ADT", i)
@@ -140,35 +140,23 @@ for(i in 1:3){
   pbmc[[assay_name]]@scale.data <- adt_mat2
   pbmc[[assay_name]]@var.features <- rownames(adt_mat2)
   
-  svd_rna <- multiSVD_obj$svd_1
-  svd_adt <- tiltedCCA:::.svd_safe(t(pbmc[[assay_name]]@scale.data),
-                                   check_stability = T,
-                                   K = nrow(adt_mat2), 
-                                   mean_vec = T, # boolean, NULL or vector
-                                   rescale = F, # boolean
-                                   scale_max = NULL, # NULL or positive integer
-                                   sd_vec = T)
-  n <- ncol(pbmc)
-  pca_rna <- tiltedCCA:::.mult_mat_vec(svd_rna$u, svd_rna$d*sqrt(n)/max(svd_rna$d))
-  l2_vec <- apply(pca_rna, 1, tiltedCCA:::.l2norm)
-  pca_rna <- tiltedCCA:::.mult_vec_mat(1/l2_vec, pca_rna)
-  pca_adt <- tiltedCCA:::.mult_mat_vec(svd_adt$u, svd_adt$d*sqrt(n)/max(svd_adt$d))
-  l2_vec <- apply(pca_adt, 1, tiltedCCA:::.l2norm)
-  pca_adt <- tiltedCCA:::.mult_vec_mat(1/l2_vec, pca_adt)
+  adt_mat2 <- t(adt_mat2)
+  consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = NULL, mat_2 = adt_mat2,
+                                             dims_1 = NULL, dims_2 = 1:ncol(adt_mat2),
+                                             dims_consensus = max(ncol(svd_1$u), ncol(adt_mat2)))
   
   set.seed(10)
-  umap_res <- Seurat::RunUMAP(pca_adt)
+  umap_res <- Seurat::RunUMAP(consensus_pca$dimred_2)
   umap_mat <- umap_res@cell.embeddings
   rownames(umap_mat) <- colnames(pbmc)
   umap_name <- paste0("adt.umap", i)
-  pbmc[[umap_name]] <- Seurat::CreateDimReducObject(umap_mat, assay = "SCT")
+  pbmc[[umap_name]] <- Seurat::CreateDimReducObject(umap_mat, assay = "ADT")
   
-  consensus_mat <- cbind(pca_rna, pca_adt)
   set.seed(10)
-  umap_res <- Seurat::RunUMAP(consensus_mat)
+  umap_res <- Seurat::RunUMAP(consensus_pca$dimred_consensus)
   umap_mat <- umap_res@cell.embeddings
   rownames(umap_mat) <- colnames(pbmc)
-  umap_name <- paste0("consensusPCA", i)
+  umap_name <- paste0("consensusUMAP", i)
   pbmc[[umap_name]] <- Seurat::CreateDimReducObject(umap_mat, assay = "SCT")
 }
 

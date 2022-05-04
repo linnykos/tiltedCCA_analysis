@@ -3,7 +3,7 @@ library(loomR)
 library(Seurat)
 
 # connect to the loom file
-lfile <- loomR::connect(filename = "~/nzhanglab/data/10x_mouse_embryo/velocyto/10x_mouse_embryo.loom", 
+lfile <- loomR::connect(filename = "~/nzhanglab/data/10x_mouse_embryo/velocyto/10x_mouse_embryo_subset.loom", 
                  mode = "r+", skip.validate = TRUE)
 lfile
 lfile[["col_attrs"]]
@@ -33,13 +33,5 @@ table(celltype_vec)
 
 lfile$add.col.attribute(list(label.Savercat = celltype_vec), overwrite = TRUE)
 lfile[["col_attrs"]]
-
-x_vec <- lfile[["col_attrs/_X"]][]
-y_vec <- lfile[["col_attrs/_Y"]][]
-
-png("../../../out/figures/main/10x_mouseembryo_loompy-umap.png",
-    height = 2500, width = 2500, units = "px", res = 300)
-plot(x_vec, y_vec, pch = 16, col = as.numeric(as.factor(celltype_vec)))
-graphics.off()
 
 lfile$close_all()
