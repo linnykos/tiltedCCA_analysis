@@ -75,12 +75,13 @@ logpval_vec <- logpval_vec[colnames(adt_mat)]
 seurat_obj <- pbmc
 seurat_celltype_variable <- "celltype.l2"
 membership_vec <- seurat_obj@meta.data[,seurat_celltype_variable]
+membership_vec <- membership_vec[which(rownames(seurat_obj@meta.data) %in% rownames(reference_dimred))]
 idx <- tiltedCCA:::construct_celltype_subsample(membership_vec, 
                                                 min_subsample_cell = 5000)
 reference_dimred <- reference_dimred[idx,]
 adt_mat <- adt_mat[idx,]
 
-cor_threshold <- 0.95
+cor_threshold <- 0.9
 max_variables <- 10
 n <- nrow(adt_mat)
 candidate_list <- vector("list", length = max_variables)
@@ -140,7 +141,7 @@ for(i in 1:3){
   pbmc[[assay_name]]@var.features <- rownames(adt_mat2)
   
   svd_rna <- multiSVD_obj$svd_1
-  svd_adt <- tiltedCCA:::.svd_safe(pbmc[[assay_name]]@scale.data,
+  svd_adt <- tiltedCCA:::.svd_safe(t(pbmc[[assay_name]]@scale.data),
                                    check_stability = T,
                                    K = nrow(adt_mat2), 
                                    mean_vec = T, # boolean, NULL or vector
@@ -160,7 +161,7 @@ for(i in 1:3){
   umap_mat <- umap_res@cell.embeddings
   rownames(umap_mat) <- colnames(pbmc)
   umap_name <- paste0("adt.umap", i)
-  pbmc[[umap_name]] <- Seurat::CreateDimReducObject(umap_mat)
+  pbmc[[umap_name]] <- Seurat::CreateDimReducObject(umap_mat, assay = "SCT")
   
   consensus_mat <- cbind(pca_rna, pca_adt)
   set.seed(10)
@@ -168,7 +169,7 @@ for(i in 1:3){
   umap_mat <- umap_res@cell.embeddings
   rownames(umap_mat) <- colnames(pbmc)
   umap_name <- paste0("consensusPCA", i)
-  pbmc[[umap_name]] <- Seurat::CreateDimReducObject(umap_mat)
+  pbmc[[umap_name]] <- Seurat::CreateDimReducObject(umap_mat, assay = "SCT")
 }
 
 save(pbmc, panel_list,
