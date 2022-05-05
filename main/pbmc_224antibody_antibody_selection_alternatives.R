@@ -143,7 +143,7 @@ for(i in 1:3){
   adt_mat2 <- t(adt_mat2)
   consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = NULL, mat_2 = adt_mat2,
                                              dims_1 = NULL, dims_2 = 1:ncol(adt_mat2),
-                                             dims_consensus = max(ncol(svd_1$u), ncol(adt_mat2)),
+                                             dims_consensus = 1:max(ncol(svd_1$u), ncol(adt_mat2)),
                                              svd_1 = svd_1)
   
   set.seed(10)
