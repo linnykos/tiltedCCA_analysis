@@ -34,10 +34,11 @@ logpval_vec <- pmin(logpval_vec, 300)
 set.seed(10)
 variable_selection_res <- tiltedCCA:::postprocess_variable_selection(
   input_obj = multiSVD_obj,
+  input_mat = t(as.matrix(pbmc[["ADT"]]@scale.data)),
   logpval_vec = logpval_vec,
-  cor_threshold = 0.9,
+  cor_threshold = 0.85,
   input_assay = 2,
-  max_variables = 10,
+  max_variables = 5,
   min_subsample_cell = 5000,
   seurat_celltype_variable = "celltype.l2",
   seurat_obj = pbmc,
@@ -199,4 +200,8 @@ tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
                            lwd_polygon_bold = 4)
 graphics.off()
 
-
+# 
+# round(variable_selection_res$logpval_vec[order(names(variable_selection_res$logpval_vec))],2)
+# round(variable_selection_res$cor_vec_intial[order(names(variable_selection_res$cor_vec_intial))],2)
+# idx <- order(variable_selection_res$logpval_vec, decreasing = T)[1:10]
+# variable_selection_res$cor_vec_intial[idx]

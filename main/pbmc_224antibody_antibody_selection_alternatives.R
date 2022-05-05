@@ -38,10 +38,7 @@ multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(multiSVD_obj,
                                                     verbose = 0)
 multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 1)
 reference_dimred <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "common_dimred")
-multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
-common_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "common_mat")
-distinct_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "distinct_mat")
-adt_mat <- common_mat + distinct_mat
+adt_mat <- t(as.matrix(pbmc[["ADT"]]@scale.data))
 
 rsquare_vec <- sapply(1:ncol(adt_mat), function(j){
   tiltedCCA:::.linear_regression(bool_include_intercept = T,
@@ -56,20 +53,18 @@ rsquare_vec <- sapply(1:ncol(adt_mat), function(j){
 names(rsquare_vec) <- colnames(adt_mat)
 
 ######################
+max_variables <- 5
 
 # First panel: Select the 10 antibodies with the highest p-vales
-panel_1 <- names(logpval_vec)[order(logpval_vec, decreasing = T)[1:10]]
+panel_1 <- names(logpval_vec)[order(logpval_vec, decreasing = T)[1:max_variables]]
 
 # Second panel: Select the 10 antibodies deviating the most from the common space
-panel_2 <- names(rsquare_vec)[order(rsquare_vec, decreasing = F)[1:10]]
+panel_2 <- names(rsquare_vec)[order(rsquare_vec, decreasing = F)[1:max_variables]]
 
 # Third panel: Select the 10 antibodies using the proposed strategy, but only consider the deviation from the RNA subspace
 verbose <- 1
 reference_dimred <- tiltedCCA:::.mult_mat_vec(multiSVD_obj$svd_1$u, multiSVD_obj$svd_1$d)
-multiSVD_obj <- tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
-common_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "common_mat")
-distinct_mat <- tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "distinct_mat")
-adt_mat <- common_mat + distinct_mat
+adt_mat <- t(as.matrix(pbmc[["ADT"]]@scale.data))
 logpval_vec <- logpval_vec[colnames(adt_mat)]
 
 seurat_obj <- pbmc
@@ -82,7 +77,6 @@ reference_dimred <- reference_dimred[idx,]
 adt_mat <- adt_mat[idx,]
 
 cor_threshold <- 0.85
-max_variables <- 10
 n <- nrow(adt_mat)
 candidate_list <- vector("list", length = max_variables)
 selected_variables <- numeric(0)
