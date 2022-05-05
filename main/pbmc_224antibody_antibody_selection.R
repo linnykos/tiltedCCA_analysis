@@ -35,7 +35,7 @@ set.seed(10)
 variable_selection_res <- tiltedCCA:::postprocess_variable_selection(
   input_obj = multiSVD_obj,
   logpval_vec = logpval_vec,
-  cor_threshold = 0.95,
+  cor_threshold = 0.9,
   input_assay = 2,
   max_variables = 10,
   min_subsample_cell = 5000,
@@ -170,7 +170,6 @@ plot3 <- plot3 + ggplot2::ggtitle("")
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_varSelect_consensusPCA-umap_cleaned.png"),
                 plot3, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
-
 
 ################################
 

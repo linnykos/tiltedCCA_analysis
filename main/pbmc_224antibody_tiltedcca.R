@@ -128,3 +128,33 @@ pbmc[["distinct2_tcca"]] <- tiltedCCA:::create_SeuratDim(input_obj = multiSVD_ob
 save(multiSVD_obj, pbmc,
      date_of_run, session_info,
      file = "../../../out/main/citeseq_pbmc224_tiltedcca.RData")
+
+#############################################
+
+svd_1 <- multiSVD_obj$svd_1
+svd_2 <- multiSVD_obj$svd_2
+consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = NULL, mat_2 = NULL,
+                                           dims_1 = NULL, dims_2 = NULL,
+                                           dims_consensus = 1:max(ncol(svd_1$u), ncol(svd_2$u)),
+                                           svd_1 = svd_1, svd_2 = svd_2,
+                                           verbose = 1)
+
+set.seed(10)
+umap_res <- Seurat::RunUMAP(consensus_pca$dimred_consensus)
+umap_mat <- umap_res@cell.embeddings
+rownames(umap_mat) <- colnames(pbmc)
+pbmc[["consensusUMAP"]] <- Seurat::CreateDimReducObject(umap_mat, 
+                                                        assay = "SCT",
+                                                        key = "cUMAP")
+source("pbmc_224antibody_colorPalette.R")
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "consensusUMAP",
+                         group.by = "celltype.l2", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         cols = col_palette,
+                         raster = FALSE)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nConsensus PCA"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_consensusPCA-umap.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+

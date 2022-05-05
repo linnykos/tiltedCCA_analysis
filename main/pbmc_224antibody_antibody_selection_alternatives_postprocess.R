@@ -23,7 +23,7 @@ for(i in 1:3){
   ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_varSelect-alternative", i, "_adt-umap_cleaned.png"),
                   plot1, device = "png", width = 6, height = 5, units = "in")
   
-  reduction_name <- paste0("consensusPCA", i)
+  reduction_name <- paste0("consensusUMAP", i)
   plot1 <- Seurat::DimPlot(pbmc, reduction = reduction_name,
                            group.by = "celltype.l2", label = TRUE,
                            repel = TRUE, label.size = 2.5,
