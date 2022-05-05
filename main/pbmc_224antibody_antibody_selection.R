@@ -83,14 +83,23 @@ consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = NULL, mat_2 = adt_mat2,
                                            dims_1 = NULL, dims_2 = 1:ncol(adt_mat2),
                                            dims_consensus = 1:max(ncol(svd_1$u), ncol(adt_mat2)),
                                            svd_1 = svd_1, verbose = 1)
+save(variable_selection_res, pbmc, 
+     logpval_vec, 
+     consensus_pca,
+     date_of_run, session_info,
+     file = "../../../out/main/citeseq_pbmc224_varSelect.RData")
+
 pbmc[["consensusPCA"]] <- Seurat::CreateDimReducObject(consensus_pca$dimred_consensus, 
-                                                       assay = "SCT")
+                                                       assay = "SCT",
+                                                       key = "cPC")
 
 set.seed(10)
 umap_res <- Seurat::RunUMAP(consensus_pca$dimred_consensus)
 umap_mat <- umap_res@cell.embeddings
 rownames(umap_mat) <- colnames(pbmc)
-pbmc[["consensusUMAP"]] <- Seurat::CreateDimReducObject(umap_mat, assay = "SCT")
+pbmc[["consensusUMAP"]] <- Seurat::CreateDimReducObject(umap_mat, 
+                                                        assay = "SCT",
+                                                        key = "cUMAP")
 
 save(variable_selection_res, pbmc, 
      logpval_vec, 
