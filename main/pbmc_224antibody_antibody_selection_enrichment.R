@@ -1,8 +1,9 @@
 rm(list=ls())
+load("../../../out/main/citeseq_pbmc224_tiltedcca.RData")
 load("../../../out/main/citeseq_pbmc224_varSelect_alternatives.RData")
 pbmc_alt <- pbmc
-
 load("../../../out/main/citeseq_pbmc224_varSelect.RData")
+
 
 library(Seurat)
 library(Signac)
