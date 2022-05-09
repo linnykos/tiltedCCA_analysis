@@ -4,7 +4,6 @@ load("../../../out/main/citeseq_pbmc224_varSelect_alternatives.RData")
 pbmc_alt <- pbmc
 load("../../../out/main/citeseq_pbmc224_varSelect.RData")
 
-
 library(Seurat)
 library(Signac)
 library(tiltedCCA)
@@ -16,7 +15,7 @@ session_info <- devtools::session_info()
 membership_vec <- droplevels(as.factor(pbmc$celltype.l2))
 print("Enrichment selected")
 set.seed(10)
-enrichment_selected <- postprocess_cell_enrichment(input_obj = consensus_pca$dimred_consensus,
+enrichment_selected <- tiltedCCA:::postprocess_cell_enrichment(input_obj = consensus_pca$dimred_consensus,
                                                    membership_vec = membership_vec, 
                                                    num_neigh = multiSVD_obj$param$snn_num_neigh,
                                                    bool_cosine = multiSVD_obj$param$snn_bool_cosine,
@@ -27,7 +26,7 @@ enrichment_selected <- postprocess_cell_enrichment(input_obj = consensus_pca$dim
 
 print("Enrichment alternative 1")
 set.seed(10)
-enrichment_alt_1 <- postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap1"]],
+enrichment_alt_1 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap1"]],
                                                 membership_vec = membership_vec, 
                                                 num_neigh = multiSVD_obj$param$snn_num_neigh,
                                                 bool_cosine = multiSVD_obj$param$snn_bool_cosine,
@@ -38,7 +37,7 @@ enrichment_alt_1 <- postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap1
 
 print("Enrichment alternative 2")
 set.seed(10)
-enrichment_alt_2 <- postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap2"]],
+enrichment_alt_2 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap2"]],
                                                 membership_vec = membership_vec, 
                                                 num_neigh = multiSVD_obj$param$snn_num_neigh,
                                                 bool_cosine = multiSVD_obj$param$snn_bool_cosine,
@@ -49,7 +48,7 @@ enrichment_alt_2 <- postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap2
 
 print("Enrichment alternative 3")
 set.seed(10)
-enrichment_alt_3 <- postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap3"]],
+enrichment_alt_3 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap3"]],
                                                 membership_vec = membership_vec, 
                                                 num_neigh = multiSVD_obj$param$snn_num_neigh,
                                                 bool_cosine = multiSVD_obj$param$snn_bool_cosine,
