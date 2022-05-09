@@ -26,7 +26,7 @@ enrichment_selected <- tiltedCCA:::postprocess_cell_enrichment(input_obj = conse
 
 print("Enrichment alternative 1")
 set.seed(10)
-enrichment_alt_1 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap1"]],
+enrichment_alt_1 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt[["consensusPCA1"]]@cell.embeddings,
                                                             membership_vec = membership_vec, 
                                                             num_neigh = multiSVD_obj$param$snn_num_neigh,
                                                             bool_cosine = multiSVD_obj$param$snn_bool_cosine,
@@ -37,7 +37,7 @@ enrichment_alt_1 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt
 
 print("Enrichment alternative 2")
 set.seed(10)
-enrichment_alt_2 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap2"]],
+enrichment_alt_2 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt[["consensusPCA2"]]@cell.embeddings,
                                                             membership_vec = membership_vec, 
                                                             num_neigh = multiSVD_obj$param$snn_num_neigh,
                                                             bool_cosine = multiSVD_obj$param$snn_bool_cosine,
@@ -48,7 +48,7 @@ enrichment_alt_2 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt
 
 print("Enrichment alternative 3")
 set.seed(10)
-enrichment_alt_3 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt[["adt.umap3"]],
+enrichment_alt_3 <- tiltedCCA:::postprocess_cell_enrichment(input_obj = pbmc_alt[["consensusPCA3"]]@cell.embeddings,
                                                             membership_vec = membership_vec, 
                                                             num_neigh = multiSVD_obj$param$snn_num_neigh,
                                                             bool_cosine = multiSVD_obj$param$snn_bool_cosine,

@@ -135,10 +135,15 @@ for(i in 1:3){
   pbmc[[assay_name]]@var.features <- rownames(adt_mat2)
   
   adt_mat2 <- t(adt_mat2)
+  set.seed(10)
   consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = NULL, mat_2 = adt_mat2,
                                              dims_1 = NULL, dims_2 = 1:ncol(adt_mat2),
                                              dims_consensus = 1:max(ncol(svd_1$u), ncol(adt_mat2)),
                                              svd_1 = svd_1)
+  dimred_name <- paste0("consensusPCA", i)
+  pbmc[[dimred_name]] <- Seurat::CreateDimReducObject(consensus_pca$dimred_consensus, 
+                                                      assay = "SCT",
+                                                      key = paste0("cPC", i))
   
   set.seed(10)
   umap_res <- Seurat::RunUMAP(consensus_pca$dimred_2)
@@ -155,6 +160,6 @@ for(i in 1:3){
   pbmc[[umap_name]] <- Seurat::CreateDimReducObject(umap_mat, assay = "SCT")
 }
 
-save(pbmc, panel_list,
+save(pbmc, panel_list, multiSVD_obj,
      date_of_run, session_info,
      file = "../../../out/main/citeseq_pbmc224_varSelect_alternatives.RData")
