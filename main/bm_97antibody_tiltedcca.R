@@ -11,63 +11,37 @@ date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
 Seurat::DefaultAssay(bm) <- "RNA"
-bm <- Seurat::ScaleData(bm) 
-bm <- Seurat::RunPCA(bm, verbose = F)
-set.seed(10)
-bm <- Seurat::RunUMAP(bm, reduction = 'pca', dims = 1:30, assay = 'RNA',
-                      reduction.name = 'rna.umap', reduction.key = 'rnaUMAP_')
 set.seed(10)
 bm <- Seurat::FindNeighbors(bm, dims = 1:30)
 bm <- Seurat::FindClusters(bm, resolution = 0.25)
 
-Seurat::DefaultAssay(bm) <- "ADT"
-bm <- Seurat::ScaleData(bm)
-bm <- Seurat::RunPCA(bm, reduction.name = 'apca', verbose = F)
-set.seed(10)
-bm <- Seurat::RunUMAP(bm, reduction = 'apca', dims = 1:30, assay = 'ADT',
-                      reduction.name = 'adt.umap', reduction.key = 'adtUMAP_')
+Seurat::DefaultAssay(bm) <- "AB"
 set.seed(10)
 bm <- Seurat::FindNeighbors(bm, dims = 1:30, reduction = "apca")
 bm <- Seurat::FindClusters(bm, resolution = 0.25)
 
 plot1 <-Seurat::DimPlot(bm, reduction = "rna.umap",
-                        group.by = "celltype.l2", label = TRUE,
-                        repel = TRUE, label.size = 2.5,
-                        cols = col_palette)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (CITE-Seq, RNA+ADT)\nRNA UMAP"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_rna-umap.png"),
-                plot1, device = "png", width = 6.5, height = 5, units = "in")
-plot1 <-Seurat::DimPlot(bm, reduction = "rna.umap",
                         group.by = "RNA_snn_res.0.25", label = TRUE,
                         repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (CITE-Seq, RNA+ADT)\nRNA clustering"))
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nRNA clustering"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_rna-clustering.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97_rna-clustering.png"),
                 plot1, device = "png", width = 6.5, height = 5, units = "in")
 
 plot1 <-Seurat::DimPlot(bm, reduction = "adt.umap",
-                        group.by = "celltype.l2", label = TRUE,
-                        repel = TRUE, label.size = 2.5,
-                        cols = col_palette)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (CITE-Seq, RNA+ADT)\nADT UMAP"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_adt-umap.png"),
-                plot1, device = "png", width = 6.5, height = 5, units = "in")
-plot1 <-Seurat::DimPlot(bm, reduction = "adt.umap",
-                        group.by = "ADT_snn_res.0.25", label = TRUE,
+                        group.by = "AB_snn_res.0.25", label = TRUE,
                         repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (CITE-Seq, RNA+ADT)\nADT clustering"))
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nADT clustering"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_adt-clustering.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97_adt-clustering.png"),
                 plot1, device = "png", width = 6.5, height = 5, units = "in")
 
 #########
 
 Seurat::DefaultAssay(bm) <- "RNA"
-mat_1 <- Matrix::t(bm[["RNA"]]@data[Seurat::VariableFeatures(object = bm),])
-Seurat::DefaultAssay(bm) <- "ADT"
-mat_2 <- Matrix::t(bm[["ADT"]]@data)
+mat_1 <- Matrix::t(bm[["RNA"]]@scale.data[Seurat::VariableFeatures(object = bm),])
+Seurat::DefaultAssay(bm) <- "AB"
+mat_2 <- Matrix::t(bm[["AB"]]@scale.data)
 
 mat_1b <- mat_1
 sd_vec <- sparseMatrixStats::colSds(mat_1b)
@@ -95,7 +69,7 @@ multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
                                             verbose = 1)
 multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            large_clustering_1 = as.factor(bm$RNA_snn_res.0.25), 
-                                           large_clustering_2 = as.factor(bm$ADT_snn_res.0.25), 
+                                           large_clustering_2 = as.factor(bm$AB_snn_res.0.25), 
                                            num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
