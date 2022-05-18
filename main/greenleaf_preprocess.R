@@ -251,6 +251,8 @@ for(i in 13:15){
                   plot1, device = "png", width = 6, height = 5, units = "in")
 }
 
+######################################
+
 # remove unwanted celltypes
 greenleaf_tmp <- greenleaf
 keep_vec <- rep(1, ncol(greenleaf_tmp))

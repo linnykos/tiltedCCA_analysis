@@ -8,14 +8,6 @@ set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
-n <- ncol(mbrain)
-keep_vec <- rep(0, n)
-keep_vec[which(mbrain$label_Savercat %in% c("Oligodendrocyte", "Radial glia", 
-                                            "Forebrain GABAergic", "Neuroblast", 
-                                            "Glioblast", "Cortical or hippocampal glutamatergic"))] <- 1
-mbrain$keep <- keep_vec
-mbrain <- subset(mbrain, keep == 1)
-
 Seurat::DefaultAssay(mbrain) <- "SCT"
 mat_1 <- Matrix::t(mbrain[["SCT"]]@data[Seurat::VariableFeatures(object = mbrain),])
 Seurat::DefaultAssay(mbrain) <- "ATAC"

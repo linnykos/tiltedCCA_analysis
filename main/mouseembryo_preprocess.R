@@ -110,7 +110,7 @@ plot1 <- Seurat::DimPlot(mbrain, reduction = "umap",
                          repel = TRUE, label.size = 2.5)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC)\nRNA UMAP"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_rna-umap.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_rna-umap_full.png"),
                 plot1, device = "png", width = 8, height = 5, units = "in")
 
 plot2 <- Seurat::DimPlot(mbrain, reduction = "umap.atac",
@@ -118,7 +118,7 @@ plot2 <- Seurat::DimPlot(mbrain, reduction = "umap.atac",
                          repel = TRUE, label.size = 2.5)
 plot2 <- plot2 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC)\nATAC UMAP"))
 plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_atac-umap.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_atac-umap_full.png"),
                 plot2, device = "png", width = 8, height = 5, units = "in")
 
 plot3 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn",
@@ -126,7 +126,162 @@ plot3 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn",
                          repel = TRUE, label.size = 2.5)
 plot3 <- plot3 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC)\nWNN UMAP"))
 plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_wnn-umap.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_wnn-umap_full.png"),
                 plot3, device = "png", width = 8, height = 5, units = "in")
 
+#########################################
+
+n <- ncol(mbrain)
+keep_vec <- rep(0, n)
+keep_vec[which(mbrain$label_Savercat %in% c("Oligodendrocyte", "Radial glia", 
+                                            "Forebrain GABAergic", "Neuroblast", 
+                                            "Glioblast", "Cortical or hippocampal glutamatergic"))] <- 1
+mbrain$keep <- keep_vec
+mbrain <- subset(mbrain, keep == 1)
+
+DefaultAssay(mbrain) <- "SCT"
+mbrain <- Seurat::RunPCA(mbrain, verbose = FALSE)
+set.seed(10)
+mbrain <- Seurat::RunUMAP(mbrain, dims = 1:50)
+
+set.seed(10)
+DefaultAssay(mbrain) <- "ATAC"
+mbrain <-  Signac::RunSVD(mbrain)  
+set.seed(10)
+mbrain <- Seurat::RunUMAP(mbrain, 
+                          reduction="lsi", 
+                          dims=2:50,
+                          reduction.name="umap.atac", 
+                          reduction.key="atacUMAP_")
+
+set.seed(10)
+mbrain <- Seurat::FindMultiModalNeighbors(mbrain, 
+                                          reduction.list = list("pca", "lsi"), 
+                                          dims.list = list(1:50, 2:50))
+set.seed(10)
+mbrain <- Seurat::RunUMAP(mbrain, 
+                          nn.name = "weighted.nn", 
+                          reduction.name = "umap.wnn", 
+                          reduction.key = "wnnUMAP_")
+
+plot1 <- Seurat::DimPlot(mbrain, reduction = "umap",
+                         group.by = "label_Savercat", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC)\nRNA UMAP"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_rna-umap.png"),
+                plot1, device = "png", width = 7, height = 5, units = "in")
+
+plot2 <- Seurat::DimPlot(mbrain, reduction = "umap.atac",
+                         group.by = "label_Savercat", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot2 <- plot2 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC)\nATAC UMAP"))
+plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_atac-umap.png"),
+                plot2, device = "png", width = 7, height = 5, units = "in")
+
+plot3 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn",
+                         group.by = "label_Savercat", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot3 <- plot3 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC)\nWNN UMAP"))
+plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_wnn-umap.png"),
+                plot3, device = "png", width = 7, height = 5, units = "in")
+
+##########
+
+Seurat::DefaultAssay(mbrain) <- "ATAC"
+set.seed(10)
+mbrain <- Seurat::FindNeighbors(mbrain, dims = 2:50, reduction = "lsi")
+set.seed(10)
+mbrain <- Seurat::FindClusters(mbrain, resolution = 2)
+
+plot3 <- Seurat::DimPlot(mbrain, reduction = "umap.atac",
+                         group.by = "seurat_clusters", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot3 <- plot3 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC)\nATAC Seurat clusters"))
+plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_atac-clusters.png"),
+                plot3, device = "png", width = 7, height = 5, units = "in")
+
+# remove unwanted clusters
+keep_vec <- rep(1, ncol(mbrain))
+keep_vec[mbrain$seurat_clusters %in% c("5","15","19","6","18","13","14","16", "4")] <- 0
+mbrain$keep <- keep_vec
+mbrain_tmp <- subset(mbrain, keep == 1)
+table(mbrain_tmp$seurat_clusters)
+
+# ad-hoc merge some clusters for Slingshot to work better
+mbrain_tmp$seurat_clusters[mbrain_tmp$seurat_clusters == "1"] <- "8"
+mbrain_tmp$seurat_clusters[mbrain_tmp$seurat_clusters == "2"] <- "8"
+mbrain_tmp$seurat_clusters[mbrain_tmp$seurat_clusters == "20"] <- "9"
+mbrain_tmp$seurat_clusters[mbrain_tmp$seurat_clusters == "11"] <- "0"
+
+set.seed(10)
+mbrain_tmp <-  Signac::RunSVD(mbrain_tmp)  
+dimmat_x <- mbrain_tmp[["lsi"]]@cell.embeddings[,2:50]
+
+# first get the MST, and then the curves
+# If the lineages for the MST is undesireable, hard-set them yourself
+# see 
+# see https://github.com/LTLA/TrajectoryUtils/blob/master/R/createClusterMST.R (mainly calls to .create_mnn_distance_matrix and .estimate_edge_confidence)
+set.seed(10)
+slingshot_lin <- slingshot::getLineages(data = dimmat_x, 
+                                        clusterLabels = as.character(mbrain_tmp$seurat_clusters), 
+                                        start.clus = c("17"), 
+                                        end.clus = c("21", "12", "8"))
+slingshot_lin@metadata$lineages
+slingshot_curve <- slingshot::getCurves(slingshot_lin)
+
+# extract pseudotime
+pseudotime_mat <- slingshot_curve@assays@data$pseudotime
+for(i in 1:3){
+  # remove pseudotimes for cells not in the correct lineage
+  idx <- mbrain_tmp$seurat_clusters
+  pseudotime_mat[which(!mbrain_tmp$seurat_clusters %in% slingshot_lin@metadata$lineages[[i]]),i] <- NA
+  idx <- which(!is.na(pseudotime_mat[,i]))
+  pseudotime_mat[idx,i] <- rank(pseudotime_mat[idx,i])
+}
+# compute a weighted rank
+lineage_length <- sapply(slingshot_lin@metadata$lineages, function(lin){
+  length(which(mbrain_tmp$seurat_clusters %in% lin))
+})
+pseudotime_vec <- apply(pseudotime_mat, 1, function(x){
+  vec <- sapply(1:3, function(i){x[i]/lineage_length[i]})
+  mean(vec, na.rm = T)
+})
+pseudotime_vec_full <- rep(NA, ncol(mbrain))
+names(pseudotime_vec_full) <- colnames(mbrain)
+pseudotime_vec_full[names(pseudotime_vec)] <- pseudotime_vec
+mbrain$pseudotime <- pseudotime_vec_full
+
+# add metadata
+for(i in 1:3){
+  traj_vec <- rep(0, ncol(mbrain))
+  names(traj_vec) <- colnames(mbrain)
+  idx <- which(!is.na(pseudotime_mat[,i]))
+  traj_vec[names(pseudotime_mat[idx,i])] <- 1
+  mbrain <- Seurat::AddMetaData(mbrain, metadata = traj_vec, col.name = paste0("Lineage", i))
+}
+
+save(mbrain, date_of_run, session_info,
+     file = "../../../out/main/10x_mouseembryo_preprocessed.RData")
+
+plot1 <- Seurat::FeaturePlot(mbrain, reduction = "umap.atac",
+                             features = "pseudotime")
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC): ATAC UMAP\nSlingshot's pseudotime via ATAC"))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_atac-pseudotime.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+plot1 <- Seurat::FeaturePlot(mbrain, reduction = "umap",
+                             features = "pseudotime")
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC): RNA UMAP\nSlingshot's pseudotime via ATAC"))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_rna-pseudotime.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
+plot3 <- Seurat::FeaturePlot(mbrain, reduction = "umap.wnn",
+                             features = "pseudotime")
+plot3 <- plot3 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC): WNN UMAP\nSlingshot's pseudotime via ATAC"))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_wnn-pseudotime.png"),
+                plot3, device = "png", width = 6, height = 5, units = "in")
 
