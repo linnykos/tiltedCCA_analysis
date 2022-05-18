@@ -8,20 +8,18 @@ set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
-keep_vec <- rep(1, ncol(bm))
-keep_vec[which(bm$ct %in% c("Aberrant erythroid", "CD69+PD-1+ memory CD4+ T cells",
-                      "NK cell progenitors", "NK T cells",
-                      "Plasma cells", "Pre-pro-B cells", "Small pre-B cell"))] <- 0
-bm$keep <- keep_vec
-bm <- subset(bm, keep == 1)
-bm$ct <- droplevels(bm$ct)
-
 ct2 <- as.character(bm$ct)
 ct2[ct2 %in% c("Conventional dendritic cell 1", "Conventional dendritic cell 2")] <- "cDC"
-
 bm$ct2 <- ct2
+
+tab <- table(ct2)
+keep_vec <- rep(1, ncol(bm))
+keep_vec[which(bm$ct %in% names(tab)[which(tab <= 300)])] <- 0
+bm$keep <- keep_vec
+bm2 <- subset(bm, keep == 1)
+
 print("Working on RNA")
-gene_de_list <- tiltedCCA:::differential_expression(seurat_obj = bm,
+gene_de_list <- tiltedCCA:::differential_expression(seurat_obj = bm2,
                                                     assay = "RNA",
                                                     idents = "ct2",
                                                     test_use = "MAST",
@@ -32,9 +30,15 @@ save(gene_de_list, bm,
 
 ########
 
-bm[["AB"]]@var.features <- rownames(bm[["AB"]])
+tab <- table(ct2)
+keep_vec <- rep(1, ncol(bm))
+keep_vec[which(bm$ct %in% names(tab)[which(tab <= 50)])] <- 0
+bm$keep <- keep_vec
+bm2 <- subset(bm, keep == 1)
+
+bm2[["AB"]]@var.features <- rownames(bm2[["AB"]])
 print("Working on ADT")
-adt_de_list <- tiltedCCA:::differential_expression(seurat_obj = bm,
+adt_de_list <- tiltedCCA:::differential_expression(seurat_obj = bm2,
                                                    assay = "AB",
                                                    idents = "ct2",
                                                    test_use = "wilcox",
