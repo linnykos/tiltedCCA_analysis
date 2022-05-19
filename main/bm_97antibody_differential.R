@@ -9,9 +9,12 @@ date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
 keep_vec <- rep(1, ncol(bm))
+tab <- table(bm$ct)
 keep_vec[which(bm$ct %in% names(tab)[which(tab <= 10)])] <- 0
 bm$keep <- keep_vec
 bm <- subset(bm, keep == 1)
+bm$ct <- droplevels(bm$ct)
+print(paste0("Number of levels: ", length(levels(bm$ct))))
 
 print("Working on RNA")
 gene_de_list <- tiltedCCA:::differential_expression(seurat_obj = bm,
