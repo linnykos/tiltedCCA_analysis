@@ -8,18 +8,22 @@ set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
+ct2 <- as.character(bm$ct)
+ct2[ct2 %in% c("Conventional dendritic cell 1", "Conventional dendritic cell 2")] <- "cDC"
+bm$ct2 <- ct2
+
 keep_vec <- rep(1, ncol(bm))
-tab <- table(bm$ct)
-keep_vec[which(bm$ct %in% names(tab)[which(tab <= 10)])] <- 0
+tab <- table(bm$ct2)
+keep_vec[which(bm$ct2 %in% names(tab)[which(tab <= 150)])] <- 0
 bm$keep <- keep_vec
 bm <- subset(bm, keep == 1)
-bm$ct <- droplevels(bm$ct)
-print(paste0("Number of levels: ", length(levels(bm$ct))))
+bm$ct2 <- droplevels(factor(bm$ct2))
+print(paste0("Number of levels: ", length(levels(bm$ct2))))
 
 print("Working on RNA")
 gene_de_list <- tiltedCCA:::differential_expression(seurat_obj = bm,
                                                     assay = "RNA",
-                                                    idents = "ct",
+                                                    idents = "ct2",
                                                     test_use = "MAST",
                                                     slot = "counts")
 save(gene_de_list, bm,
@@ -32,7 +36,7 @@ bm[["AB"]]@var.features <- rownames(bm[["AB"]])
 print("Working on ADT")
 adt_de_list <- tiltedCCA:::differential_expression(seurat_obj = bm,
                                                    assay = "AB",
-                                                   idents = "ct",
+                                                   idents = "ct2",
                                                    test_use = "wilcox",
                                                    slot = "data")
 
