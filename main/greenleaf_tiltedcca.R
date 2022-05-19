@@ -42,20 +42,28 @@ multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
 multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            large_clustering_1 = NULL, 
                                            large_clustering_2 = NULL, 
-                                           num_metacells = NULL,
+                                           num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
-                                         latent_k = 30,
-                                         num_neigh = 100,
+                                         latent_k = 20,
+                                         num_neigh = 30,
                                          bool_cosine = T,
                                          bool_intersect = F,
-                                         min_deg = 100,
+                                         min_deg = 30,
                                          verbose = 2)
 
 tmp <- greenleaf; tmp_mat <- multiSVD_obj$laplacian_list$common_laplacian
 colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
-set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)
-tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap@cell.embeddings)
+set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)@cell.embeddings
+tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
+for(i in 1:length(multiSVD_obj$metacell_obj$metacell_clustering_list)){
+  idx <- multiSVD_obj$metacell_obj$metacell_clustering_list[[i]]
+  tmp_umap_full[idx,] <- rep(tmp_umap[i,], each = length(idx))
+}
+set.seed(10)
+tmp_umap_full <- jitter(tmp_umap_full)
+rownames(tmp_umap_full) <- colnames(tmp)
+tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP")
 plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
                         group.by = "celltype", label = TRUE,
                         repel = TRUE, label.size = 2.5)
@@ -63,7 +71,6 @@ plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nCommon La
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_umap_common-laplacian.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
-
 
 ##################3
 
