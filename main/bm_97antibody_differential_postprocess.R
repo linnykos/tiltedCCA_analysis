@@ -11,18 +11,26 @@ date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
 Seurat::DefaultAssay(bm) <- "RNA"
-logpval_vec <- sapply(Seurat::VariableFeatures(bm), function(gene){
-  val <- stats::median(
-    sapply(1:length(gene_de_list), function(j){
-      idx <- which(rownames(gene_de_list[[j]]) == gene)
-      if(length(idx) == 0) return(1)
-      gene_de_list[[j]][idx, "p_val"]
-    })
-  )
+gene_names <- Seurat::VariableFeatures(bm)
+logpval_vec <- sapply(1:length(gene_names), function(k){
+  if(k %% floor(length(gene_names)/10) == 0) cat('*')
+  gene <- gene_names[k]
   
-  -log10(val)
+  # cycle through all the celltypes
+  celltype_vec <- sapply(1:length(gene_de_list$level_vec), function(i){
+    idx <- which(gene_de_list$combn_mat == i, arr.ind = T)[,2]
+    vec <-  sapply(idx, function(j){
+      idx <- which(rownames(gene_de_list$de_list[[j]]) == gene)
+      if(length(idx) == 0) return(1)
+      gene_de_list$de_list[[j]][idx, "p_val"]
+    })
+    stats::quantile(vec, probs = 0.75)
+  })
+  
+  max(-log10(celltype_vec))
 })
 names(logpval_vec) <- Seurat::VariableFeatures(bm)
+logpval_vec <- pmin(logpval_vec, 300)
 
 rsquare_vec <- tiltedCCA:::postprocess_alignment(input_obj = multiSVD_obj,
                                                  bool_use_denoised = T,
@@ -31,7 +39,7 @@ rsquare_vec <- tiltedCCA:::postprocess_alignment(input_obj = multiSVD_obj,
                                                  seurat_assay = "RNA",
                                                  seurat_slot = "data")
 all(names(logpval_vec) == names(rsquare_vec))
-stats::median(rsquare_vec[which(logpval_vec >=1)])
+stats::median(rsquare_vec[which(logpval_vec >= 1)])
 
 png("../../../out/figures/main/abseq_bm97_differential_gene.png",
     height = 3500, width = 2500, res = 500, units = "px")
