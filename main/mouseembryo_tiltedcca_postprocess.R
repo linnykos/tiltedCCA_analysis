@@ -12,6 +12,13 @@ plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_tcca-umap_common.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
+plot1 <- Seurat::FeaturePlot(mbrain, reduction = "common_tcca",
+                             features = "pseudotime")
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC): T-CCA's Common\nSlingshot's pseudotime via ATAC"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_tcca-umap_common-pseudotime.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
+
 plot2 <- Seurat::DimPlot(mbrain, reduction = "distinct1_tcca",
                          group.by = "label_Savercat", label = TRUE,
                          repel = TRUE, label.size = 2.5,

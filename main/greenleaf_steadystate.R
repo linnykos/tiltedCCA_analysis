@@ -33,5 +33,5 @@ plot1 <-Seurat::FeaturePlot(greenleaf, feature = "alignment",
                             reduction = "common_tcca")
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nAlignment between ATAC and common RNA"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_steadystate.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_steadystate-full.png"),
                 plot1, device = "png", width = 5, height = 5, units = "in")
