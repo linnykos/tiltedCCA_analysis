@@ -47,7 +47,7 @@ rsquare_vec <- tiltedCCA:::postprocess_alignment(input_obj = multiSVD_obj,
                                                  seurat_assay = "RNA",
                                                  seurat_slot = "data")
 all(names(logpval_vec) == names(rsquare_vec))
-stats::median(rsquare_vec[which(logpval_vec >= 1)])
+stats::median(rsquare_vec[which(logpval_vec >= 10)])
 
 png("../../../out/figures/main/citeseq_bm25_differential_gene.png",
     height = 3500, width = 2500, res = 500, units = "px")
@@ -68,7 +68,7 @@ tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
                            lwd_axis = 1.5,
                            lwd_axis_ticks = 1.5,
                            lwd_polygon_bold = 5,
-                           mark_median_xthres = 1)
+                           mark_median_xthres = 10)
 graphics.off()
 
 
