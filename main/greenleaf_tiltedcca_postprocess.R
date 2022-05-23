@@ -19,7 +19,6 @@ plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca-umap_common-pseudotime.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
-
 plot2 <- Seurat::DimPlot(greenleaf, reduction = "distinct1_tcca",
                          group.by = "celltype", label = TRUE,
                          repel = TRUE, label.size = 2.5,
