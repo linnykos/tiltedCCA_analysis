@@ -42,28 +42,28 @@ multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
 multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            large_clustering_1 = NULL, 
                                            large_clustering_2 = NULL, 
-                                           num_metacells = NULL,
+                                           num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
                                          latent_k = 20,
-                                         num_neigh = 30,
+                                         num_neigh = 15,
                                          bool_cosine = T,
                                          bool_intersect = F,
-                                         min_deg = 30,
+                                         min_deg = 15,
                                          verbose = 2)
 
 tmp <- greenleaf; tmp_mat <- multiSVD_obj$laplacian_list$common_laplacian
 colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
 set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)@cell.embeddings
-# tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
-# for(i in 1:length(multiSVD_obj$metacell_obj$metacell_clustering_list)){
-#   idx <- multiSVD_obj$metacell_obj$metacell_clustering_list[[i]]
-#   tmp_umap_full[idx,] <- rep(tmp_umap[i,], each = length(idx))
-# }
-# set.seed(10)
-# tmp_umap_full <- jitter(tmp_umap_full)
-# rownames(tmp_umap_full) <- colnames(tmp)
-tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap, key = "commonLapUMAP")
+tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
+for(i in 1:length(multiSVD_obj$metacell_obj$metacell_clustering_list)){
+  idx <- multiSVD_obj$metacell_obj$metacell_clustering_list[[i]]
+  tmp_umap_full[idx,] <- rep(tmp_umap[i,], each = length(idx))
+}
+set.seed(10)
+tmp_umap_full <- jitter(tmp_umap_full)
+rownames(tmp_umap_full) <- colnames(tmp)
+tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP")
 plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
                         group.by = "celltype", label = TRUE,
                         repel = TRUE, label.size = 2.5)
@@ -75,6 +75,7 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_umap_
 ##################3
 
 multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
+                                      enforce_boundary = T,
                                       verbose = 1)
 multiSVD_obj <- tiltedCCA:::fine_tuning(input_obj = multiSVD_obj,
                                         verbose = 1)
