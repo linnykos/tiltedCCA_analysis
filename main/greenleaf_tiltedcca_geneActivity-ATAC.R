@@ -10,8 +10,9 @@ date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 n <- ncol(greenleaf)
 
-Seurat::DefaultAssay(greenleaf) <- "SCT"
-mat_1 <- Matrix::t(greenleaf[["SCT"]]@data[Seurat::VariableFeatures(object = greenleaf),])
+Seurat::DefaultAssay(greenleaf) <- "geneActivity"
+greenleaf[["geneActivity"]]@var.features <- intersect(greenleaf[["geneActivity"]]@var.features, rownames(greenleaf[["geneActivity"]]@data))
+mat_1 <- Matrix::t(greenleaf[["geneActivity"]]@data[Seurat::VariableFeatures(object = greenleaf),])
 Seurat::DefaultAssay(greenleaf) <- "ATAC"
 mat_2 <- Matrix::t(greenleaf[["ATAC"]]@data[Seurat::VariableFeatures(object = greenleaf),])
 
@@ -31,7 +32,7 @@ if(any(sd_vec <= 1e-6)){
 
 set.seed(10)
 multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
-                                            dims_1 = 1:50, dims_2 = 2:50,
+                                            dims_1 = 2:50, dims_2 = 2:50,
                                             center_1 = T, center_2 = F,
                                             normalize_row = T,
                                             normalize_singular_value = T,
@@ -42,7 +43,7 @@ multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
 multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            large_clustering_1 = NULL, 
                                            large_clustering_2 = NULL, 
-                                           num_metacells = NULL,
+                                           num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
                                          latent_k = 20,
@@ -55,22 +56,22 @@ multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
 tmp <- greenleaf; tmp_mat <- multiSVD_obj$laplacian_list$common_laplacian
 colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
 set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)@cell.embeddings
-# tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
-# for(i in 1:length(multiSVD_obj$metacell_obj$metacell_clustering_list)){
-#   idx <- multiSVD_obj$metacell_obj$metacell_clustering_list[[i]]
-#   tmp_umap_full[idx,] <- rep(tmp_umap[i,], each = length(idx))
-# }
-# set.seed(10)
-# tmp_umap_full <- jitter(tmp_umap_full)
-# rownames(tmp_umap_full) <- colnames(tmp)
-# tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP")
-tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap, key = "commonLapUMAP")
+tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
+for(i in 1:length(multiSVD_obj$metacell_obj$metacell_clustering_list)){
+  idx <- multiSVD_obj$metacell_obj$metacell_clustering_list[[i]]
+  tmp_umap_full[idx,] <- rep(tmp_umap[i,], each = length(idx))
+}
+set.seed(10)
+tmp_umap_full <- jitter(tmp_umap_full)
+rownames(tmp_umap_full) <- colnames(tmp)
+tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP")
+# tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap, key = "commonLapUMAP")
 plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
-                        group.by = "celltype", label = TRUE,
-                        repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nCommon Laplacian"))
+                         group.by = "celltype", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, GeneActivity+ATAC)\nCommon Laplacian"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_umap_common-laplacian.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_umap_geneActivity-ATAC_common-laplacian.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
 
 ##################3
@@ -87,7 +88,7 @@ multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
 
 save(multiSVD_obj, greenleaf,
      date_of_run, session_info,
-     file = "../../../out/main/10x_greenleaf_tcca.RData")
+     file = "../../../out/main/10x_greenleaf_tcca_geneActivity-ATAC.RData")
 
 #################################
 
@@ -115,5 +116,5 @@ greenleaf[["distinct2_tcca"]] <- tiltedCCA:::create_SeuratDim(input_obj = multiS
 
 save(multiSVD_obj, greenleaf,
      date_of_run, session_info,
-     file = "../../../out/main/10x_greenleaf_tcca.RData")
+     file = "../../../out/main/10x_greenleaf_tcca_geneActivity-ATAC.RData")
 
