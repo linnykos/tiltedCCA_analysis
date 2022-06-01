@@ -1,9 +1,9 @@
 rm(list=ls())
-load("../../../out/main/10x_greenleaf_tcca.RData")
-
 library(Seurat)
 library(Signac)
 library(tiltedCCA)
+
+load("../../../out/main/10x_greenleaf_tcca_RNA-ATAC.RData")
 
 set.seed(10)
 date_of_run <- Sys.time()
@@ -26,12 +26,71 @@ alignment_vec <- sapply(1:n, function(i){
   summary(lm_res)$r.squared
 })
 
-# !! Change to use the colors in viridis::viridis(100)
+scaling_grid <- seq(0.1, 10, length.out = 100)
+scaling_quality <- sapply(scaling_grid, function(val){
+  stats::cor(alignment_vec^val, rank(alignment_vec))
+})
+greenleaf$alignment <- alignment_vec^(scaling_grid[which.max(scaling_quality)])
+num_color <- 100
+color_palette <- viridis::viridis(num_color)
+color_breaks <- seq(min(greenleaf$alignment), max(greenleaf$alignment), length.out = num_color)
+color_vec <- sapply(greenleaf$alignment, function(val){
+  color_palette[which.min(abs(color_breaks - val))]
+})
 
-greenleaf$alignment <- alignment_vec
-plot1 <-Seurat::FeaturePlot(greenleaf, feature = "alignment",
-                            reduction = "common_tcca")
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nAlignment between ATAC and common RNA"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_steadystate-full.png"),
-                plot1, device = "png", width = 5, height = 5, units = "in")
+png(paste0("../../../out/figures/main/10x_greenleaf_tcca_steadystate-full.png"),
+    height = 3000, width = 3000, units = "px", res = 500)
+par(mar = c(4,4,4,0.5))
+plot(x = greenleaf[["common_tcca"]]@cell.embeddings[,1],
+     y = greenleaf[["common_tcca"]]@cell.embeddings[,2],
+     col = color_vec, pch = 16,
+     xlab = colnames(greenleaf[["common_tcca"]]@cell.embeddings)[1],
+     ylab = colnames(greenleaf[["common_tcca"]]@cell.embeddings)[2],
+     main = paste0("Human brain (10x, RNA+ATAC)\nAlignment between ATAC and common RNA"),
+     xaxt = "n", yaxt = "n", bty = "n")
+axis(side = 1)
+axis(side = 2)
+graphics.off()
+
+###########
+
+Seurat::DefaultAssay(greenleaf) <- "SCT"
+mat_1 <- Matrix::t(greenleaf[["SCT"]]@data[Seurat::VariableFeatures(object = greenleaf),])
+mat_1b <- mat_1
+sd_vec <- sparseMatrixStats::colSds(mat_1b)
+if(any(sd_vec <= 1e-6)){
+  mat_1b <- mat_1b[,-which(sd_vec <= 1e-6)]
+}
+alignment_vec_alt <- sapply(1:n, function(i){
+  df <- data.frame(rna = mat_1b[i,],
+                   atac = atac_pred[i,])
+  lm_res <- stats::lm(rna ~ atac, data = df)
+  summary(lm_res)$r.squared
+})
+
+scaling_grid <- seq(0.1, 10, length.out = 100)
+scaling_quality <- sapply(scaling_grid, function(val){
+  stats::cor(alignment_vec_alt^val, rank(alignment_vec_alt))
+})
+greenleaf$alignment_alt <- alignment_vec_alt^(scaling_grid[which.max(scaling_quality)])
+num_color <- 100
+color_palette <- viridis::viridis(num_color)
+color_breaks <- seq(min(greenleaf$alignment_alt), max(greenleaf$alignment_alt), length.out = num_color)
+color_vec <- sapply(greenleaf$alignment_alt, function(val){
+  color_palette[which.min(abs(color_breaks - val))]
+})
+
+png(paste0("../../../out/figures/main/10x_greenleaf_tcca_steadystate_alt-full.png"),
+    height = 3000, width = 3000, units = "px", res = 500)
+par(mar = c(4,4,4,0.5))
+plot(x = greenleaf[["common_tcca"]]@cell.embeddings[,1],
+     y = greenleaf[["common_tcca"]]@cell.embeddings[,2],
+     col = color_vec, pch = 16,
+     xlab = colnames(greenleaf[["common_tcca"]]@cell.embeddings)[1],
+     ylab = colnames(greenleaf[["common_tcca"]]@cell.embeddings)[2],
+     main = paste0("Human brain (10x, RNA+ATAC)\nAlignment between ATAC and RNA"),
+     xaxt = "n", yaxt = "n", bty = "n")
+axis(side = 1)
+axis(side = 2)
+graphics.off()
+
