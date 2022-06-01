@@ -72,15 +72,18 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_wnn-u
 
 ##########################
 
-bm[["bothUMAP"]] <- NULL
-bm[["bothTSNE"]] <- NULL
+bm[["UMAPni"]] <- NULL
+bm[["TSNEni"]] <- NULL
+bm[["tsne"]] <- NULL
 bm[["MOFA"]] <- NULL
 bm[["MOFAUMAP"]] <- NULL
 bm[["MOFATSNE"]] <- NULL
 bm[["Projected"]] <- NULL
 bm[["ProjectedMean"]] <- NULL
 bm[["BOTH"]] <- NULL
+bm[["integrated"]] <- NULL
 
+Seurat::DefaultAssay(bm) <- "RNA"
 save(bm, date_of_run, session_info,
      file = "../../../out/main/abseq_bm97Ref_preprocessed.RData")
 
