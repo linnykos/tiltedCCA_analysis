@@ -9,7 +9,7 @@ set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
-cell_idx <- unique(c(which(!is.na(mbrain$Lineage1)), which(!is.na(mbrain$Lineage2))))
+cell_idx <- unique(c(which(mbrain$Lineage1 == 1), which(mbrain$Lineage2 == 1)))
 selection_res <- tiltedCCA:::postprocess_smooth_variable_selection(
   input_obj = multiSVD_obj,
   bool_use_denoised = F,
@@ -19,6 +19,7 @@ selection_res <- tiltedCCA:::postprocess_smooth_variable_selection(
   cor_threshold = 0.8,
   input_assay = 1,
   num_variables = 50,
+  sd_quantile = 0.75,
   seurat_obj = mbrain,
   seurat_assay = "SCT",
   seurat_slot = "data",

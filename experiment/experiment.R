@@ -1,65 +1,50 @@
 rm(list=ls())
-load("tests/assets/test_data2.RData")
-mat_1 <- test_data$mat_1
-mat_2 <- test_data$mat_2
-seurat_obj <- Seurat::CreateSeuratObject(counts = t(mat_1))
-seurat_obj[["RNA"]]@var.features <- colnames(mat_1)
+library(Seurat)
+library(Signac)
+library(tiltedCCA)
 
-n <- nrow(mat_1)
-large_clustering_1 <- test_data$clustering_1
-large_clustering_2 <- test_data$clustering_2
-multiSVD_obj <- create_multiSVD(mat_1 = mat_1, mat_2 = mat_2,
-                                dims_1 = 1:2, dims_2 = 1:2,
-                                center_1 = F, center_2 = F,
-                                normalize_row = T,
-                                normalize_singular_value = F,
-                                recenter_1 = F, recenter_2 = F,
-                                rescale_1 = F, rescale_2 = F,
-                                scale_1 = F, scale_2 = F)
-multiSVD_obj <- form_metacells(input_obj = multiSVD_obj,
-                               large_clustering_1 = large_clustering_1, 
-                               large_clustering_2 = large_clustering_2,
-                               num_metacells = NULL)
-multiSVD_obj <- compute_snns(input_obj = multiSVD_obj,
-                             latent_k = 2,
-                             num_neigh = 10,
-                             bool_cosine = T,
-                             bool_intersect = T,
-                             min_deg = 10)
-multiSVD_obj <- tiltedCCA(input_obj = multiSVD_obj,
-                          verbose = F)
-multiSVD_obj <- tiltedCCA_decomposition(multiSVD_obj)
+load("../../../out/main/10x_greenleaf_tcca_RNA-ATAC.RData")
 
-res <- postprocess_graph_alignment(
-  input_obj = multiSVD_obj,
-  bool_use_denoised = F,
-  bool_include_intercept = T,
-  bool_use_metacells = F,
-  input_assay = 1,
+set.seed(10)
+date_of_run <- Sys.time()
+session_info <- devtools::session_info()
+
+cell_idx <- unique(c(which(!is.na(greenleaf$Lineage1)), which(!is.na(greenleaf$Lineage2))))
+
+input_obj = multiSVD_obj
+bool_use_denoised = F
+bool_include_intercept = T
+bool_use_metacells = F
+cell_idx = cell_idx
+cor_threshold = 0.8
+input_assay = 1
+num_variables = 50
+seurat_obj = greenleaf
+seurat_assay = "SCT"
+seurat_slot = "data"
+verbose = 2
+
+res <- tiltedCCA:::postprocess_graph_alignment(
+  input_obj = input_obj,
+  bool_use_denoised = bool_use_denoised,
+  bool_include_intercept = bool_include_intercept,
+  bool_use_metacells = bool_use_metacells,
+  cell_idx = cell_idx,
+  input_assay = input_assay,
   return_everything_mat = T,
   seurat_obj = seurat_obj,
-  seurat_assay = "RNA",
-  seurat_slot = "counts",
-  verbose = 0)
+  seurat_assay = seurat_assay,
+  seurat_slot = seurat_slot,
+  verbose = verbose
+)
 
+alignment_vec <- res$alignment
 everything_mat <- res$everything_mat
-colnames(everything_mat)
+if(any(is.na(alignment_vec))){
+  everything_mat <- everything_mat[,which(!is.na(alignment_vec)), drop = F]
+  alignment_vec <- alignment_vec[which(!is.na(alignment_vec))]
+}
+stopifnot(all(names(alignment_vec) == names(everything_mat)))
+sd_vec <- matrixStats::colSds(everything_mat)
+p <- length(alignment_vec)
 
-idx <- which(colnames(everything_mat) %in% c("g16", "g2"))
-selected_mat <- everything_mat[,idx]
-other_mat <- everything_mat[,-idx]
-cor_vec <- sapply(1:ncol(other_mat), function(j){
-  .linear_regression(bool_include_intercept = T,
-                     bool_center_x = T,
-                     bool_center_y = T,
-                     bool_scale_x = T,
-                     bool_scale_y = T,
-                     return_type = "r_squared", 
-                     x_mat = selected_mat,
-                     y_vec = other_mat[,j])
-})
-
-df <- data.frame(cbind(other_mat[,1], selected_mat))
-colnames(df)[1] <- "y"
-lm_res <- stats::lm(y ~ ., data = df)
-plot(df[,1], lm_res$fitted.values)
