@@ -76,10 +76,9 @@ save(umap_res, "../../../out/main/tmp_consensuspca.RData")
 
 umap_mat <- umap_res@cell.embeddings
 rownames(umap_mat) <- colnames(bm)
+colnames(umap_mat) <- paste0("consensusUMAP_", 1:ncol(umap_mat))
 bm[["consensusUMAP"]] <- Seurat::CreateDimReducObject(umap_mat, 
-                                                      assay = "RNA",
-                                                      reduction.name = 'consensus.umap', 
-                                                      reduction.key = 'consensusUMAP_')
+                                                      assay = "RNA")
 
 ##########
 
