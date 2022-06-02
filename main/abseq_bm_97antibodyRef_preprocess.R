@@ -72,7 +72,7 @@ bm[["consensusPCA"]] <- Seurat::CreateDimReducObject(consensus_dimred,
 
 set.seed(10)
 umap_res <- Seurat::RunUMAP(consensus_pca$dimred_consensus)
-save(umap_res, "../../../out/main/tmp_consensuspca.RData")
+save(umap_res, file = "../../../out/main/tmp_consensuspca.RData")
 
 umap_mat <- umap_res@cell.embeddings
 rownames(umap_mat) <- colnames(bm)

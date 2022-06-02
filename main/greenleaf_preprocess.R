@@ -346,7 +346,7 @@ if(any(sd_vec <= 1e-6)){
 }
 
 consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = mat_1b, mat_2 = mat_2b,
-                                           dims_1 = 1:50, dims_2 = 1:50,
+                                           dims_1 = 1:50, dims_2 = 2:50,
                                            dims_consensus = 1:50,
                                            center_1 = T, center_2 = F,
                                            recenter_1 = F, recenter_2 = T,
