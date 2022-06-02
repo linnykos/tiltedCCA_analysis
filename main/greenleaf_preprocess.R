@@ -146,17 +146,17 @@ greenleaf <- Seurat::RunUMAP(greenleaf, reduction="lsi",
 
 set.seed(10)
 greenleaf <- Seurat::FindMultiModalNeighbors(greenleaf, reduction.list = list("pca", "lsi"), 
-                                                 dims.list = list(1:50, 2:50))
+                                             dims.list = list(1:50, 2:50))
 set.seed(10)
 greenleaf <- Seurat::RunUMAP(greenleaf, nn.name = "weighted.nn", reduction.name = "umap.wnn", 
-                                 reduction.key = "wnnUMAP_")
+                             reduction.key = "wnnUMAP_")
 
 Seurat::DefaultAssay(greenleaf) <- "SCT"
 greenleaf[["percent.mt"]] <- Seurat::PercentageFeatureSet(object = greenleaf, pattern = "^MT-")
 greenleaf[["percent.rb"]] <- Seurat::PercentageFeatureSet(object = greenleaf, pattern = "^RPS")
 greenleaf <- Seurat::CellCycleScoring(greenleaf, 
-                                          g2m.features = cc.genes$g2m.genes, 
-                                          s.features = cc.genes$s.genes)
+                                      g2m.features = cc.genes$g2m.genes, 
+                                      s.features = cc.genes$s.genes)
 
 ####################
 
@@ -325,6 +325,49 @@ for(i in 1:3){
   greenleaf <- Seurat::AddMetaData(greenleaf, metadata = traj_vec, col.name = paste0("Lineage", i))
 }
 
+###############
+
+# consensus pca
+Seurat::DefaultAssay(greenleaf) <- "SCT"
+mat_1 <- Matrix::t(greenleaf[["SCT"]]@data[Seurat::VariableFeatures(object = greenleaf),])
+Seurat::DefaultAssay(greenleaf) <- "ATAC"
+mat_2 <- Matrix::t(greenleaf[["ATAC"]]@data[Seurat::VariableFeatures(object = greenleaf),])
+
+mat_1b <- mat_1
+sd_vec <- sparseMatrixStats::colSds(mat_1b)
+if(any(sd_vec <= 1e-6)){
+  mat_1b <- mat_1b[,-which(sd_vec <= 1e-6)]
+}
+
+mat_2b <- mat_2
+sd_vec <- sparseMatrixStats::colSds(mat_2b)
+if(any(sd_vec <= 1e-6)){
+  mat_2b <- mat_2b[,-which(sd_vec <= 1e-6)]
+}
+
+consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = mat_1b, mat_2 = mat_2b,
+                                           dims_1 = 1:50, dims_2 = 1:50,
+                                           dims_consensus = 1:50,
+                                           center_1 = T, center_2 = F,
+                                           recenter_1 = F, recenter_2 = T,
+                                           rescale_1 = F, rescale_2 = T,
+                                           scale_1 = T, scale_2 = F,
+                                           verbose = 1)
+consensus_dimred <- consensus_pca$dimred_consensus
+colnames(consensus_dimred) <- paste0("consensusPCA_", 1:ncol(consensus_dimred))
+greenleaf[["consensusPCA"]] <- Seurat::CreateDimReducObject(consensus_dimred, 
+                                                            assay = "SCT")
+
+set.seed(10)
+umap_res <- Seurat::RunUMAP(consensus_pca$dimred_consensus)
+umap_mat <- umap_res@cell.embeddings
+rownames(umap_mat) <- colnames(greenleaf)
+colnames(umap_mat) <- paste0("consensusUMAP_", 1:ncol(umap_mat))
+greenleaf[["consensusUMAP"]] <- Seurat::CreateDimReducObject(umap_mat, 
+                                                             assay = "SCT")
+
+##########
+
 save(greenleaf, date_of_run, session_info,
      file = "../../../out/main/10x_greenleaf_preprocessed.RData")
 
@@ -351,3 +394,12 @@ plot4 <- Seurat::FeaturePlot(greenleaf, reduction = "umap.geneActivity",
 plot4 <- plot4 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC): Gene Activity UMAP\nSlingshot's pseudotime via ATAC"))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_geneActivity-pseudotime.png"),
                 plot4, device = "png", width = 6, height = 5, units = "in")
+
+
+plot1 <- Seurat::DimPlot(greenleaf, reduction = "consensusUMAP",
+                         group.by = "celltype", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nConsensus PCA's UMAP"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_consensusPCA-umap.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")

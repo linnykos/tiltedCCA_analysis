@@ -58,7 +58,7 @@ sapply(unique(greenleaf$celltype), function(celltype){
 })
 
 # hard set pseudotimes too early as lineage 1 for visualization purposes
-branching_threshold <- 0.75
+branching_threshold <- 0.6
 for(i in 1:nrow(variable_summary)){
   if(variable_summary[i,"pseudotime"] <= branching_threshold & variable_summary[i,"Lineage"] == 2){
     variable_summary[i,"Lineage"] <- 1
@@ -168,5 +168,55 @@ alignment_vec <- sapply(1:n, function(i){
 })
 greenleaf$alignment <- alignment_vec
 
-lineage_idx1 <- which(greenleaf$Lineage1 == 1)
+alignment_vec1 <- greenleaf$alignment[colnames(heatmap_mat1)]^2
+df1 <- data.frame(y = alignment_vec1, x = 1:length(alignment_vec1))
+np_res1 <- npregfast::frfast(y ~ x, data = df1)
+
+col <- rgb(224, 139, 0, maxColorValue = 255)
+
+png(paste0("../../../out/figures/main/10x_greenleaf_steadystate_forHeatmap1.png"),
+    height = 900, width = 2500, units = "px", res = 500)
+par(mar = c(0.5,3,0.5,0))
+y <- np_res1$p[,1,1]; n <- length(y)
+plot(x = seq(0, 1, length = length(alignment_vec1)),
+     y = alignment_vec1, 
+     col = rgb(0.5, 0.5, 0.5, 0.1), main = "", 
+     xaxt = "n", yaxt = "n", bty = "n", xlab = "", ylab = "",
+     pch = 16)
+lines(x = seq(0, 1, length = n), y = y, lwd = 6, col = "white")
+lines(x = seq(0, 1, length = n), y = y, lwd = 4, col = col)
+axis(2)
+graphics.off()
+
+# the second lineage is tricker since 1) we want to fit the curve on all the points in
+#  the second lineage, and 2) we only plot the predictions for the relevant cells in heatmap_mat2,
+#  but np_res2 outputs the regression values on a grid
 lineage_idx2 <- which(greenleaf$Lineage2 == 1)
+lineage_idx_reordered <- lineage_idx2[order(greenleaf$pseudotime[lineage_idx2])]
+alignment_vec2 <- greenleaf$alignment[lineage_idx_reordered]^2
+names(alignment_vec2) <- colnames(greenleaf)[lineage_idx_reordered]
+x_full <- 1:length(alignment_vec2)
+names(x_full) <- colnames(greenleaf)[lineage_idx_reordered]
+df2 <- data.frame(y = alignment_vec2, x = x_full)
+np_res2 <- npregfast::frfast(y ~ x, data = df2)
+
+quantile(np_res2$p[,1,1])
+alignment_vec2_subset <- alignment_vec2[colnames(heatmap_mat2)]
+x_subset <- x_full[colnames(heatmap_mat2)]
+predicted_y <- stats::predict(np_res2, newdata = data.frame(x = x_subset))
+predicted_y <- predicted_y$Estimation[,"Pred"]
+
+png(paste0("../../../out/figures/main/10x_greenleaf_steadystate_forHeatmap2.png"),
+    height = 900, width = 700, units = "px", res = 500)
+par(mar = c(0.5,0.5,0.5,0))
+n <- length(x_subset)
+plot(x = seq(0, 1, length = n),
+     y = alignment_vec2_subset, 
+     col = rgb(0.5, 0.5, 0.5, 0.1), main = "", 
+     ylim = c(0,1),
+     xaxt = "n", yaxt = "n", bty = "n", xlab = "", ylab = "",
+     pch = 16)
+lines(x = seq(0, 1, length = n), y = predicted_y, lwd = 6, col = "white")
+lines(x = seq(0, 1, length = n), y = predicted_y, lwd = 4, col = col)
+axis(2, labels = F, at = seq(0, 1, length.out = 6))
+graphics.off()
