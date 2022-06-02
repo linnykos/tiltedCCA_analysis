@@ -63,7 +63,7 @@ if(any(sd_vec <= 1e-6)){
 
 consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = mat_1b, mat_2 = mat_2b,
                                            dims_1 = 1:30, dims_2 = 1:30,
-                                           dims_consensus = 1:30,
+                                           dims_consensus = 1:20,
                                            verbose = 1)
 consensus_dimred <- consensus_pca$dimred_consensus
 colnames(consensus_dimred) <- paste0("consensusPCA_", 1:ncol(consensus_dimred))
@@ -72,7 +72,7 @@ bm[["consensusPCA"]] <- Seurat::CreateDimReducObject(consensus_dimred,
 
 set.seed(10)
 umap_res <- Seurat::RunUMAP(consensus_pca$dimred_consensus)
-save(umap_res, file = "../../../out/main/tmp_consensuspca.RData")
+# save(umap_res, file = "../../../out/main/tmp_consensuspca.RData")
 
 umap_mat <- umap_res@cell.embeddings
 rownames(umap_mat) <- colnames(bm)
@@ -133,5 +133,5 @@ bm[["integrated"]] <- NULL
 
 Seurat::DefaultAssay(bm) <- "RNA"
 save(bm, date_of_run, session_info,
-     file = "../../../out/main/abseq_bm97Ref_preprocessed_tmp.RData")
+     file = "../../../out/main/abseq_bm97Ref_preprocessed.RData")
 

@@ -12,12 +12,12 @@ session_info <- devtools::session_info()
 
 Seurat::DefaultAssay(bm) <- "RNA"
 set.seed(10)
-bm <- Seurat::FindNeighbors(bm, dims = 1:50)
+bm <- Seurat::FindNeighbors(bm, dims = 1:30)
 bm <- Seurat::FindClusters(bm, resolution = 0.25)
 
 Seurat::DefaultAssay(bm) <- "AB"
 set.seed(10)
-bm <- Seurat::FindNeighbors(bm, dims = 1:50, reduction = "apca")
+bm <- Seurat::FindNeighbors(bm, dims = 1:30, reduction = "apca")
 bm <- Seurat::FindClusters(bm, resolution = 0.25)
 
 plot1 <-Seurat::DimPlot(bm, reduction = "rna.umap",
@@ -59,7 +59,7 @@ if(any(sd_vec <= 1e-6)){
 
 set.seed(10)
 multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
-                                            dims_1 = 1:50, dims_2 = 1:50,
+                                            dims_1 = 1:30, dims_2 = 1:30,
                                             center_1 = T, center_2 = T,
                                             normalize_row = T,
                                             normalize_singular_value = T,
