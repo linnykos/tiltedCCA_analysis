@@ -23,19 +23,19 @@ bm <- Seurat::RunPCA(bm, reduction.name = 'apca',
                      verbose = F)
 
 set.seed(10)
-bm <- Seurat::RunUMAP(bm, reduction = 'pca', dims = 1:50, assay = 'RNA',
+bm <- Seurat::RunUMAP(bm, reduction = 'pca', dims = 1:30, assay = 'RNA',
                       reduction.name = 'rna.umap', reduction.key = 'rnaUMAP_')
 set.seed(10)
 bm <- Seurat::RunUMAP(bm, 
                       reduction = 'apca', 
-                      dims = 1:50, assay = 'ADT',
+                      dims = 1:30, assay = 'ADT',
                       reduction.name = 'adt.umap', 
                       reduction.key = 'adtUMAP_')
 
 set.seed(10)
 bm <- Seurat::FindMultiModalNeighbors(
   bm, reduction.list = list("pca", "apca"), 
-  dims.list = list(1:50, 1:50), modality.weight.name = "RNA.weight"
+  dims.list = list(1:30, 1:30), modality.weight.name = "RNA.weight"
 )
 
 set.seed(10)
@@ -62,8 +62,8 @@ if(any(sd_vec <= 1e-6)){
 }
 
 consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = mat_1b, mat_2 = mat_2b,
-                                           dims_1 = 1:50, dims_2 = 1:50,
-                                           dims_consensus = 1:50,
+                                           dims_1 = 1:30, dims_2 = 1:30,
+                                           dims_consensus = 1:30,
                                            verbose = 1)
 consensus_dimred <- consensus_pca$dimred_consensus
 colnames(consensus_dimred) <- paste0("consensusPCA_", 1:ncol(consensus_dimred))
