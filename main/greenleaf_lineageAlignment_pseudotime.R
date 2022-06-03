@@ -22,6 +22,7 @@ dimred_1 <-  tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what =
 multiSVD_obj <-  tiltedCCA:::.set_defaultAssay(multiSVD_obj, assay = 2)
 dimred_2 <-  tiltedCCA:::.get_tCCAobj(multiSVD_obj, apply_postDimred = F, what = "common_dimred")
 dimred <- cbind(dimred_1, dimred_2)
+# dimred <- multiSVD_obj$tcca_obj$common_score
 colnames(dimred) <- paste0("common_tcca_", 1:ncol(dimred))
 greenleaf[["common_tccaDimred"]] <- Seurat::CreateDimReducObject(dimred)
 
@@ -130,6 +131,7 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_linea
 
 dimred <- greenleaf[["lsi"]]@cell.embeddings[,2:50]
 cluster_vec <- as.character(greenleaf$atac_clustering)
+# lineage_order <- c("4", "0", "10", "6", "5", "8")
 # cluster_vec[cluster_vec == "6"] <- "5"
 lineage_order <- c("4", "0", "10", "6", "5", "8")
 keep_idx <- which(cluster_vec %in% lineage_order)
@@ -195,7 +197,8 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_linea
 
 # now fit the new ordering for consensus PCA and tilted CCA
 dimred <- greenleaf[["consensusPCA"]]@cell.embeddings[,1:49]
-lineage_order <- c("9", "5", "0", "4", "2", "10")
+# lineage_order <- c("9", "5", "0", "4", "2", "10")
+lineage_order <- c("8", "5", "0", "3", "11", "6", "10", "13")
 cluster_vec <- as.character(greenleaf$consensus_clustering)
 keep_idx <- which(cluster_vec %in% lineage_order)
 dimred_subset1 <- dimred[keep_idx,]
@@ -224,6 +227,7 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_linea
 
 dimred <- greenleaf[["common_tccaDimred"]]@cell.embeddings
 lineage_order <- c("12", "2", "8", "4", "1", "3", "10")
+# lineage_order <- c("8", "4", "0", "2", "3", "11")
 cluster_vec <- as.character(greenleaf$tcca_clustering)
 keep_idx <- which(cluster_vec %in% lineage_order)
 dimred_subset1 <- dimred[keep_idx,]
