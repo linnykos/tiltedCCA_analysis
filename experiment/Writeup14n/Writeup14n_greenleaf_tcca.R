@@ -1,5 +1,5 @@
 rm(list=ls())
-load("../../../../out/Writeup14n/10x_greenleaf_preprocessed.RData")
+load("../../../../out/main/10x_greenleaf_preprocessed.RData")
 
 library(Seurat)
 library(Signac)
