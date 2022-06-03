@@ -78,7 +78,7 @@ res <- tiltedCCA:::.generic_variable_selection(
   vec = logpval_vec,
   verbose = 2
 )
-panel_3 <- res$selected_variables
+panel_3 <- res
 
 panel_list <- list(most_DE = panel_1,
                    least_aligned = panel_2,
