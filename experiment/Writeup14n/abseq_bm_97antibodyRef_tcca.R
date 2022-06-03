@@ -4,7 +4,7 @@ library(Signac)
 library(tiltedCCA)
 
 load("../../../../out/main/abseq_bm97Ref_preprocessed.RData")
-source("bm_97antibodyRef_colorPalette.R")
+source("../../main/bm_97antibodyRef_colorPalette.R")
 
 set.seed(10)
 
@@ -74,11 +74,11 @@ multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
-                                         latent_k = 20,
+                                         latent_k = 15,
                                          num_neigh = 60,
                                          bool_cosine = T,
                                          bool_intersect = T,
-                                         min_deg = 15,
+                                         min_deg = 1,
                                          verbose = 2)
 
 tmp <- bm; tmp_mat <- multiSVD_obj$laplacian_list$common_laplacian
