@@ -1,6 +1,6 @@
 rm(list=ls())
 
-library(Seurat); library(Signac); library(slingshot)
+library(Seurat); library(Signac)
 source("slingshot_funcs.R")
 
 load("../../../out/main/10x_greenleaf_tcca_RNA-ATAC.RData")

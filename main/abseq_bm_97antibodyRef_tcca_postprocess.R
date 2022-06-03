@@ -1,4 +1,6 @@
 rm(list=ls())
+library(Seurat)
+
 load("../../../out/main/abseq_bm97Ref_tcca.RData")
 source("bm_97antibodyRef_colorPalette.R")
 
