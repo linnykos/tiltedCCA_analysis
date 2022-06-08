@@ -86,38 +86,44 @@ for(j in 1:nrow(param_df)){
                                       min_deg = param_df$min_deg[j],
                                       verbose = 2)
   
-  tmp <- bm; tmp_mat <- tmp_obj$laplacian_list$common_laplacian
-  colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
-  set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)@cell.embeddings
-  tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
-  for(i in 1:length(tmp_obj$metacell_obj$metacell_clustering_list)){
-    idx <- tmp_obj$metacell_obj$metacell_clustering_list[[i]]
-    tmp_umap_full[idx,] <- rep(tmp_umap[i,], each = length(idx))
+  for(lap in c("laplacian_1", "laplacian_2", "common_laplacian")){
+    tmp <- bm; tmp_mat <- tmp_obj$laplacian_list[[lap]]
+    colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
+    set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)@cell.embeddings
+    tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
+    for(i in 1:length(tmp_obj$metacell_obj$metacell_clustering_list)){
+      idx <- tmp_obj$metacell_obj$metacell_clustering_list[[i]]
+      tmp_umap_full[idx,] <- rep(tmp_umap[i,], each = length(idx))
+    }
+    set.seed(10)
+    tmp_umap_full <- jitter(tmp_umap_full)
+    rownames(tmp_umap_full) <- colnames(tmp)
+    
+    # plot umap of laplacian
+    tmp[[lap]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = paste0(lap, "UMAP_"))
+    plot1 <- Seurat::DimPlot(tmp, reduction = lap,
+                             group.by = "ct", label = TRUE,
+                             repel = TRUE, label.size = 2.5,
+                             cols = col_palette)
+    plot1 <- plot1 + ggplot2::ggtitle(paste0("k: ", param_df$latent_k[j],
+                                             ", nn: ", param_df$num_neigh[j],
+                                             ", cos: ", param_df$bool_cosine[j],
+                                             "\nint: ", param_df$bool_intersect[j],
+                                             ", deg: ", param_df$min_deg[j]))
+    plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+    ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14n/abseq_bm97Ref_", j, "_", lap, ".png"),
+                    plot1, device = "png", width = 11, height = 5, units = "in")
+    
   }
-  set.seed(10)
-  tmp_umap_full <- jitter(tmp_umap_full)
-  rownames(tmp_umap_full) <- colnames(tmp)
   
-  # plot umap of laplacian
-  tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP")
-  plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
-                           group.by = "ct", label = TRUE,
-                           repel = TRUE, label.size = 2.5,
-                           cols = col_palette)
-  plot1 <- plot1 + ggplot2::ggtitle(paste0("k: ", param_df$latent_k[j],
-                                           ", nn: ", param_df$num_neigh[j],
-                                           ", cos: ", param_df$bool_cosine[j],
-                                           "\nint: ", param_df$bool_intersect[j],
-                                           ", deg: ", param_df$min_deg[j]))
-  plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-  ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14n/abseq_bm97Ref_laplacian-", j, ".png"),
-                  plot1, device = "png", width = 11, height = 5, units = "in")
+  ##################
   
   lap_full <- matrix(0, nrow = ncol(tmp), ncol = ncol(tmp_obj$laplacian_list$common_laplacian))
   for(i in 1:length(tmp_obj$metacell_obj$metacell_clustering_list)){
     idx <- tmp_obj$metacell_obj$metacell_clustering_list[[i]]
     lap_full[idx,] <- rep(tmp_obj$laplacian_list$common_laplacian[i,], each = length(idx))
   }
+  
   png(paste0("../../../../out/figures/Writeup14n/abseq_bm97Ref_laplacian_heatmap-", j, ".png"),
       width = 1500, height = 3500, units = "px", res = 300)
   tiltedCCA:::plot_scores_heatmap.list(obj = list(lap_full),
