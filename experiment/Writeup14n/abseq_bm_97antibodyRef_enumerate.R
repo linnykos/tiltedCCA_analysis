@@ -1,5 +1,6 @@
 rm(list=ls())
 load("../../../../out/main/abseq_bm97Ref_preprocessed.RData")
+source("../../main/bm_97antibody_colorPalette.R")
 
 library(Seurat)
 library(Signac)
@@ -101,7 +102,8 @@ for(j in 1:nrow(param_df)){
   tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP")
   plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
                            group.by = "ct", label = TRUE,
-                           repel = TRUE, label.size = 2.5)
+                           repel = TRUE, label.size = 2.5,
+                           cols = col_palette)
   plot1 <- plot1 + ggplot2::ggtitle(paste0("k: ", param_df$latent_k[j],
                                            ", nn: ", param_df$num_neigh[j],
                                            ", cos: ", param_df$bool_cosine[j],
@@ -109,7 +111,7 @@ for(j in 1:nrow(param_df)){
                                            ", deg: ", param_df$min_deg[j]))
   plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
   ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14n/abseq_bm97Ref_laplacian-", j, ".png"),
-                  plot1, device = "png", width = 6, height = 5, units = "in")
+                  plot1, device = "png", width = 11, height = 5, units = "in")
   
   lap_full <- matrix(0, nrow = ncol(tmp), ncol = ncol(tmp_obj$laplacian_list$common_laplacian))
   for(i in 1:length(tmp_obj$metacell_obj$metacell_clustering_list)){
