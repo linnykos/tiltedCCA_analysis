@@ -100,7 +100,7 @@ for(j in 1:nrow(param_df)){
   # plot umap of laplacian
   tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP")
   plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
-                           group.by = "celltype", label = TRUE,
+                           group.by = "ct", label = TRUE,
                            repel = TRUE, label.size = 2.5)
   plot1 <- plot1 + ggplot2::ggtitle(paste0("k: ", param_df$latent_k[j],
                                            ", nn: ", param_df$num_neigh[j],
@@ -124,7 +124,7 @@ for(j in 1:nrow(param_df)){
                                                      ", cos: ", param_df$bool_cosine[j],
                                                      "\nint: ", param_df$bool_intersect[j],
                                                      ", deg: ", param_df$min_deg[j]),
-                                       membership_vec = as.factor(tmp$celltype),
+                                       membership_vec = as.factor(tmp$ct),
                                        log_scale = T, scaling = 2)
   graphics.off()
 }
