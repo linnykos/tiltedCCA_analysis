@@ -122,7 +122,7 @@ color_breaks <- seq(min(c(heatmap_mat1, heatmap_mat2)),
                     length.out = num_color+1)
 
 png(paste0("../../../out/figures/main/10x_greenleaf_developmentalGenes_heatmap1.png"),
-    height = 1300, width = 2000, units = "px", res = 500)
+    height = 1300, width = 2600, units = "px", res = 500)
 par(mar = c(0,0,0,0))
 image(tiltedCCA:::.rotate(heatmap_mat1), xaxs = "i", yaxs = "i",
       col = color_palette, breaks = color_breaks,
@@ -135,7 +135,7 @@ lines(x = c(0,1), y = rep(y_val, 2), lty = 2, lwd = 2)
 graphics.off()
 
 png(paste0("../../../out/figures/main/10x_greenleaf_developmentalGenes_heatmap2.png"),
-    height = 1300, width = ncol(heatmap_mat2)*2000/ncol(heatmap_mat1), units = "px", res = 500)
+    height = 1300, width = ncol(heatmap_mat2)*2600/ncol(heatmap_mat1), units = "px", res = 500)
 par(mar = c(0,0,0,0))
 image(tiltedCCA:::.rotate(heatmap_mat2), xaxs = "i", yaxs = "i",
       col = color_palette, breaks = color_breaks,
@@ -175,7 +175,7 @@ np_res1 <- npregfast::frfast(y ~ x, data = df1)
 col <- rgb(224, 139, 0, maxColorValue = 255)
 
 png(paste0("../../../out/figures/main/10x_greenleaf_steadystate_forHeatmap1.png"),
-    height = 900, width = 2500, units = "px", res = 500)
+    height = 600, width = 3500, units = "px", res = 500)
 par(mar = c(0.5,3,0.5,0))
 y <- np_res1$p[,1,1]; n <- length(y)
 plot(x = seq(0, 1, length = length(alignment_vec1)),
@@ -207,7 +207,7 @@ predicted_y <- stats::predict(np_res2, newdata = data.frame(x = x_subset))
 predicted_y <- predicted_y$Estimation[,"Pred"]
 
 png(paste0("../../../out/figures/main/10x_greenleaf_steadystate_forHeatmap2.png"),
-    height = 900, width = 700, units = "px", res = 500)
+    height = 600, width = 500, units = "px", res = 500)
 par(mar = c(0.5,0.5,0.5,0))
 n <- length(x_subset)
 plot(x = seq(0, 1, length = n),

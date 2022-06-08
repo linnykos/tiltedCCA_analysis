@@ -264,6 +264,51 @@ for(i in 1:3){
   mbrain <- Seurat::AddMetaData(mbrain, metadata = traj_vec, col.name = paste0("Lineage", i))
 }
 
+###############
+
+# consensus pca
+Seurat::DefaultAssay(mbrain) <- "SCT"
+mat_1 <- Matrix::t(mbrain[["SCT"]]@data[Seurat::VariableFeatures(object = mbrain),])
+Seurat::DefaultAssay(mbrain) <- "ATAC"
+mat_2 <- Matrix::t(mbrain[["ATAC"]]@data[Seurat::VariableFeatures(object = mbrain),])
+
+mat_1b <- mat_1
+sd_vec <- sparseMatrixStats::colSds(mat_1b)
+if(any(sd_vec <= 1e-6)){
+  mat_1b <- mat_1b[,-which(sd_vec <= 1e-6)]
+}
+
+mat_2b <- mat_2
+sd_vec <- sparseMatrixStats::colSds(mat_2b)
+if(any(sd_vec <= 1e-6)){
+  mat_2b <- mat_2b[,-which(sd_vec <= 1e-6)]
+}
+
+consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = mat_1b, mat_2 = mat_2b,
+                                           dims_1 = 1:50, dims_2 = 1:50,
+                                           dims_consensus = 1:50,
+                                           center_1 = T, center_2 = F,
+                                           recenter_1 = F, recenter_2 = T,
+                                           rescale_1 = F, rescale_2 = T,
+                                           scale_1 = T, scale_2 = F,
+                                           verbose = 1)
+consensus_dimred <- consensus_pca$dimred_consensus
+colnames(consensus_dimred) <- paste0("consensusPCA_", 1:ncol(consensus_dimred))
+mbrain[["consensusPCA"]] <- Seurat::CreateDimReducObject(consensus_dimred, 
+                                                            assay = "SCT")
+
+set.seed(10)
+umap_res <- Seurat::RunUMAP(consensus_pca$dimred_consensus)
+umap_mat <- umap_res@cell.embeddings
+rownames(umap_mat) <- colnames(mbrain)
+colnames(umap_mat) <- paste0("consensusUMAP_", 1:ncol(umap_mat))
+mbrain[["consensusUMAP"]] <- Seurat::CreateDimReducObject(umap_mat, 
+                                                             assay = "SCT")
+
+##########
+
+
+
 save(mbrain, date_of_run, session_info,
      file = "../../../out/main/10x_mouseembryo_preprocessed.RData")
 
@@ -284,4 +329,12 @@ plot3 <- Seurat::FeaturePlot(mbrain, reduction = "umap.wnn",
 plot3 <- plot3 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC): WNN UMAP\nSlingshot's pseudotime via ATAC"))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_wnn-pseudotime.png"),
                 plot3, device = "png", width = 6, height = 5, units = "in")
+
+plot1 <- Seurat::DimPlot(mbrain, reduction = "consensusUMAP",
+                         group.by = "label_Savercat", label = TRUE,
+                         repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC)\nConsensus PCA's UMAP"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_consensusPCA-umap.png"),
+                plot1, device = "png", width = 6, height = 5, units = "in")
 
