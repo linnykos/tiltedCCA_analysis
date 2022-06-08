@@ -1,5 +1,5 @@
 rm(list=ls())
-load("../../../out/main/abseq_bm97Ref_preprocessed.RData")
+load("../../../../out/main/abseq_bm97Ref_preprocessed.RData")
 
 library(Seurat)
 library(Signac)
