@@ -14,12 +14,29 @@ n <- ncol(bm)
 Seurat::DefaultAssay(bm) <- "RNA"
 set.seed(10)
 bm <- Seurat::FindNeighbors(bm, dims = 1:30)
-bm <- Seurat::FindClusters(bm, resolution = 0.25)
+bm <- Seurat::FindClusters(bm, resolution = 0.1)
 
 Seurat::DefaultAssay(bm) <- "AB"
 set.seed(10)
 bm <- Seurat::FindNeighbors(bm, dims = 1:30, reduction = "apca")
-bm <- Seurat::FindClusters(bm, resolution = 0.25)
+bm <- Seurat::FindClusters(bm, resolution = 0.1)
+
+plot1 <-Seurat::DimPlot(bm, reduction = "rna.umap",
+                        group.by = "RNA_snn_res.0.1", label = TRUE,
+                        repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nRNA clustering"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14n/abseq_bm97Ref_rna-clustering.png"),
+                plot1, device = "png", width = 6.5, height = 5, units = "in")
+
+plot1 <-Seurat::DimPlot(bm, reduction = "adt.umap",
+                        group.by = "AB_snn_res.0.1", label = TRUE,
+                        repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nADT clustering"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../../out/figures/Writeup14n/abseq_bm97Ref_adt-clustering.png"),
+                plot1, device = "png", width = 6.5, height = 5, units = "in")
+
 
 Seurat::DefaultAssay(bm) <- "RNA"
 mat_1 <- Matrix::t(bm[["RNA"]]@scale.data[Seurat::VariableFeatures(object = bm),])
@@ -78,6 +95,7 @@ param_df <- data.frame(latent_k =       c(20, 20, 50, 50, 20, 20, 40, 20, 20,
                                           30))
 
 for(j in 1:nrow(param_df)){
+  print(j)
   tmp_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
                                       latent_k = param_df$latent_k[j],
                                       num_neigh = param_df$num_neigh[j],
@@ -118,23 +136,23 @@ for(j in 1:nrow(param_df)){
   
   ##################
   
-  lap_full <- matrix(0, nrow = ncol(tmp), ncol = ncol(tmp_obj$laplacian_list$common_laplacian))
-  for(i in 1:length(tmp_obj$metacell_obj$metacell_clustering_list)){
-    idx <- tmp_obj$metacell_obj$metacell_clustering_list[[i]]
-    lap_full[idx,] <- rep(tmp_obj$laplacian_list$common_laplacian[i,], each = length(idx))
-  }
-  
-  png(paste0("../../../../out/figures/Writeup14n/abseq_bm97Ref_laplacian_heatmap-", j, ".png"),
-      width = 1500, height = 3500, units = "px", res = 300)
-  tiltedCCA:::plot_scores_heatmap.list(obj = list(lap_full),
-                                       main = paste0("k: ", param_df$latent_k[j],
-                                                     ", nn: ", param_df$num_neigh[j],
-                                                     ", cos: ", param_df$bool_cosine[j],
-                                                     "\nint: ", param_df$bool_intersect[j],
-                                                     ", deg: ", param_df$min_deg[j]),
-                                       membership_vec = as.factor(tmp$ct),
-                                       log_scale = T, scaling = 2)
-  graphics.off()
+  # lap_full <- matrix(0, nrow = ncol(tmp), ncol = ncol(tmp_obj$laplacian_list$common_laplacian))
+  # for(i in 1:length(tmp_obj$metacell_obj$metacell_clustering_list)){
+  #   idx <- tmp_obj$metacell_obj$metacell_clustering_list[[i]]
+  #   lap_full[idx,] <- rep(tmp_obj$laplacian_list$common_laplacian[i,], each = length(idx))
+  # }
+  # 
+  # png(paste0("../../../../out/figures/Writeup14n/abseq_bm97Ref_laplacian_heatmap-", j, ".png"),
+  #     width = 1500, height = 3500, units = "px", res = 300)
+  # tiltedCCA:::plot_scores_heatmap.list(obj = list(lap_full),
+  #                                      main = paste0("k: ", param_df$latent_k[j],
+  #                                                    ", nn: ", param_df$num_neigh[j],
+  #                                                    ", cos: ", param_df$bool_cosine[j],
+  #                                                    "\nint: ", param_df$bool_intersect[j],
+  #                                                    ", deg: ", param_df$min_deg[j]),
+  #                                      membership_vec = as.factor(tmp$ct),
+  #                                      log_scale = T, scaling = 2)
+  # graphics.off()
 }
 
 
