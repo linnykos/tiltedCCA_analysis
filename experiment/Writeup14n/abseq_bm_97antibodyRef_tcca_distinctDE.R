@@ -34,4 +34,4 @@ adt_distinct_de_list <- tiltedCCA:::differential_expression(seurat_obj = bm,
                                                             slot = "data")
 
 save(adt_distinct_de_list, date_of_run, session_info,
-     file = "../../../out/Writeup14n/abseq_bm97Ref_distinct_differential.RData")
+     file = "../../../../out/Writeup14n/abseq_bm97Ref_distinct_differential.RData")
