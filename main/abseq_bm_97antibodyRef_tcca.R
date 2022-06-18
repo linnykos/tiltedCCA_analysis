@@ -13,15 +13,15 @@ session_info <- devtools::session_info()
 Seurat::DefaultAssay(bm) <- "RNA"
 set.seed(10)
 bm <- Seurat::FindNeighbors(bm, dims = 1:30)
-bm <- Seurat::FindClusters(bm, resolution = 0.25)
+bm <- Seurat::FindClusters(bm, resolution = 0.1)
 
 Seurat::DefaultAssay(bm) <- "AB"
 set.seed(10)
 bm <- Seurat::FindNeighbors(bm, dims = 1:30, reduction = "apca")
-bm <- Seurat::FindClusters(bm, resolution = 0.25)
+bm <- Seurat::FindClusters(bm, resolution = 0.1)
 
 plot1 <-Seurat::DimPlot(bm, reduction = "rna.umap",
-                        group.by = "RNA_snn_res.0.25", label = TRUE,
+                        group.by = "RNA_snn_res.0.1", label = TRUE,
                         repel = TRUE, label.size = 2.5)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nRNA clustering"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
@@ -29,7 +29,7 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_rna-c
                 plot1, device = "png", width = 6.5, height = 5, units = "in")
 
 plot1 <-Seurat::DimPlot(bm, reduction = "adt.umap",
-                        group.by = "AB_snn_res.0.25", label = TRUE,
+                        group.by = "AB_snn_res.0.1", label = TRUE,
                         repel = TRUE, label.size = 2.5)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nADT clustering"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
@@ -68,15 +68,15 @@ multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
                                             scale_1 = T, scale_2 = T,
                                             verbose = 1)
 multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
-                                           large_clustering_1 = as.factor(bm$RNA_snn_res.0.25), 
-                                           large_clustering_2 = as.factor(bm$AB_snn_res.0.25), 
+                                           large_clustering_1 = as.factor(bm$RNA_snn_res.0.1), 
+                                           large_clustering_2 = as.factor(bm$AB_snn_res.0.1), 
                                            num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
                                          latent_k = 20,
-                                         num_neigh = 60,
+                                         num_neigh = 15,
                                          bool_cosine = T,
-                                         bool_intersect = T,
+                                         bool_intersect = F,
                                          min_deg = 15,
                                          verbose = 2)
 

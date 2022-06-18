@@ -278,9 +278,29 @@ greenleaf_tmp$seurat_clusters[greenleaf_tmp$seurat_clusters == "8"] <- "5"
 table(greenleaf_tmp$seurat_clusters)
 
 set.seed(10)
-greenleaf_tmp <-  Signac::RunSVD(greenleaf_tmp)  
+greenleaf_tmp <- Signac::RunSVD(greenleaf_tmp)  
+set.seed(10)
+greenleaf_tmp <- Seurat::FindNeighbors(greenleaf_tmp, dims = 2:50, reduction = "lsi")
 
 dimmat_x <- greenleaf_tmp[["lsi"]]@cell.embeddings[,2:50]
+snn_graph <- greenleaf_tmp@graphs$ATAC_nn
+
+.nonzero_col <- function(mat, col_idx, bool_value){
+  stopifnot(inherits(mat, "dgCMatrix"), col_idx %% 1 == 0,
+            col_idx > 0, col_idx <= ncol(mat))
+  
+  val1 <- mat@p[col_idx]
+  val2 <- mat@p[col_idx+1]
+  
+  if(val1 == val2) return(numeric(0))
+  if(bool_value){
+    # return the value
+    mat@x[(val1+1):val2]
+  } else {
+    # return the row index
+    mat@i[(val1+1):val2]+1
+  }
+}
 
 # first get the MST, and then the curves
 # If the lineages for the MST is undesireable, hard-set them yourself
@@ -296,12 +316,21 @@ slingshot_curve <- slingshot::getCurves(slingshot_lin)
 
 # extract pseudotime
 pseudotime_mat <- slingshot_curve@assays@data$pseudotime
+set.seed(10)
 for(i in 1:3){
   # remove pseudotimes for cells not in the correct lineage
   idx <- greenleaf_tmp$seurat_clusters
   pseudotime_mat[which(!greenleaf_tmp$seurat_clusters %in% slingshot_lin@metadata$lineages[[i]]),i] <- NA
   idx <- which(!is.na(pseudotime_mat[,i]))
   pseudotime_mat[idx,i] <- rank(pseudotime_mat[idx,i])
+  pseudotime_mat_tmp <- pseudotime_mat
+  for(k in idx){
+    neighbors <- .nonzero_col(snn_graph, col_idx = k, bool_value = F)
+    neighbors <- unique(c(intersect(neighbors, idx), k))
+    pseudotime_mat_tmp[k,i] <- mean(pseudotime_mat[neighbors,i], na.rm = T)
+  }
+  pseudotime_mat <- pseudotime_mat_tmp
+  pseudotime_mat[idx,i] <- rank(pseudotime_mat[idx,i], ties.method = "random")
 }
 # compute a weighted rank
 lineage_length <- sapply(slingshot_lin@metadata$lineages, function(lin){
@@ -394,6 +423,11 @@ plot4 <- Seurat::FeaturePlot(greenleaf, reduction = "umap.geneActivity",
 plot4 <- plot4 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC): Gene Activity UMAP\nSlingshot's pseudotime via ATAC"))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_geneActivity-pseudotime.png"),
                 plot4, device = "png", width = 6, height = 5, units = "in")
+
+png("../../../out/figures/main/10x_greenleaf_pseudotime_histogram.png",
+    height = 1500, width = 2500, res = 300, units = "px")
+hist(greenleaf$pseudotime, main = "Slingshot pseudotime", xlab = "Pseudotime", breaks = 50)
+graphics.off()
 
 
 plot1 <- Seurat::DimPlot(greenleaf, reduction = "consensusUMAP",
