@@ -48,7 +48,6 @@ quantile(rsquare_vec)
 
 ##########################
 
-cor_power <- 3
 Seurat::DefaultAssay(bm) <- "AB"
 mat_2 <- Matrix::t(bm[["AB"]]@scale.data)
 mat_2b <- mat_2
@@ -58,20 +57,34 @@ if(any(sd_vec <= 1e-6)){
 }
 cor_mat <- abs(stats::cor(mat_2b))
 diag(cor_mat) <- 0
-cor_mat2 <- cor_mat^cor_power
 
+# compute the layout via a graph
+n <- ncol(cor_mat)
+adj_mat <- matrix(0, n, n)
+# adj_mat[cor_mat >= variable_selection_res$cor_threshold] <- cor_mat[cor_mat >= variable_selection_res$cor_threshold]
+adj_mat[cor_mat >= 0.7] <- 1
+k <- 10
+for(i in 1:n){
+  idx <- order(cor_mat[,i], decreasing = T)[1:k]
+  val_vec <- sort(cor_mat[,i], decreasing = T)[1:k]
+  adj_mat[i,idx] <- 1
+}
+adj_mat <- (adj_mat + t(adj_mat))/2
+rownames(adj_mat) <- colnames(mat_2b)
+colnames(adj_mat) <- colnames(mat_2b)
 set.seed(10)
-umap_res <- Seurat::RunUMAP(cor_mat2)
+umap_res <- Seurat::RunUMAP(adj_mat, spread = 0.75, min.dist = 0.1)
 
 cor_power <- 5; max_width <- 3
-g <- igraph::graph.adjacency(cor_mat, mode="undirected", weighted=TRUE)
-igraph::E(g)$width <- igraph::E(g)$weight^cor_power
-igraph::E(g)$width <- max_width*igraph::E(g)$width/max(igraph::E(g)$width)
+g <- igraph::graph.adjacency(adj_mat, mode="undirected")
+# igraph::E(g)$width <- igraph::E(g)$weight^cor_power
+# igraph::E(g)$width <- max_width*igraph::E(g)$width/max(igraph::E(g)$width)
 
 g2 <- g
 color_palette <- grDevices::colorRampPalette(c("white", 2))(20)
-cor_power <- 1
-x_vec <- logpval_vec; x_vec <- (x_vec - min(x_vec))/diff(range(x_vec)); x_vec <- x_vec^cor_power
+cor_power <- 1; max_val <- 100
+x_vec <- logpval_vec; x_vec[x_vec >= max_val] <- 2*max_val
+x_vec <- (x_vec - min(x_vec))/diff(range(x_vec)); x_vec <- x_vec^cor_power
 seq_vec <- seq(0, 1, length.out = 20)
 col_vec <- sapply(names(igraph::V(g2)), function(i){
   val <- x_vec[i]
@@ -80,8 +93,8 @@ col_vec <- sapply(names(igraph::V(g2)), function(i){
 })
 igraph::V(g2)$color <- col_vec
 
-size_breakpoints <- c(min(rsquare_vec)-.1, 0.8, 0.85, max(rsquare_vec)+.1)
-size_vals <- c(4,2,1)
+size_breakpoints <- c(min(rsquare_vec)-.1, 0.75, 0.84, max(rsquare_vec)+.1)
+size_vals <- c(5,4,2)
 size_vec <- sapply(names(igraph::V(g2)), function(i){
   val <- rsquare_vec[i]
   idx <- max(which(size_breakpoints <= val))
@@ -119,3 +132,37 @@ plot(g2,
      vertex.color = igraph::V(g2)$color, 
      edge.curved = 0.3)
 graphics.off()
+
+png("../../../out/figures/main/abseq_bm97Ref_varSelect_graph-labeled.png",
+    height = 2500, width = 2500, units = "px", res = 300)
+par(mar = rep(0.5,4))
+set.seed(10)
+plot(g2, 
+     layout = umap_res@cell.embeddings,
+     vertex.size = 3, 
+     edge.curved = 0.3)
+graphics.off()
+
+###############################
+
+variable_selection_res$selected_variables
+table(adj_mat["Disialoganglioside.GD2-AB",])
+vec <- adj_mat["CD40-AB",]; vec[which(vec != 0)]
+vec <- adj_mat["IgD-AB",]; vec[which(vec != 0)]
+
+################################3
+
+multiSVD_obj2 <- tiltedCCA:::tiltedCCA_decomposition(multiSVD_obj, 
+                                     bool_modality_1_full = F,
+                                     bool_modality_2_full = F,
+                                     verbose = verbose)
+reference_dimred <- tiltedCCA:::.get_tCCAobj(multiSVD_obj2, apply_postDimred = F, what = "common_dimred")
+# reference_dimred <- cbind(reference_dimred)#, mat_2b[,variable_selection_res$selected_variables[1]])
+tiltedCCA:::.linear_regression(bool_include_intercept = T,
+                   bool_center_x = T,
+                   bool_center_y = T,
+                   bool_scale_x = T,
+                   bool_scale_y = T,
+                   return_type = "r_squared", 
+                   x_mat = reference_dimred,
+                   y_vec = mat_2b[,"CD8-AB"])
