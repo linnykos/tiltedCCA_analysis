@@ -4,7 +4,7 @@ library(Seurat)
 library(Signac)
 library(tiltedCCA)
 
-load("../../../out/main/abseq_bm97Ref_differential.RData")
+load("../../../out/main/abseq_bm97Ref_distinct_differential.RData")
 load("../../../out/main/abseq_bm97Ref_tcca.RData")
 source("bm_97antibodyRef_colorPalette.R")
 
@@ -19,12 +19,12 @@ logpval_vec <- sapply(1:length(antibody_names), function(k){
   antibody <- antibody_names[k]
   
   # cycle through all the celltypes
-  celltype_vec <- sapply(1:length(adt_de_list$level_vec), function(i){
-    idx <- which(adt_de_list$combn_mat == i, arr.ind = T)[,2]
+  celltype_vec <- sapply(1:length(adt_distinct_de_list$level_vec), function(i){
+    idx <- which(adt_distinct_de_list$combn_mat == i, arr.ind = T)[,2]
     vec <-  sapply(idx, function(j){
-      idx <- which(rownames(adt_de_list$de_list[[j]]) == antibody)
+      idx <- which(rownames(adt_distinct_de_list$de_list[[j]]) == antibody)
       if(length(idx) == 0) return(1)
-      adt_de_list$de_list[[j]][idx, "p_val"]
+      adt_distinct_de_list$de_list[[j]][idx, "p_val"]
     })
     stats::quantile(vec, probs = 0.75)
   })
@@ -62,7 +62,7 @@ variable_selection_res <- tiltedCCA:::postprocess_distinct_variable_selection(
 # cor_mat <- stats::cor(distinct_mat[,variable_selection_res$selected_variables])
 
 adt_mat2 <- bm[["AB"]]@scale.data
-adt_mat2 <- adt_mat2[variable_selection_res$selected_variables[1:5],]
+adt_mat2 <- adt_mat2[variable_selection_res$selected_variables,]
 bm[["AB2"]] <- Seurat::CreateAssayObject(counts = adt_mat2)
 bm[["AB2"]]@data <- adt_mat2
 bm[["AB2"]]@scale.data <- adt_mat2
@@ -74,7 +74,7 @@ bm <- Seurat::RunPCA(bm, reduction.name = 'apca2',
                      verbose = F)
 
 set.seed(10)
-bm <- Seurat::RunUMAP(bm, reduction = 'apca2', dims = 1:(ncol(bm[["apca2"]]@cell.embeddings)-1), 
+bm <- Seurat::RunUMAP(bm, reduction = 'apca2', dims = 1:(ncol(bm[["apca2"]]@cell.embeddings)), 
                       assay = 'AB2',
                       reduction.name = 'AB2.umap', reduction.key = 'AB2UMAP_')
 
