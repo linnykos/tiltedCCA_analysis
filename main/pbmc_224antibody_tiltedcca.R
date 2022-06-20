@@ -1,5 +1,6 @@
 rm(list=ls())
 load("../../../out/main/citeseq_pbmc224_preprocessed.RData")
+source("pbmc_224antibody_colorPalette.R")
 
 library(Seurat)
 library(Signac)
@@ -19,15 +20,16 @@ pbmc <- subset(pbmc, keep == 1)
 Seurat::DefaultAssay(pbmc) <- "SCT"
 set.seed(10)
 pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:40, reduction = "pca")
-pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
+set.seed(10)
+pbmc <- Seurat::FindClusters(pbmc, resolution = 0.02)
 
 Seurat::DefaultAssay(pbmc) <- "ADT"
 set.seed(10)
 pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:25, reduction = "apca")
-pbmc <- Seurat::FindClusters(pbmc, resolution = 0.25)
+pbmc <- Seurat::FindClusters(pbmc, resolution = 0.05)
 
 plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
-                         group.by = "SCT_snn_res.0.25", label = TRUE,
+                         group.by = "SCT_snn_res.0.02", label = TRUE,
                          repel = TRUE, label.size = 2.5,
                          raster = F)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nSubset, RNA clustering"))
@@ -36,7 +38,7 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_rna
                 plot1, device = "png", width = 6.5, height = 5, units = "in")
 
 plot1 <- Seurat::DimPlot(pbmc, reduction = "adt.umap",
-                         group.by = "ADT_snn_res.0.25", label = TRUE,
+                         group.by = "ADT_snn_res.0.05", label = TRUE,
                          repel = TRUE, label.size = 2.5,
                          raster = F)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nSubset, ADT clustering"))
@@ -76,8 +78,8 @@ multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
                                             scale_1 = T, scale_2 = T,
                                             verbose = 1)
 multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
-                                           large_clustering_1 = as.factor(pbmc$SCT_snn_res.0.25), 
-                                           large_clustering_2 = as.factor(pbmc$ADT_snn_res.0.25), 
+                                           large_clustering_1 = as.factor(pbmc$SCT_snn_res.0.01), 
+                                           large_clustering_2 = as.factor(pbmc$ADT_snn_res.0.05), 
                                            num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
@@ -87,6 +89,33 @@ multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
                                          bool_intersect = F,
                                          min_deg = 30,
                                          verbose = 2)
+
+tmp <- pbmc; tmp_mat <- multiSVD_obj$laplacian_list$common_laplacian
+colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
+set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)@cell.embeddings
+tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
+for(i in 1:length(multiSVD_obj$metacell_obj$metacell_clustering_list)){
+  idx <- multiSVD_obj$metacell_obj$metacell_clustering_list[[i]]
+  tmp_umap_full[idx,] <- rep(tmp_umap[i,], each = length(idx))
+}
+set.seed(10)
+tmp_umap_full <- jitter(tmp_umap_full)
+rownames(tmp_umap_full) <- colnames(tmp)
+tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP",
+                                                          assay = "SCT")
+# tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap, key = "commonLapUMAP")
+plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
+                         group.by = "celltype.l2", label = TRUE,
+                         repel = TRUE, label.size = 2.5,
+                         raster = F,
+                         cols = col_palette)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nCommon Laplacian"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_pbmc224_common-laplacian.png"),
+                plot1, device = "png", width = 6.5, height = 5, units = "in")
+
+
+
 multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
                                       verbose = 1)
 
