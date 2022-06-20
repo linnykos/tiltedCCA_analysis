@@ -21,7 +21,7 @@ Seurat::DefaultAssay(pbmc) <- "SCT"
 set.seed(10)
 pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:40, reduction = "pca")
 set.seed(10)
-pbmc <- Seurat::FindClusters(pbmc, resolution = 0.02)
+pbmc <- Seurat::FindClusters(pbmc, resolution = 0.01)
 
 Seurat::DefaultAssay(pbmc) <- "ADT"
 set.seed(10)
@@ -29,7 +29,7 @@ pbmc <- Seurat::FindNeighbors(pbmc, dims = 1:25, reduction = "apca")
 pbmc <- Seurat::FindClusters(pbmc, resolution = 0.05)
 
 plot1 <- Seurat::DimPlot(pbmc, reduction = "rna.umap",
-                         group.by = "SCT_snn_res.0.02", label = TRUE,
+                         group.by = "SCT_snn_res.0.01", label = TRUE,
                          repel = TRUE, label.size = 2.5,
                          raster = F)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (CITE-Seq, RNA+224 ADT)\nSubset, RNA clustering"))
