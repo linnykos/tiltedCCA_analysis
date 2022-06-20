@@ -73,7 +73,7 @@ adj_mat <- (adj_mat + t(adj_mat))/2
 rownames(adj_mat) <- colnames(mat_2b)
 colnames(adj_mat) <- colnames(mat_2b)
 set.seed(10)
-umap_res <- Seurat::RunUMAP(adj_mat, spread = 0.75, min.dist = 0.1)
+umap_res <- Seurat::RunUMAP(adj_mat, spread = 5, min.dist = 0.1)
 
 cor_power <- 5; max_width <- 3
 g <- igraph::graph.adjacency(adj_mat, mode="undirected")

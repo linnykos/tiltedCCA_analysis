@@ -91,6 +91,16 @@ plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_rna-umap.png"),
                 plot1, device = "png", width = 11, height = 5, units = "in")
 
+plot1 <- Seurat::DimPlot(bm, reduction = "rna.umap",
+                         group.by = "ct", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_rna-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
 plot1 <-Seurat::DimPlot(bm, reduction = "adt.umap",
                         group.by = "ct", label = TRUE,
                         repel = TRUE, label.size = 2.5,
@@ -99,6 +109,16 @@ plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nADT UMAP"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_adt-umap.png"),
                 plot1, device = "png", width = 11, height = 5, units = "in")
+
+plot1 <- Seurat::DimPlot(bm, reduction = "adt.umap",
+                         group.by = "ct", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_adt-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
 
 plot1 <-Seurat::DimPlot(bm, reduction = "wnn.umap",
                         group.by = "ct", label = TRUE,
@@ -117,6 +137,16 @@ plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nConsensus P
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_consensusPCA-umap.png"),
                 plot1, device = "png", width = 11, height = 5, units = "in")
+
+plot1 <- Seurat::DimPlot(bm, reduction = "consensusUMAP",
+                         group.by = "ct", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_consensusPCA-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
 
 ##########################
 

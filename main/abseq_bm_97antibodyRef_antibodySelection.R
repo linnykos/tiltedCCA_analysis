@@ -74,7 +74,7 @@ bm <- Seurat::RunPCA(bm, reduction.name = 'apca2',
                      verbose = F)
 
 set.seed(10)
-bm <- Seurat::RunUMAP(bm, reduction = 'apca2', dims = 1:(ncol(bm[["apca2"]]@cell.embeddings)), 
+bm <- Seurat::RunUMAP(bm, reduction = 'apca2', dims = 1:ncol(bm[["apca2"]]@cell.embeddings), 
                       assay = 'AB2',
                       reduction.name = 'AB2.umap', reduction.key = 'AB2UMAP_')
 
@@ -85,17 +85,17 @@ consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = NULL, mat_2 = adt_mat2,
                                            dims_consensus = 1:20,
                                            svd_1 = svd_1, verbose = 1)
 
-bm[["consensusPCA"]] <- Seurat::CreateDimReducObject(consensus_pca$dimred_consensus, 
-                                                     assay = "RNA",
-                                                     key = "cPC")
+bm[["consensusPCA2"]] <- Seurat::CreateDimReducObject(consensus_pca$dimred_consensus, 
+                                                      assay = "RNA",
+                                                      key = "cPC")
 
 set.seed(10)
 umap_res <- Seurat::RunUMAP(consensus_pca$dimred_consensus)
 umap_mat <- umap_res@cell.embeddings
 rownames(umap_mat) <- colnames(bm)
-bm[["consensusUMAP"]] <- Seurat::CreateDimReducObject(umap_mat, 
-                                                      assay = "RNA",
-                                                      key = "cUMAP")
+bm[["consensusUMAP2"]] <- Seurat::CreateDimReducObject(umap_mat, 
+                                                       assay = "RNA",
+                                                       key = "cUMAP")
 
 save(variable_selection_res, bm, 
      logpval_vec, 
@@ -118,7 +118,17 @@ plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_varSelect_adt-umap.png"),
                 plot2, device = "png", width = 11, height = 5, units = "in")
 
-plot3 <- Seurat::DimPlot(bm, reduction = "consensusUMAP",
+plot1 <- Seurat::DimPlot(bm, reduction = "AB2.umap",
+                         group.by = "ct", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_varSelect_adt-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot3 <- Seurat::DimPlot(bm, reduction = "consensusUMAP2",
                          group.by = "ct", label = TRUE,
                          repel = TRUE, label.size = 2.5,
                          cols = col_palette,
@@ -127,3 +137,13 @@ plot3 <- plot3 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nConsensusPC
 plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_varSelect_consensusPCA-umap.png"),
                 plot3, device = "png", width = 11, height = 5, units = "in")
+
+plot1 <- Seurat::DimPlot(bm, reduction = "consensusUMAP2",
+                         group.by = "ct", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_varSelect_consensusPCA-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)

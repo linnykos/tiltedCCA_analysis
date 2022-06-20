@@ -55,7 +55,7 @@ rsquare_vec <- sapply(1:ncol(adt_mat), function(j){
 names(rsquare_vec) <- colnames(adt_mat)
 
 ######################
-num_variables <- 5
+num_variables <- 10
 
 # First panel: Select the antibodies with the highest p-vales
 panel_1 <- names(logpval_vec)[order(logpval_vec, decreasing = T)[1:num_variables]]
