@@ -19,10 +19,10 @@ pbmc[["distinctADT"]] <- Seurat::CreateAssayObject(data = t(multiSVD_obj$distinc
 
 print("Working on RNA")
 adt_distinct_de_list <- tiltedCCA:::differential_expression(seurat_obj = pbmc,
-                                                    assay = "distinctADT",
-                                                    idents = "celltype.l3",
-                                                    test_use = "wilcox",
-                                                    slot = "data")
+                                                            assay = "distinctADT",
+                                                            idents = "celltype.l3",
+                                                            test_use = "wilcox",
+                                                            slot = "data")
 save(adt_distinct_de_list, pbmc,
      date_of_run, session_info,
      file = "../../../out/main/citeseq_pbmc224_differential_distinct.RData")
