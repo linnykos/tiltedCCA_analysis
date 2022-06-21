@@ -94,7 +94,7 @@ col_vec <- sapply(names(igraph::V(g2)), function(i){
 igraph::V(g2)$color <- col_vec
 
 size_breakpoints <- c(min(rsquare_vec)-.1, 0.75, 0.84, max(rsquare_vec)+.1)
-size_vals <- c(5,4,2)
+size_vals <- c(8,6,4)
 size_vec <- sapply(names(igraph::V(g2)), function(i){
   val <- rsquare_vec[i]
   idx <- max(which(size_breakpoints <= val))
@@ -103,7 +103,7 @@ size_vec <- sapply(names(igraph::V(g2)), function(i){
 igraph::V(g2)$size <- size_vec
 
 png("../../../out/figures/main/abseq_bm97Ref_varSelect_graph-cleaned.png",
-    height = 3000, width = 3000, units = "px", res = 500)
+    height = 1500, width = 2000, units = "px", res = 500)
 par(mar = rep(0.5,4))
 set.seed(10)
 plot(g2, 
@@ -140,7 +140,8 @@ set.seed(10)
 plot(g2, 
      layout = umap_res@cell.embeddings,
      vertex.size = 3, 
-     edge.curved = 0.3)
+     edge.curved = 0.3,
+     vertex.label.cex = 0.5)
 graphics.off()
 
 ###############################

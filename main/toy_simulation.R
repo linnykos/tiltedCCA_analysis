@@ -67,7 +67,7 @@ multiSVD_obj <- compute_snns(input_obj = multiSVD_obj,
 multiSVD_obj <- tiltedCCA(input_obj = multiSVD_obj)
 multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
                                                     verbose = 1)
-
+  
 ###############
 
 set.seed(10)
@@ -93,12 +93,35 @@ image(t(tmp), asp = 6/9, col = col_vec,
       xaxt = "n", yaxt = "n", bty = "n")
 graphics.off()
 
+col_vec <- colorRampPalette(c("white", 
+                              rgb(219, 154, 237, maxColorValue = 255),
+                              rgb(191, 74, 223, maxColorValue = 255)))(10)
+tmp <- mat_2[1:13,1:10]
+png("../../out/figures/main/toy_simulation_atac-heatmap.png", 
+    height = 2500, width = 2500, res = 500, units = "px")
+par(mar = c(0.1, 0.1, 0.1, 0.1))
+image(t(tmp), asp = 12/9, col = col_vec, 
+      xaxt = "n", yaxt = "n", bty = "n")
+graphics.off()
+
 set.seed(10)
 col_vec <- colorRampPalette(c("white", 
                               rgb(246, 224, 157, maxColorValue = 255),
                               rgb(236, 170, 16, maxColorValue = 255)))(10)
 tmp <- multiSVD_obj$common_mat_1[1:13,1:10]
 png("../../out/figures/main/toy_simulation_rna-commonMat-heatmap.png", 
+    height = 2500, width = 2500, res = 500, units = "px")
+par(mar = c(0.1, 0.1, 0.1, 0.1))
+image(t(tmp), asp = 12/9, col = col_vec, 
+      xaxt = "n", yaxt = "n", bty = "n")
+graphics.off()
+
+set.seed(10)
+col_vec <- colorRampPalette(c("white", 
+                              rgb(98, 147, 194, maxColorValue = 255),
+                              rgb(65, 88, 163, maxColorValue = 255)))(10)
+tmp <- multiSVD_obj$common_mat_1[1:13,1:10]
+png("../../out/figures/main/toy_simulation_rna-commonMat-heatmap2.png", 
     height = 2500, width = 2500, res = 500, units = "px")
 par(mar = c(0.1, 0.1, 0.1, 0.1))
 image(t(tmp), asp = 12/9, col = col_vec, 

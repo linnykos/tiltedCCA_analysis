@@ -26,11 +26,11 @@ celltype_list <- list("NK cells" = c("CD56brightCD16- NK cells", "CD56dimCD16+ N
                                       "Late erythroid progenitor", "Megakaryocyte progenitors"),
                       "HSC-MPPs" = c("HSCs & MPPs"),
                       "Myeloid" = c("Classical Monocytes", "Conventional dendritic cell 1",
-                                    "Conventional dendritic cell 1", "Early promyelocytes",
+                                    "Conventional dendritic cell 2", "Early promyelocytes",
                                     "Late promyelocytes", "Lymphomyeloid prog", "Myelocytes",
                                     "Non-classical monocytes", "Plasmacytoid dendritic cell progenitors",
                                     "Plasmacytoid dendritic cells"),
-                      "Other" = c("GammaDelta T cells", "Plasma cells", "Aberrant erythroid"))
+                      "Other" = c("Aberrant erythroid", "GammaDelta T cells", "Plasma cells"))
 celltype_all <- unlist(celltype_list)
 names(celltype_all) <- NULL
 

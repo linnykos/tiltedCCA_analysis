@@ -1,7 +1,9 @@
 rm(list=ls())
 library(Seurat); library(Signac)
-# load("../../../out/main/10x_greenleaf_tcca_RNA-ATAC.RData")
-load("../../../out/Writeup14n/10x_greenleaf_tcca_RNA-ATAC.RData")
+
+source("greenleaf_colorPalette.R")
+load("../../../out/main/10x_greenleaf_tcca_RNA-ATAC.RData")
+# load("../../../out/Writeup14n/10x_greenleaf_tcca_RNA-ATAC.RData")
 
 plot1 <- Seurat::DimPlot(greenleaf, reduction = "common_tcca",
                          group.by = "celltype", label = TRUE,
