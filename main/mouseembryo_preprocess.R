@@ -219,7 +219,28 @@ mbrain_tmp$seurat_clusters[mbrain_tmp$seurat_clusters == "11"] <- "0"
 
 set.seed(10)
 mbrain_tmp <-  Signac::RunSVD(mbrain_tmp)  
+set.seed(10)
+mbrain_tmp <- Seurat::FindNeighbors(mbrain_tmp, dims = 2:50, reduction = "lsi")
+
 dimmat_x <- mbrain_tmp[["lsi"]]@cell.embeddings[,2:50]
+snn_graph <- mbrain_tmp@graphs$ATAC_nn
+
+.nonzero_col <- function(mat, col_idx, bool_value){
+  stopifnot(inherits(mat, "dgCMatrix"), col_idx %% 1 == 0,
+            col_idx > 0, col_idx <= ncol(mat))
+  
+  val1 <- mat@p[col_idx]
+  val2 <- mat@p[col_idx+1]
+  
+  if(val1 == val2) return(numeric(0))
+  if(bool_value){
+    # return the value
+    mat@x[(val1+1):val2]
+  } else {
+    # return the row index
+    mat@i[(val1+1):val2]+1
+  }
+}
 
 # first get the MST, and then the curves
 # If the lineages for the MST is undesireable, hard-set them yourself
@@ -241,6 +262,14 @@ for(i in 1:3){
   pseudotime_mat[which(!mbrain_tmp$seurat_clusters %in% slingshot_lin@metadata$lineages[[i]]),i] <- NA
   idx <- which(!is.na(pseudotime_mat[,i]))
   pseudotime_mat[idx,i] <- rank(pseudotime_mat[idx,i])
+  pseudotime_mat_tmp <- pseudotime_mat
+  for(k in idx){
+    neighbors <- .nonzero_col(snn_graph, col_idx = k, bool_value = F)
+    neighbors <- unique(c(intersect(neighbors, idx), k))
+    pseudotime_mat_tmp[k,i] <- mean(pseudotime_mat[neighbors,i], na.rm = T)
+  }
+  pseudotime_mat <- pseudotime_mat_tmp
+  pseudotime_mat[idx,i] <- rank(pseudotime_mat[idx,i], ties.method = "random")
 }
 # compute a weighted rank
 lineage_length <- sapply(slingshot_lin@metadata$lineages, function(lin){
@@ -285,8 +314,8 @@ if(any(sd_vec <= 1e-6)){
 }
 
 consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = mat_1b, mat_2 = mat_2b,
-                                           dims_1 = 1:50, dims_2 = 1:50,
-                                           dims_consensus = 1:50,
+                                           dims_1 = 1:50, dims_2 = 2:50,
+                                           dims_consensus = 1:49,
                                            center_1 = T, center_2 = F,
                                            recenter_1 = F, recenter_2 = T,
                                            rescale_1 = F, rescale_2 = T,
