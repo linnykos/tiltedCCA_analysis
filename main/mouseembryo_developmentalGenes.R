@@ -42,4 +42,5 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mbrain_tcca_dev
                 plot1, device = "png", width = 20, height = 15, units = "in")
 
 save(selection_res, date_of_run, session_info, cell_idx,
-     file = "../../../out/main/10x_mbrain_developmentalGenes.RData")
+     file = "../../../out/main/10x_mouseembryo_developmentalGenes.RData")
+

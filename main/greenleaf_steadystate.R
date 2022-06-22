@@ -38,6 +38,11 @@ color_vec <- sapply(greenleaf$alignment, function(val){
   color_palette[which.min(abs(color_breaks - val))]
 })
 
+save(color_vec, alignment_vec,
+     scaling_grid, scaling_quality,
+     date_of_run, session_info,
+     file = "../../../out/main/10x_greenleaf_steadystate.RData")
+
 png(paste0("../../../out/figures/main/10x_greenleaf_tcca_steadystate-full.png"),
     height = 3000, width = 3000, units = "px", res = 500)
 par(mar = c(4,4,4,0.5))
@@ -50,6 +55,17 @@ plot(x = greenleaf[["common_tcca"]]@cell.embeddings[,1],
      xaxt = "n", yaxt = "n", bty = "n")
 axis(side = 1)
 axis(side = 2)
+graphics.off()
+
+
+png(paste0("../../../out/figures/main/10x_greenleaf_tcca_steadystate-full_cleaned.png"),
+    height = 2000, width = 2000, units = "px", res = 500)
+par(mar = c(0.5,0.5,0.5,0.5))
+plot(x = greenleaf[["common_tcca"]]@cell.embeddings[,1],
+     y = greenleaf[["common_tcca"]]@cell.embeddings[,2],
+     col = color_vec, pch = 16,
+     main = "",
+     xaxt = "n", yaxt = "n", bty = "n")
 graphics.off()
 
 ###########

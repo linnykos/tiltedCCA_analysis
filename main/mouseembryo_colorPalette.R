@@ -3,7 +3,7 @@ col_palette <- c(
   "Forebrain GABAergic" = rgb(175, 175, 175, maxColorValue = 255),
   "Glioblast" = rgb(230, 204, 118, maxColorValue = 255),
   "Neuroblast"= rgb(115, 98, 157, maxColorValue = 255),
-  "Oligodendrocyte" = rgb(243, 241, 132, maxColorValue = 255),
+  "Oligodendrocyte" = rgb(215, 203, 110, maxColorValue = 255),
   "Radial glia" = rgb(197, 125, 95, maxColorValue = 255)
 )
 

@@ -42,4 +42,16 @@ plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_RNA-ATAC_umap_distinct2.png"),
                 plot3, device = "png", width = 6, height = 5, units = "in")
 
+############
+
+plot1 <- Seurat::DimPlot(greenleaf, reduction = "common_tcca",
+                         group.by = "celltype", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_RNA-ATA_cleaned-smaller.png"),
+                plot1, device = "png", width = 2, height = 2, units = "in",
+                dpi = 500)
+
+
 

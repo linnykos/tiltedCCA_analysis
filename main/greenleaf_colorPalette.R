@@ -8,7 +8,7 @@ col_palette <- c(
   "IN1" = rgb(163, 139, 184, maxColorValue = 255),
   "IN2" = rgb(209, 157, 152, maxColorValue = 255),
   "IN3" = rgb(218, 188, 213, maxColorValue = 255),
-  "mGPC/OPC" = rgb(243, 241, 132, maxColorValue = 255),
+  "mGPC/OPC" = rgb(215, 203, 110, maxColorValue = 255),
   "nIPC/GluN1" = rgb(114, 169, 158, maxColorValue = 255),
   "RG" = rgb(197, 125, 95, maxColorValue = 255),
   "SP" = rgb(140, 184, 165, maxColorValue = 255)
