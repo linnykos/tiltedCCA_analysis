@@ -1,7 +1,8 @@
 rm(list=ls())
-load("../../../out/main/10x_mouseembryo_tiltedcca.RData")
-
 library(Seurat); library(Signac)
+
+load("mouseembryo_colorPalette")
+load("../../../out/main/10x_mouseembryo_tiltedcca.RData")
 
 plot1 <- Seurat::DimPlot(mbrain, reduction = "common_tcca",
                          group.by = "label_Savercat", label = TRUE,
