@@ -25,7 +25,9 @@ for(j in 1:p){
   
   tmp_df <- data.frame(y = rna_common[,j], x = 1:nrow(rna_common))
   reg_res <- npregfast::frfast(y ~ x, data = tmp_df)
-  predicted_list[[j]] <- cbind(reg_res$x, reg_res$p[,1,1])
+  x_vec <- 1:nrow(rna_common)
+  y_vec <- stats::predict(object = reg_res, newdata = data.frame(x = x_vec))
+  predicted_list[[j]] <- y_vec$Estimation[,"Pred"]
 }
 
 save(greenleaf, multiSVD_obj, rna_common, predicted_list, 
