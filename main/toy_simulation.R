@@ -96,11 +96,11 @@ graphics.off()
 col_vec <- colorRampPalette(c("white", 
                               rgb(219, 154, 237, maxColorValue = 255),
                               rgb(191, 74, 223, maxColorValue = 255)))(10)
-tmp <- mat_2[1:13,1:10]
+tmp <- mat_2[1:13,1:20]
 png("../../out/figures/main/toy_simulation_atac-heatmap.png", 
     height = 2500, width = 2500, res = 500, units = "px")
 par(mar = c(0.1, 0.1, 0.1, 0.1))
-image(t(tmp), asp = 12/9, col = col_vec, 
+image(t(tmp), asp = 12/19, col = col_vec, 
       xaxt = "n", yaxt = "n", bty = "n")
 graphics.off()
 

@@ -43,3 +43,10 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_
 
 save(selection_res, date_of_run, session_info, cell_idx,
      file = "../../../out/main/10x_greenleaf_developmentalGenes.RData")
+
+sink("../../../out/main/10x_greenleaf_developmentalGenes.txt")
+for(i in 1:length(selection_res$selected_variables)){
+  cat(selection_res$selected_variables[i])
+  cat("\n")
+}
+sink()

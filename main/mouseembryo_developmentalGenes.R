@@ -44,3 +44,10 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mbrain_tcca_dev
 save(selection_res, date_of_run, session_info, cell_idx,
      file = "../../../out/main/10x_mouseembryo_developmentalGenes.RData")
 
+
+sink("../../../out/main/10x_mouseembryo_developmentalGenes.txt")
+for(i in 1:length(selection_res$selected_variables)){
+  cat(selection_res$selected_variables[i])
+  cat("\n")
+}
+sink()

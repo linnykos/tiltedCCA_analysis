@@ -209,6 +209,7 @@ keep_vec <- rep(1, ncol(mbrain))
 keep_vec[mbrain$seurat_clusters %in% c("5","15","19","6","18","13","14","16", "4")] <- 0
 mbrain$keep <- keep_vec
 mbrain_tmp <- subset(mbrain, keep == 1)
+mbrain_tmp2 <- mbrain_tmp
 table(mbrain_tmp$seurat_clusters)
 
 # ad-hoc merge some clusters for Slingshot to work better
@@ -254,14 +255,49 @@ slingshot_lin <- slingshot::getLineages(data = dimmat_x,
 slingshot_lin@metadata$lineages
 slingshot_curve <- slingshot::getCurves(slingshot_lin)
 
+# minor adjustment
+.initial_curve_fit <- function(cluster_vec,
+                               dimred, 
+                               lineage_order){
+  stopifnot(all(lineage_order %in% cluster_vec),
+            length(cluster_vec) == nrow(dimred))
+  t(sapply(lineage_order, function(cluster){
+    idx <- which(cluster_vec == cluster)
+    Matrix::colMeans(dimred[idx,,drop = F])
+  }))
+}
+
+.extract_pseudotime <- function(dimred,
+                                initial_fit,
+                                stretch){ # default strecth=2
+  pcurve <- princurve::project_to_curve(dimred,
+                                        s = initial_fit,
+                                        stretch = 2)
+  pcurve$lambda
+}
+
+lineage1_initial_fit <- .initial_curve_fit(cluster_vec = as.character(mbrain_tmp2$seurat_clusters),
+                                           dimred = dimmat_x,
+                                           lineage_order = c("17", "9", "3", "0", "10", "8"))
+lineage1_pseudotime <- .extract_pseudotime(dimred = dimmat_x[which(mbrain_tmp$seurat_clusters %in% slingshot_lin@metadata$lineages[[1]]),],
+                                           initial_fit = lineage1_initial_fit,
+                                           stretch = 2)
+# sapply(unique(as.character(c("17", "9", "3", "11", "0", "10", "1", "2", "8"))), function(clust){
+#   cellnames <- colnames(mbrain_tmp2)[which(mbrain_tmp2$seurat_clusters == clust)]
+#   mean(lineage1_pseudotime[cellnames])
+# })
+
 # extract pseudotime
 pseudotime_mat <- slingshot_curve@assays@data$pseudotime
-for(i in 1:3){
+num_lin <- length(slingshot_lin@metadata$lineages)
+pseudotime_mat[names(lineage1_pseudotime),1] <- lineage1_pseudotime
+
+for(i in 1:num_lin){
   # remove pseudotimes for cells not in the correct lineage
-  idx <- mbrain_tmp$seurat_clusters
   pseudotime_mat[which(!mbrain_tmp$seurat_clusters %in% slingshot_lin@metadata$lineages[[i]]),i] <- NA
   idx <- which(!is.na(pseudotime_mat[,i]))
   pseudotime_mat[idx,i] <- rank(pseudotime_mat[idx,i])
+
   pseudotime_mat_tmp <- pseudotime_mat
   for(k in idx){
     neighbors <- .nonzero_col(snn_graph, col_idx = k, bool_value = F)
@@ -276,20 +312,30 @@ lineage_length <- sapply(slingshot_lin@metadata$lineages, function(lin){
   length(which(mbrain_tmp$seurat_clusters %in% lin))
 })
 pseudotime_vec <- apply(pseudotime_mat, 1, function(x){
-  vec <- sapply(1:3, function(i){x[i]/lineage_length[i]})
+  vec <- sapply(1:num_lin, function(i){x[i]/lineage_length[i]})
   mean(vec, na.rm = T)
 })
+
+# store results
 pseudotime_vec_full <- rep(NA, ncol(mbrain))
 names(pseudotime_vec_full) <- colnames(mbrain)
 pseudotime_vec_full[names(pseudotime_vec)] <- pseudotime_vec
 mbrain$pseudotime <- pseudotime_vec_full
 
 # add metadata
-for(i in 1:3){
+# mbrain$Lineage1 <- NULL; mbrain$Lineage2 <- NULL; mbrain$Lineage3 <- NULL
+lineage_celltypes <- list(c("Radial glia", "Neuroblast", "Cortical or hippocampal glutamatergic"),
+                         c("Radial glia", "Neuroblast", "Forebrain GABAergic"),
+                         c("Radial glia", "Glioblast", "Oligodendrocyte"))
+for(i in 1:num_lin){
   traj_vec <- rep(0, ncol(mbrain))
   names(traj_vec) <- colnames(mbrain)
-  idx <- which(!is.na(pseudotime_mat[,i]))
-  traj_vec[names(pseudotime_mat[idx,i])] <- 1
+  
+  cellnames1 <- colnames(mbrain_tmp)[which(mbrain_tmp$label_Savercat %in% lineage_celltypes[[i]])]
+  cellnames2 <- colnames(mbrain_tmp)[which(mbrain_tmp$seurat_clusters %in% slingshot_lin@metadata$lineages[[i]])]
+  
+  cellnames <- intersect(cellnames1, cellnames2)
+  traj_vec[cellnames] <- 1
   mbrain <- Seurat::AddMetaData(mbrain, metadata = traj_vec, col.name = paste0("Lineage", i))
 }
 
@@ -336,8 +382,6 @@ mbrain[["consensusUMAP"]] <- Seurat::CreateDimReducObject(umap_mat,
 
 ##########
 
-
-
 save(mbrain, date_of_run, session_info,
      file = "../../../out/main/10x_mouseembryo_preprocessed.RData")
 
@@ -366,4 +410,18 @@ plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse Embryo E18 (10x, RNA+ATAC)\nCons
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_consensusPCA-umap.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
+
+plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.atac",
+                         cells.highlight = which(mbrain@meta.data[,"Lineage1"] != 0))
+plot1 <- plot1 + Seurat::NoLegend()
+plot2 <- Seurat::DimPlot(mbrain, reduction = "umap.atac",
+                         cells.highlight = which(mbrain@meta.data[,"Lineage2"] != 0))
+plot2 <- plot2 + Seurat::NoLegend()
+plot3 <- Seurat::DimPlot(mbrain, reduction = "umap.atac",
+                         cells.highlight = which(mbrain@meta.data[,"Lineage3"] != 0))
+plot3 <- plot3 + Seurat::NoLegend()
+plot_all <- cowplot::plot_grid(plot1, plot2, plot3, nrow = 1, ncol = 3)
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_atac_lineageHighlighted.png"),
+                plot_all, device = "png", width = 10, height = 4, units = "in")
+
 
