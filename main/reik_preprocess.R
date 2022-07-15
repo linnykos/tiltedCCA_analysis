@@ -103,15 +103,16 @@ source("reik_colorPalette.R")
 #      file = "../../../out/main/10x_reik_preprocessed.RData")
 # 
 # ###############
-# 
-# set.seed(10)
-# reik <- Seurat::FindMultiModalNeighbors(reik, reduction.list = list("pca", "lsi"), 
-#                                         dims.list = list(1:50, 2:50))
-# set.seed(10)
-# reik <- Seurat::RunUMAP(reik, nn.name = "weighted.nn", reduction.name = "umap.wnn", 
-#                         reduction.key = "wnnUMAP_")
-# 
-# ###########
+
+load("../../../out/main/10x_reik_preprocessed.RData")
+set.seed(10)
+reik <- Seurat::FindMultiModalNeighbors(reik, reduction.list = list("pca", "lsi"),
+                                        dims.list = list(1:50, 2:50))
+set.seed(10)
+reik <- Seurat::RunUMAP(reik, nn.name = "weighted.nn", reduction.name = "umap.wnn",
+                        reduction.key = "wnnUMAP_")
+
+###########
 
 Seurat::DefaultAssay(reik) <- "RNA"
 mat_1 <- Matrix::t(reik[["RNA"]]@data[Seurat::VariableFeatures(object = reik),])
