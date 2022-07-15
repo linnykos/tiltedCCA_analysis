@@ -1,0 +1,43 @@
+col_palette <- c(
+  "Allantois" = rgb(77, 49, 133, maxColorValue = 255),
+  "Anterior_Primitive_Streak" = rgb(214, 190, 157, maxColorValue = 255),
+  "Blood_progenitors_1" = rgb(245, 223, 209, maxColorValue = 255),
+  "Blood_progenitors_2" = rgb(196, 170, 153, maxColorValue = 255),
+  "Cardiomyocytes" = rgb(166, 50, 137, maxColorValue = 255),
+  "Caudal_epiblast" = rgb(150, 105, 100, maxColorValue = 255),
+  "Caudal_Mesoderm" = rgb(79, 131, 166, maxColorValue = 255),
+  "Caudal_neurectoderm" = rgb(79, 131, 166, maxColorValue = 255),
+  "Def._enoderm",
+  "Endothelium",
+  "Epiblast",
+  "Erythroid1",
+  "Erythroid2",
+  "Erythroid3",
+  "ExE_ectoderm",
+  "ExE_endoderm",
+  "ExE_mesoderm",
+  "Forebrain_Midbrain_Hindbrain",
+  "Gut",
+  "Haematoendothelial_progenitors",
+  "Intermediate_mesoderm",
+  "Mesenchyme",
+  "Mixed_mesoderm",
+  "Nascent_mesoderm",
+  "Neural_crest",
+  "NMP",
+  "Notochord",
+  "Paraxial_mesoderm",
+  "Parietal_endoderm",
+  "PGC",
+  "Pharyngael_mesoderm",
+  "Primitive_Streak",
+  "Rostral_neurectoderm",
+  "Somitic_mesoderm",
+  "Spinal_cord",
+  "Surface_ectoderm",
+  "Visceral_endoderm"
+)
+col_palette <- col_palette[order(names(col_palette))]
+
+# plot(1:length(col_palette), pch = 16, col = col_palette, cex = 5)
+
