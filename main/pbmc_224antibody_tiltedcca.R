@@ -1,10 +1,10 @@
 rm(list=ls())
-load("../../../out/main/citeseq_pbmc224_preprocessed.RData")
-source("pbmc_224antibody_colorPalette.R")
-
 library(Seurat)
 library(Signac)
 library(tiltedCCA)
+source("pbmc_224antibody_colorPalette.R")
+
+load("../../../out/main/citeseq_pbmc224_preprocessed.RData")
 
 set.seed(10)
 date_of_run <- Sys.time()

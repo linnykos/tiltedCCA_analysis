@@ -218,7 +218,7 @@ plot1 <- Seurat::DimPlot(reik, reduction = "consensusUMAP",
                          group.by = "celltype", label = TRUE,
                          repel = TRUE, label.size = 2.5,
                          cols = col_palette)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse embryo (10x, RNA+ATAC)\nWNN UMAP"))
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse embryo (10x, RNA+ATAC)\nConsensus-PCA UMAP"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_reik_consensuspca-umap_celltype.png"),
                 plot1, device = "png", width = 10, height = 5, units = "in")
@@ -226,7 +226,7 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_reik_consensusp
 plot1 <- Seurat::DimPlot(reik, reduction = "consensusUMAP",
                          group.by = "orig.ident", label = TRUE,
                          repel = TRUE, label.size = 2.5)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse embryo (10x, RNA+ATAC)\nWNN UMAP"))
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse embryo (10x, RNA+ATAC)\nConsensus-PCA UMAP"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_reik_consensuspca-umap_orig-ident.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
