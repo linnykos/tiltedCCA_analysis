@@ -52,8 +52,17 @@ multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
                                          verbose = 2)
 tmp <- reik; tmp_mat <- multiSVD_obj$laplacian_list$common_laplacian
 colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
-set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)
-tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap@cell.embeddings)
+set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)@cell.embeddings
+tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
+for(i in 1:length(multiSVD_obj$metacell_obj$metacell_clustering_list)){
+  idx <- multiSVD_obj$metacell_obj$metacell_clustering_list[[i]]
+  tmp_umap_full[idx,] <- rep(tmp_umap[i,], each = length(idx))
+}
+set.seed(10)
+tmp_umap_full <- jitter(tmp_umap_full)
+rownames(tmp_umap_full) <- colnames(tmp)
+tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP",
+                                                          assay = "SCT")
 plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
                          group.by = "celltype", label = TRUE,
                          repel = TRUE, label.size = 2.5,
