@@ -62,7 +62,7 @@ set.seed(10)
 tmp_umap_full <- jitter(tmp_umap_full)
 rownames(tmp_umap_full) <- colnames(tmp)
 tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP",
-                                                          assay = "SCT")
+                                                          assay = "RNA")
 plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
                          group.by = "celltype", label = TRUE,
                          repel = TRUE, label.size = 2.5,
