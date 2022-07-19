@@ -77,7 +77,7 @@ for(j in 1:nrow(param_df)){
                                       verbose = 2)
   
   for(lap in c("laplacian_1", "laplacian_2", "common_laplacian")){
-    tmp <- bm; tmp_mat <- tmp_obj$laplacian_list[[lap]]
+    tmp <- reik; tmp_mat <- tmp_obj$laplacian_list[[lap]]
     colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
     set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)@cell.embeddings
     tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
