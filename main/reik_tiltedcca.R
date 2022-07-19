@@ -70,7 +70,7 @@ plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Mouse embryo (10x, RNA+ATAC)\nCommon Laplacian"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_reik_umap_common-laplacian.png"),
-                plot1, device = "png", width = 6, height = 5, units = "in")
+                plot1, device = "png", width = 10, height = 5, units = "in")
 
 #########3
 
