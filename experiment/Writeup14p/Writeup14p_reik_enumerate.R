@@ -92,7 +92,7 @@ for(j in 1:nrow(param_df)){
     # plot umap of laplacian
     tmp[[lap]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = paste0(lap, "UMAP_"))
     plot1 <- Seurat::DimPlot(tmp, reduction = lap,
-                             group.by = "ct", label = TRUE,
+                             group.by = "celltype", label = TRUE,
                              repel = TRUE, label.size = 2.5,
                              cols = col_palette)
     plot1 <- plot1 + ggplot2::ggtitle(paste0("k: ", param_df$latent_k[j],
