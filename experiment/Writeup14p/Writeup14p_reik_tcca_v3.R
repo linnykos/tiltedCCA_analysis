@@ -1,7 +1,7 @@
 rm(list=ls())
 library(Seurat)
 library(Signac)
-source("reik_colorPalette.R")
+source("../../main/reik_colorPalette.R")
 
 load("../../../../out/main/10x_reik_preprocessed.RData")
 
