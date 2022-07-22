@@ -85,7 +85,7 @@ multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
 
 save(multiSVD_obj, reik, peak_granges,
      date_of_run, session_info,
-     file = "../../../out/main/10x_reik_tiltedcca.RData")
+     file = "../../../../out/Writeup14p/Writeup14p_10x_reik_tiltedcca_v3.RData")
 
 ########################
 
