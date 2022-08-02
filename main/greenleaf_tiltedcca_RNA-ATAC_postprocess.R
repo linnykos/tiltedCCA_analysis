@@ -54,4 +54,11 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_
                 dpi = 500)
 
 
+#####################
+
+zz <- greenleaf[["common_tcca"]]@cell.embeddings
+zz <- zz[-intersect(which(zz[,1] <= 0), which(zz[,2]>0)),]
+zz <- zz[-which(zz[,2] >= 10),]
+zz <- zz[-which(zz[,2] <= -9),]
+nrow(zz)
 

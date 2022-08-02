@@ -4,6 +4,8 @@ library(Signac)
 library(tiltedCCA)
 
 load("../../../out/main/10x_greenleaf_tcca_RNA-ATAC.RData")
+# load("../../../out/Writeup14p/Writeup14p_10x_greenleaf_tcca.RData")
+source("greenleaf_colorPalette.R")
 
 set.seed(10)
 date_of_run <- Sys.time()
@@ -109,4 +111,76 @@ plot(x = greenleaf[["common_tcca"]]@cell.embeddings[,1],
 axis(side = 1)
 axis(side = 2)
 graphics.off()
+
+###########################3
+
+greenleaf$alignment2 <- alignment_vec
+keep_vec <- rep(1, ncol(greenleaf))
+zz <- greenleaf[["common_tcca"]]@cell.embeddings
+keep_vec[intersect(which(zz[,1] <= 0), which(zz[,2]>0))] <- 0
+keep_vec[which(zz[,2] >= 10)] <- 0
+keep_vec[which(zz[,2] <= -9)] <- 0
+keep_vec[which(greenleaf$celltype %in% c("EC/Peric.", "IN1", "IN2", "IN3", "RG", "SP"))] <- 0
+table(keep_vec)
+greenleaf$keep <- keep_vec
+greenleaf2 <- subset(greenleaf, keep == 1)
+col_palette2 <- col_palette
+names(col_palette2) <- as.character(1:length(col_palette2))
+greenleaf2$tmp_label <- plyr::mapvalues(greenleaf2$celltype, from = names(col_palette), to = names(col_palette2))
+
+plot1 <- Seurat::VlnPlot(greenleaf2, features = "alignment2", 
+                         group.by = 'tmp_label', 
+                         sort = "decreasing", pt.size = 0, cols = col_palette2) + Seurat::NoLegend()
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_steadystate_violinplot_cleaned-subset.png"),
+                plot1, device = "png", width = 4.5, height = 2, units = "in",
+                dpi = 500)
+
+######################################
+
+target_genes <- c("GLI3", "EOMES", "NEUROG1", "OLIG2", "SOX3", "SOX10")
+cell_idx <- intersect(which(greenleaf$Lineage1 == 1), which(!is.na(greenleaf$pseudotime)))
+pseudotime_vec <- greenleaf$pseudotime[cell_idx]
+order_vec <- order(pseudotime_vec, decreasing = F)
+rna_mat <- rna_common[cell_idx[order_vec],]
+atac_mat <- atac_pred[cell_idx[order_vec],]
+
+rna_mat2 <- t(scale(t(rna_mat)))
+atac_mat2 <- t(scale(t(atac_mat)))
+diff_mat <- (rna_mat2 - atac_mat2)/rna_mat2
+colnames(diff_mat) <- colnames(rna_common)
+diff_mat <- abs(diff_mat[,target_genes])
+diff_mat <- pmin(diff_mat, 15)
+summary(diff_mat)
+
+p <- ncol(diff_mat); n <- nrow(diff_mat)
+pred_diff_mat <- sapply(1:p, function(j){
+  print(j)
+  
+  tmp_df <- data.frame(y = diff_mat[,j], x = 1:n)
+  reg_res <- npregfast::frfast(y ~ x, data = tmp_df)
+  x_vec <- 1:n
+  y_vec <- stats::predict(object = reg_res, newdata = data.frame(x = x_vec))
+  y_vec$Estimation[,"Pred"]
+})
+colnames(pred_diff_mat) <- colnames(diff_mat)
+summary(pred_diff_mat)
+
+n <- nrow(pred_diff_mat)
+for(i in 1:ncol(pred_diff_mat)){
+  png(paste0("../../../out/figures/main/10x_greenleaf_steadystate_difference-",
+             colnames(pred_diff_mat)[i], "_cleaned.png"),
+      height = 500, width = 800, units = "px", res = 300)
+  par(mar = c(2,2,0.5,0.5), bg = NA)
+  plot(x = seq(0, 1, length.out = n),
+       y = diff_mat[,i], pch = 16, col = rgb(0.75, 0.75, 0.75, 0.15),
+       xlab = "", ylab = "", xaxt = "n", yaxt = "n", bty = "n",
+       ylim = c(0, 1.5*max(pred_diff_mat[,i])))
+  lines(x = seq(0, 1, length.out = n),
+        y = pred_diff_mat[,i], col = "white", lwd = 6)
+  lines(x = seq(0, 1, length.out = n),
+        y = pred_diff_mat[,i], col = "black", lwd = 4)
+  axis(1, at = c(0, 0.5, 1), cex.axis = 1.25, cex.lab = 1.25, lwd = 2)
+  axis(2, label = F, cex.axis = 1.25, cex.lab = 1.25, lwd = 2)
+  graphics.off()
+}
 

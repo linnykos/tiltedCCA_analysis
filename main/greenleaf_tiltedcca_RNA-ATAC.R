@@ -11,6 +11,24 @@ session_info <- devtools::session_info()
 n <- ncol(greenleaf)
 
 Seurat::DefaultAssay(greenleaf) <- "SCT"
+var_genes <- Seurat::VariableFeatures(object = greenleaf)
+
+mentioned_genes <- c("ALDH2", "APOE", "AQP4", "ASCL1", "BHLHE22",
+                     "BHLHE40", "C16orf89", "CAV2", "DLX2", "DOK5",
+                     "DUSP1", "EOMES", "ETV4", "FOS", "FOXJ1", "GLI3",
+                     "HAS2", "HES1", "HES4", "HSPA1A", "HSPA1B",
+                     "ID3", "IGFBP7", "JUN", "KIF1A", "LIMCH1",
+                     "MBP", "MEF2C", "NEUROD1", "NEUROD2", "NEUROD4",
+                     "NEUROD6", "NEUROG1", "NEUROG2", "NFIA", "NFIB", "NFIC",
+                     "NHLH1", "NR2F1", "PAX6", "RFX4", "RUNX1",
+                     "OLIG1", "OLIG2", "SOX2", "SOX3", "SOX6",
+                     "SOX9", "SOX10", "SOX21", "SPARCL1", "SNCB", "TBX",
+                     "TNC", "TOP2A", "TRB1", "WNT11")
+mentioned_genes <- mentioned_genes[mentioned_genes %in% rownames(greenleaf)]
+var_genes <- unique(c(var_genes, mentioned_genes))
+greenleaf[["SCT"]]@var.features <- var_genes
+
+Seurat::DefaultAssay(greenleaf) <- "SCT"
 mat_1 <- Matrix::t(greenleaf[["SCT"]]@data[Seurat::VariableFeatures(object = greenleaf),])
 Seurat::DefaultAssay(greenleaf) <- "ATAC"
 mat_2 <- Matrix::t(greenleaf[["ATAC"]]@data[Seurat::VariableFeatures(object = greenleaf),])

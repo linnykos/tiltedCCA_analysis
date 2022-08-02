@@ -4,6 +4,7 @@ library(Signac)
 library(tiltedCCA)
 
 load("../../../out/main/10x_mouseembryo_tiltedcca.RData")
+source("mouseembryo_colorPalette.R")
 
 set.seed(10)
 date_of_run <- Sys.time()
@@ -109,3 +110,24 @@ plot(x = mbrain[["common_tcca"]]@cell.embeddings[,1],
 axis(side = 1)
 axis(side = 2)
 graphics.off()
+
+##########################
+
+mbrain$alignment2 <- alignment_vec
+keep_vec <- rep(1, ncol(mbrain))
+zz <- mbrain[["common_tcca"]]@cell.embeddings
+keep_vec[intersect(which(zz[,1] >= 5), which(zz[,2] <= 4))] <- 0
+keep_vec[which(zz[,2] <= -7)] <- 0
+table(keep_vec)
+mbrain$keep <- keep_vec
+mbrain2 <- subset(mbrain, keep == 1)
+col_palette2 <- col_palette
+names(col_palette2) <- as.character(1:length(col_palette2))
+mbrain2$tmp_label <- plyr::mapvalues(mbrain2$label_Savercat, from = names(col_palette), to = names(col_palette2))
+
+plot1 <- Seurat::VlnPlot(mbrain2, features = "alignment2", 
+                         group.by = 'tmp_label', 
+                         sort = "decreasing", pt.size = 0, cols = col_palette2) + Seurat::NoLegend()
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_steadystate_violinplot_cleaned-subset.png"),
+                plot1, device = "png", width = 4, height = 2, units = "in",
+                dpi = 500)

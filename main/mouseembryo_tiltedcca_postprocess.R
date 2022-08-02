@@ -63,3 +63,10 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_tcc
                 dpi = 500)
 
 
+zz <- mbrain[["common_tcca"]]@cell.embeddings
+nrow(zz)
+zz <- zz[-intersect(which(zz[,1] >= 5), which(zz[,2] <= 4)),]
+nrow(zz)
+zz <- zz[-which(zz[,2] <= -7),]
+nrow(zz)
+
