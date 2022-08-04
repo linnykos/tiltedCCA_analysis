@@ -12,8 +12,22 @@ order_vec <- order(pseudotime_vec, decreasing = F)
 rna_common <- multiSVD_obj$common_mat_1[cell_idx[order_vec],]
 
 mentioned_genes <- colnames(rna_common)
+# load("../../../../out/main/10x_greenleaf_developmentalGenes.RData")
+# mentioned_genes <- c("ALDH2", "APOE", "AQP4", "ASCL1", "BHLHE22",
+#                      "BHLHE40", "C16orf89", "CAV2", "DLX2", "DOK5",
+#                      "DUSP1", "EOMES", "ETV4", "FOS", "FOXJ1", "GLI3",
+#                      "HAS2", "HES1", "HES4", "HSPA1A", "HSPA1B",
+#                      "ID3", "IGFBP7", "JUN", "KIF1A", "LIMCH1",
+#                      "MBP", "MEF2C", "NEUROD1", "NEUROD2", "NEUROD4",
+#                      "NEUROD6", "NEUROG1", "NEUROG2", "NFIA", "NFIB", "NFIC",
+#                      "NHLH1", "NR2F1", "PAX6", "RFX4", "RUNX1",
+#                      "OLIG1", "OLIG2", "SOX2", "SOX3", "SOX6",
+#                      "SOX9", "SOX10", "SOX21", "SPARCL1", "SNCB", "TBX",
+#                      "TNC", "TOP2A", "TRB1", "WNT11",
+#                      "SATB2")
+# mentioned_genes <- unique(c(mentioned_genes, selection_res$selected_variables))
 mentioned_genes <- mentioned_genes[which(paste0("ATAC-", mentioned_genes) %in% rownames(greenleaf[["customGAct"]]@scale.data))]
-mentioned_genes <- sort(mentioned_genes)
+mentioned_genes <- sort(unique(mentioned_genes))
 rna_common <- rna_common[,mentioned_genes]
 
 set.seed(10)
@@ -53,6 +67,7 @@ base_palette <- RColorBrewer::brewer.pal(11, name = "RdYlBu")
 color_vec <- rev(grDevices::colorRampPalette(base_palette)(n))
 
 for(k in 1:ceiling(ncol(rna_common)/30)){
+  print(k)
   genes <- mentioned_genes[((k-1)*30+1):min((k*30), length(mentioned_genes))]
   
   png(paste0("../../../../out/figures/Writeup14p/10x_greenleaf_leafplots_geneactivity_enumerate_", 

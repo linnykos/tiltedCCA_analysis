@@ -1,59 +1,16 @@
 rm(list=ls())
 library(Seurat); library(Signac)
-load("../../../out/main/10x_greenleaf_tcca_RNA-geneActivity.RData")
+load("../../../../out/main/10x_greenleaf_tcca_RNA-geneActivity2.RData")
 
-plot1 <- Seurat::DimPlot(greenleaf, reduction = "common_tcca",
-                         group.by = "celltype", label = TRUE,
-                         repel = TRUE, label.size = 2.5,
-                         raster=FALSE)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+Gene Activity)\nCommon subspace"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_RNA-geneActivity_umap_common.png"),
-                plot1, device = "png", width = 6, height = 5, units = "in")
-
-plot1 <- Seurat::FeaturePlot(greenleaf, reduction = "common_tcca",
-                             features = "pseudotime")
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+Gene Activity): T-CCA's Common\nSlingshot's pseudotime via ATAC"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_RNA-geneActivity_umap_common-pseudotime.png"),
-                plot1, device = "png", width = 6, height = 5, units = "in")
-
-plot2 <- Seurat::DimPlot(greenleaf, reduction = "distinct1_tcca",
-                         group.by = "celltype", label = TRUE,
-                         repel = TRUE, label.size = 2.5,
-                         raster=FALSE)
-plot2 <- plot2 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+Gene Activity)\nRNA distinct subspace"))
-plot2 <- plot2 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_RNA-geneActivity_umap_distinct1.png"),
-                plot2, device = "png", width = 6, height = 5, units = "in")
-
-plot3 <- Seurat::DimPlot(greenleaf, reduction = "distinct2_tcca",
-                         group.by = "celltype", label = TRUE,
-                         repel = TRUE, label.size = 2.5,
-                         raster=FALSE)
-plot3 <- plot3 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+Gene Activity)\nGene Activity distinct subspace"))
-plot3 <- plot3 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_RNA-geneActivity_umap_distinct2.png"),
-                plot3, device = "png", width = 6, height = 5, units = "in")
-
-##########################
-
-var_features <- sort(c("ALDH2", "APOE", "AQP4", "ASCL1", "BHLHE22",
-                  "BHLHE40", "C16orf89", "CAV2", "DLX2", "DOK5",
-                  "DUSP1", "EOMES", "ETV4", "FOS", "FOXJ1", "GLI3",
-                  "HAS2", "HES1", "HES4", "HSPA1A", "HSPA1B",
-                  "ID3", "IGFBP7", "JUN", "KIF1A", "LIMCH1",
-                  "MBP", "MEF2C", "NEUROD1", "NEUROD2", "NEUROD4",
-                  "NEUROD6", "NEUROG1", "NEUROG2", "NFIA", "NFIB", "NFIC",
-                  "NHLH1", "NR2F1", "PAX6", "RFX4", "RUNX1",
-                  "OLIG1", "OLIG2", "SOX2", "SOX3", "SOX6",
-                  "SOX9", "SOX10", "SOX21", "SPARCL1", "SNCB", "TBX",
-                  "TNC", "TOP2A", "TRB1", "WNT11",
-                  "SOX4", "DSCAM", "SATB2", "DAB1", "OPCML", "GRIN2B",
-                  "MDGA2", "MEIS2", "CNTN4", "TENM2", "ADGRL3",
-                  "VSTM2L", "CHL1"))
+var_features <- sort(c("EOMES", "GLI3", "NHLH1", "PAX6", 
+                       "SMOC1", "ZNF521", "HES4", "HES4", "VSTM2L", 
+                       "WNT11", "SOX21", "MEIS2", "DUSP1", "KCNH8",
+                       "NEUROD1", "ASCL1", "KIAA0319", "MSRA",
+                       "NYAP2", "SERPINI1", "ANKRD33B", "CDH8",
+                       "CNTN1", "GRM1", "NEFL", "NEFM", "NTRK2",
+                       "OLFML3", "SEMA3E", "SYNDIG1"))
 var_features <- intersect(var_features, rownames(greenleaf[["SCT"]]))
-var_features <- var_features[which(paste0("ATAC-",var_features) %in% rownames(greenleaf[["customGAct"]]))]
+var_features <- var_features[which(paste0("ATAC-",var_features) %in% colnames(multiSVD_obj$common_mat_2))]
 
 cell_idx <- intersect(which(greenleaf$Lineage1 == 1), which(!is.na(greenleaf$pseudotime)))
 pseudotime_vec <- greenleaf$pseudotime[cell_idx]
@@ -87,14 +44,14 @@ colnames(pred_rna_mat) <- colnames(rna_mat)
 base_palette <- RColorBrewer::brewer.pal(11, name = "RdYlBu")
 color_vec <- rev(grDevices::colorRampPalette(base_palette)(n))
 
-for(k in 1:ceiling(ncol(rna_mat)/20)){
+for(k in 1:ceiling(ncol(rna_mat)/30)){
   print(k)
-  genes <- colnames(rna_mat)[((k-1)*20+1):min((k*20), ncol(rna_mat))]
+  genes <- colnames(rna_mat)[((k-1)*30+1):min((k*30), ncol(rna_mat))]
   
-  png(paste0("../../../out/figures/main/10x_greenleaf_leafplots_RNA-geneActivity_common_enumerate_", 
+  png(paste0("../../../../out/figures/Writeup14p/10x_greenleaf_leafplots_RNA-geneActivity2_cicero-common_enumerate_", 
              k, ".png"),
       height = 3500, width = 3000, units = "px", res = 300)
-  par(mfrow = c(5,4), mar = c(4,4,4,0.5))
+  par(mfrow = c(6,5), mar = c(4,4,4,0.5))
   for(gene in genes){
     set.seed(10)
     idx <- sample(1:n)
@@ -138,7 +95,7 @@ for(k in 1:ceiling(ncol(rna_mat)/20)){
   graphics.off()
 }
 
-#########################
+#############################
 
 cell_idx <- intersect(which(greenleaf$Lineage1 == 1), which(!is.na(greenleaf$pseudotime)))
 pseudotime_vec <- greenleaf$pseudotime[cell_idx]
@@ -146,7 +103,7 @@ order_vec <- order(pseudotime_vec, decreasing = F)
 rna_mat <- multiSVD_obj$common_mat_1 + multiSVD_obj$distinct_mat_1
 rna_mat <- rna_mat[cell_idx[order_vec],var_features] 
 
-mat <- Matrix::t(greenleaf[["customGAct"]]@data[rownames(multiSVD_obj$svd_2$v),])
+mat <- Matrix::t(greenleaf[["geneActivity"]]@data[rownames(multiSVD_obj$svd_2$v),])
 mat <- scale(mat)
 set.seed(10)
 svd_atac <- irlba::irlba(mat, nv = 50)
@@ -182,14 +139,15 @@ colnames(pred_rna_mat) <- colnames(rna_mat)
 base_palette <- RColorBrewer::brewer.pal(11, name = "RdYlBu")
 color_vec <- rev(grDevices::colorRampPalette(base_palette)(n))
 
-for(k in 1:ceiling(ncol(rna_mat)/20)){
+
+for(k in 1:ceiling(ncol(rna_mat)/30)){
   print(k)
-  genes <- colnames(rna_mat)[((k-1)*20+1):min((k*20), ncol(rna_mat))]
+  genes <- colnames(rna_mat)[((k-1)*30+1):min((k*30), ncol(rna_mat))]
   
-  png(paste0("../../../out/figures/main/10x_greenleaf_leafplots_RNA-geneActivity_original_enumerate_", 
+  png(paste0("../../../../out/figures/Writeup14p/10x_greenleaf_leafplots_RNA-geneActivity2_cicero-original_enumerate_", 
              k, ".png"),
       height = 3500, width = 3000, units = "px", res = 300)
-  par(mfrow = c(5,4), mar = c(4,4,4,0.5))
+  par(mfrow = c(6,5), mar = c(4,4,4,0.5))
   for(gene in genes){
     set.seed(10)
     idx <- sample(1:n)

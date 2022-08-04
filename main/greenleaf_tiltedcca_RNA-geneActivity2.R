@@ -1,5 +1,5 @@
 rm(list=ls())
-load("../../../out/main/10x_greenleaf_preprocessed_customGAct.RData")
+load("../../../out/main/10x_greenleaf_preprocessed.RData")
 
 library(Seurat)
 library(Signac)
@@ -9,6 +9,8 @@ set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 n <- ncol(greenleaf)
+
+Seurat::DefaultAssay(greenleaf) <- "SCT"
 
 var_features <- greenleaf[["SCT"]]@var.features
 mentioned_genes <- c("ALDH2", "APOE", "AQP4", "ASCL1", "BHLHE22",
@@ -24,12 +26,12 @@ mentioned_genes <- c("ALDH2", "APOE", "AQP4", "ASCL1", "BHLHE22",
                      "TNC", "TOP2A", "TRB1", "WNT11")
 var_features <- unique(c(var_features, mentioned_genes))
 var_features <- intersect(var_features, rownames(greenleaf[["SCT"]]))
-var_features <- var_features[which(paste0("ATAC-",var_features) %in% rownames(greenleaf[["customGAct"]]))]
+var_features <- var_features[which(paste0("ATAC-",var_features) %in% rownames(greenleaf[["geneActivity"]]))]
 
 Seurat::DefaultAssay(greenleaf) <- "SCT"
 mat_1 <- Matrix::t(greenleaf[["SCT"]]@data[var_features,])
-Seurat::DefaultAssay(greenleaf) <- "customGAct"
-mat_2 <- Matrix::t(greenleaf[["customGAct"]]@data[paste0("ATAC-",var_features),])
+Seurat::DefaultAssay(greenleaf) <- "geneActivity"
+mat_2 <- Matrix::t(greenleaf[["geneActivity"]]@data[paste0("ATAC-",var_features),])
 
 mat_1b <- mat_1
 sd_vec <- sparseMatrixStats::colSds(mat_1b)
@@ -86,10 +88,8 @@ plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
                          repel = TRUE, label.size = 2.5)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+GeneActivity)\nCommon Laplacian"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_umap_RNA-geneActivity_common-laplacian.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_umap_RNA-geneActivity2_common-laplacian.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
-
-##################3
 
 multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
                                       enforce_boundary = T,
@@ -103,7 +103,7 @@ multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
 
 save(multiSVD_obj, greenleaf,
      date_of_run, session_info,
-     file = "../../../out/main/10x_greenleaf_tcca_RNA-geneActivity.RData")
+     file = "../../../out/main/10x_greenleaf_tcca_RNA-geneActivity2.RData")
 
 #################################
 
@@ -131,5 +131,6 @@ greenleaf[["distinct2_tcca"]] <- tiltedCCA:::create_SeuratDim(input_obj = multiS
 
 save(multiSVD_obj, greenleaf,
      date_of_run, session_info,
-     file = "../../../out/main/10x_greenleaf_tcca_RNA-geneActivity.RData")
+     file = "../../../out/main/10x_greenleaf_tcca_RNA-geneActivity2.RData")
+
 
