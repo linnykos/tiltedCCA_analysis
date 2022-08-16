@@ -1,6 +1,6 @@
 rm(list=ls())
 load("../../../out/main/10x_greenleaf_differential.RData")
-load("../../../out/main/10x_greenleaf_tcca.RData")
+load("../../../out/main/10x_greenleaf_tcca_RNA-ATAC.RData")
 
 library(Seurat)
 library(Signac)
@@ -39,14 +39,14 @@ logpval_vec <- sapply(1:length(gene_names), function(k){
 names(logpval_vec) <- Seurat::VariableFeatures(greenleaf)
 logpval_vec <- pmin(logpval_vec, 300)
 
-rsquare_vec <- tiltedCCA:::postprocess_alignment(input_obj = multiSVD_obj,
-                                                 bool_use_denoised = T,
-                                                 seurat_obj = greenleaf,
-                                                 input_assay = 1,
-                                                 seurat_assay = "SCT",
-                                                 seurat_slot = "data")
+rsquare_vec <- tiltedCCA:::postprocess_modality_alignment(input_obj = multiSVD_obj,
+                                                          bool_use_denoised = T,
+                                                          seurat_obj = greenleaf,
+                                                          input_assay = 1,
+                                                          seurat_assay = "SCT",
+                                                          seurat_slot = "data")
 all(names(logpval_vec) == names(rsquare_vec))
-stats::median(rsquare_vec[which(logpval_vec >= 1)])
+stats::median(rsquare_vec[which(logpval_vec >= 10)])
 
 png("../../../out/figures/main/10x_greenleaf_differential_gene.png",
     height = 3500, width = 2500, res = 500, units = "px")
@@ -66,5 +66,5 @@ tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
                            lwd_axis = 1.5,
                            lwd_axis_ticks = 1.5,
                            lwd_polygon_bold = 5,
-                           mark_median_xthres = 1)
+                           mark_median_xthres = 10)
 graphics.off()

@@ -161,3 +161,12 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_pbmc_wnn-umap.p
                 plot3, device = "png", width = 6, height = 5, units = "in")
 
 
+######################
+
+pbmc$logumi <- log1p(pbmc$nCount_RNA)
+plot1 <- Seurat::VlnPlot(pbmc, features = "logumi", 
+                         group.by = 'predicted.id', 
+                         sort = "decreasing") + Seurat::NoLegend()
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_pbmc_ncount_violin-by-celltype.png"),
+                plot1, device = "png", width = 10, height = 3, units = "in",
+                dpi = 500)

@@ -20,6 +20,15 @@ gene_de_list <- list(de_list = gene_de_list, combn_mat = combn_mat, level_vec = 
 
 Seurat::DefaultAssay(bm) <- "RNA"
 gene_names <- Seurat::VariableFeatures(bm)
+
+celltype_l3 <- as.character(bm$celltype.l2)
+celltype_l3[celltype_l3 %in% c("NK", "CD56 bright NK")] <- "NK_all"
+celltype_l3[celltype_l3 %in% c("MAIT", "gdT")] <- "MAIT-gdT"
+celltype_l3[celltype_l3 %in% c("Memory B", "Naive B")] <- "B"
+celltype_l3[celltype_l3 %in% c("Prog_B 1", "Prog_B 2")] <- "Prog_B"
+celltype_l3[celltype_l3 %in% c("Prog_Mk", "Plasmablast", "LMPP", "Treg")] <- NA
+celltype_names <- sort(unique(celltype_l3))
+
 logpval_vec <- sapply(1:length(gene_names), function(k){
   if(k %% floor(length(gene_names)/10) == 0) cat('*')
   gene <- gene_names[k]
@@ -34,18 +43,20 @@ logpval_vec <- sapply(1:length(gene_names), function(k){
     })
     stats::quantile(vec, probs = 0.75)
   })
+  names(celltype_vec) <- celltype_names
+  celltype_vec <- celltype_vec[!names(celltype_vec) %in% c("GMP", "Prog_B", "Prog_DC", "Prog_RBC")]
   
   max(-log10(celltype_vec))
 })
 names(logpval_vec) <- Seurat::VariableFeatures(bm)
 logpval_vec <- pmin(logpval_vec, 300)
 
-rsquare_vec <- tiltedCCA:::postprocess_alignment(input_obj = multiSVD_obj,
-                                                 bool_use_denoised = T,
-                                                 seurat_obj = bm,
-                                                 input_assay = 1,
-                                                 seurat_assay = "RNA",
-                                                 seurat_slot = "data")
+rsquare_vec <- tiltedCCA:::postprocess_modality_alignment(input_obj = multiSVD_obj,
+                                                          bool_use_denoised = T,
+                                                          seurat_obj = bm,
+                                                          input_assay = 1,
+                                                          seurat_assay = "RNA",
+                                                          seurat_slot = "data")
 all(names(logpval_vec) == names(rsquare_vec))
 stats::median(rsquare_vec[which(logpval_vec >= 10)])
 
@@ -98,10 +109,10 @@ celltype_l3[celltype_l3 %in% c("Memory B", "Naive B")] <- "B"
 celltype_l3[celltype_l3 %in% c("Prog_B 1", "Prog_B 2")] <- "Prog_B"
 celltype_l3[celltype_l3 %in% c("Prog_Mk", "Plasmablast", "LMPP", "Treg")] <- NA
 col_palette2 <- c(col_palette, 
-                 col_palette["NK"], 
-                 col_palette["MAIT"], 
-                 col_palette["Memory B"], 
-                 col_palette["Prog_B 1"])
+                  col_palette["NK"], 
+                  col_palette["MAIT"], 
+                  col_palette["Memory B"], 
+                  col_palette["Prog_B 1"])
 names(col_palette2) <- c(names(col_palette), "NK_all", "MAIT-gdT", "B", "Prog_B")
 bm$celltype.l3 <- celltype_l3
 Seurat::Idents(bm) <- "celltype.l3"
@@ -114,7 +125,7 @@ log_thres <- 2
 num_instances <- round(length(level_vec)*.25)
 gene_list <- lapply(1:length(level_vec), function(i){
   idx <- which(combn_mat == i, arr.ind = T)[,2]
-  lis <- lapply(gene_de_list[idx], function(mat){
+  lis <- lapply(gene_de_list$de_list[idx], function(mat){
     idx1 <- which(abs(mat[,2]) >= log_thres)
     idx2 <- which(abs(mat[,5]) <= p_val_thres)
     rownames(mat)[intersect(idx1, idx2)]
@@ -125,14 +136,14 @@ gene_list <- lapply(1:length(level_vec), function(i){
   
   if(length(name_vec) <= 5){
     # find the genes that have the smallest median p-value
-    all_genes <- unique(unlist(lapply(gene_de_list[idx], rownames)))
+    all_genes <- unique(unlist(lapply(gene_de_list$de_list[idx], rownames)))
     all_genes <- all_genes[!all_genes %in% name_vec]
     
     p_val_vec <- sapply(all_genes, function(gene){
       val <- stats::median(sapply(idx, function(j){
-        row_idx <- which(rownames(gene_de_list[[j]]) == gene)
+        row_idx <- which(rownames(gene_de_list$de_list[[j]]) == gene)
         if(length(row_idx) == 0) return(1)
-        gene_de_list[[j]][row_idx, "p_val"]
+        gene_de_list$de_list[[j]][row_idx, "p_val"]
       }))
     })
     

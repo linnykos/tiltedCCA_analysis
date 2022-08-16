@@ -39,12 +39,12 @@ logpval_vec <- sapply(1:length(gene_names), function(k){
 names(logpval_vec) <- Seurat::VariableFeatures(pbmc)
 logpval_vec <- pmin(logpval_vec, 300)
 
-rsquare_vec <- tiltedCCA:::postprocess_alignment(input_obj = multiSVD_obj,
-                                                 bool_use_denoised = T,
-                                                 seurat_obj = pbmc,
-                                                 input_assay = 1,
-                                                 seurat_assay = "SCT",
-                                                 seurat_slot = "data")
+rsquare_vec <- tiltedCCA:::postprocess_modality_alignment(input_obj = multiSVD_obj,
+                                                          bool_use_denoised = T,
+                                                          seurat_obj = pbmc,
+                                                          input_assay = 1,
+                                                          seurat_assay = "SCT",
+                                                          seurat_slot = "data")
 all(names(logpval_vec) == names(rsquare_vec))
 stats::median(rsquare_vec[which(logpval_vec >= 10)])
 

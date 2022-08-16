@@ -361,3 +361,19 @@ for(i in 1:length(xseq)){
   lines(range(xseq), rep(xseq[i], 2), lwd = 2)
 }
 graphics.off()
+
+########################################
+
+set.seed(10)
+mat <- matrix(abs(stats::rnorm(8*10)), nrow = 8, ncol = 10)
+mat[5:6,1:5] <- mat[5:6,1:5] + 1
+mat[7:8,8:10] <- mat[7:8,8:10] + 1.25
+
+col_vec <- colorRampPalette(c(rgb(255, 240, 215, maxColorValue = 255),
+                              rgb(224, 139, 0, maxColorValue = 255)))(10)
+png("../../out/figures/main/toy_simulation_consensus-heatmap.png", 
+    height = 2500, width = 2500, res = 500, units = "px")
+par(mar = c(0.1, 0.1, 0.1, 0.1))
+image(t(mat[nrow(mat):1,]), asp = 7/9, col = col_vec, 
+      xaxt = "n", yaxt = "n", bty = "n")
+graphics.off()

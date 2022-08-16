@@ -437,3 +437,14 @@ plot1 <- plot1 + ggplot2::ggtitle(paste0("Human brain (10x, RNA+ATAC)\nConsensus
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_consensusPCA-umap.png"),
                 plot1, device = "png", width = 6, height = 5, units = "in")
+
+
+######################
+
+greenleaf$logumi <- log1p(greenleaf$nCount_RNA)
+plot1 <- Seurat::VlnPlot(greenleaf, features = "logumi", 
+                         group.by = 'celltype', 
+                         sort = "decreasing") + Seurat::NoLegend()
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_ncount_violin-by-celltype.png"),
+                plot1, device = "png", width = 10, height = 3, units = "in",
+                dpi = 500)

@@ -425,3 +425,27 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_ata
                 plot_all, device = "png", width = 10, height = 4, units = "in")
 
 
+##########
+
+source("mouseembryo_colorPalette.R")
+
+mbrain[["umap.atac"]]@cell.embeddings <- tiltedCCA:::.rotate_matrix(
+  source_mat = mbrain[["umap"]]@cell.embeddings,
+  target_mat = mbrain[["umap.atac"]]@cell.embeddings
+)
+plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.atac",
+                         group.by = "label_Savercat", 
+                         cols = col_palette, pt.size = 1.5)
+plot1 <- plot1 + Seurat::NoLegend() 
+plot1 <- plot1 + ggplot2::ggtitle("") + ggplot2::ylab("ATAC UMAP 2") + ggplot2::xlab("ATAC UMAP 1")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_atac-umap_slides.png"),
+                plot1, device = "png", width = 4, height = 4, units = "in")
+
+plot1 <- Seurat::DimPlot(mbrain, reduction = "umap",
+                         group.by = "label_Savercat", 
+                         cols = col_palette, pt.size = 1.5)
+plot1 <- plot1 + Seurat::NoLegend() 
+plot1 <- plot1 + ggplot2::ggtitle("") + ggplot2::ylab("RNA UMAP 2") + ggplot2::xlab("RNA UMAP 1")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_rna-umap_slides.png"),
+                plot1, device = "png", width = 4, height = 4, units = "in")
+

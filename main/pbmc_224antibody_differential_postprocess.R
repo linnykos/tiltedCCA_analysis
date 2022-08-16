@@ -15,6 +15,7 @@ num_celltypes <- ceiling(sqrt(2*length(gene_de_list)))
 combn_mat <- combn(num_celltypes, 2)
 stopifnot(ncol(combn_mat) == length(gene_de_list))
 gene_de_list <- list(de_list = gene_de_list, combn_mat = combn_mat, level_vec = 1:num_celltypes)
+
 ############
 
 Seurat::DefaultAssay(pbmc) <- "SCT"
@@ -39,7 +40,7 @@ logpval_vec <- sapply(1:length(gene_names), function(k){
 names(logpval_vec) <- Seurat::VariableFeatures(pbmc)
 logpval_vec <- pmin(logpval_vec, 300)
 
-rsquare_vec <- tiltedCCA:::postprocess_alignment(input_obj = multiSVD_obj,
+rsquare_vec <- tiltedCCA:::postprocess_modality_alignment(input_obj = multiSVD_obj,
                                                  bool_use_denoised = T,
                                                  seurat_obj = pbmc,
                                                  input_assay = 1,
