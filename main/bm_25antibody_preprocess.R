@@ -45,4 +45,17 @@ names(bm)
 save(bm, date_of_run, session_info,
      file = "../../../out/main/citeseq_bm25_preprocessed.RData")
 
+################################
+
+source("bm_25antibody_colorPalette.R")
+plot1 <- Seurat::DimPlot(bm, reduction = "wnn.umap",
+                         group.by = "celltype.l2", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_wnn_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
 
