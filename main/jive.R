@@ -39,7 +39,7 @@ jive <- function(mat_1, mat_2,
     a_svd_1 <- svd_res <- irlba::irlba(proj_1, nv = r_1)
     a_embedding_1 <- tiltedCCA:::.mult_mat_vec(a_svd_1$u, a_svd_1$d)
     a_mat_1 <- tcrossprod(a_embedding_1, a_svd_1$v)
-    a_svd_2 <- svd_res <- irlba::irlba(proj_1, nv = r_2)
+    a_svd_2 <- svd_res <- irlba::irlba(proj_2, nv = r_2)
     a_embedding_2 <- tiltedCCA:::.mult_mat_vec(a_svd_2$u, a_svd_2$d)
     a_mat_2 <- tcrossprod(a_embedding_2, a_svd_2$v)
     
