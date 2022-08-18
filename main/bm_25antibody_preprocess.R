@@ -58,4 +58,11 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_wnn_cl
                 plot1, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
 
-
+plot1 <- Seurat::VlnPlot(bm, features = "RNA.weight", 
+                         group.by = 'celltype.l2', 
+                         sort = TRUE, pt.size = 0.1,
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend()
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_wnn_violin.png"),
+                plot1, device = "png", width = 15, height = 5, units = "in",
+                dpi = 500)

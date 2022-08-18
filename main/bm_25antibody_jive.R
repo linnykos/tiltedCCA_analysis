@@ -31,7 +31,9 @@ if(any(sd_vec <= 1e-6)){
 set.seed(10)
 jive_results <- jive(mat_1 = mat_1b, 
                      mat_2 = mat_2b, 
-                     r = 30)
+                     common_r = 30,
+                     r_1 = 30,
+                     r_2 = 18)
 
 save(jive_results, bm,
      date_of_run, session_info,
