@@ -1,9 +1,9 @@
 rm(list=ls())
 library(Seurat)
-library(r.jive)
 
 load("../../../out/main/citeseq_bm25_preprocessed.RData")
 source("bm_25antibody_colorPalette.R")
+source("jive.R")
 
 set.seed(10)
 date_of_run <- Sys.time()
@@ -28,14 +28,10 @@ if(any(sd_vec <= 1e-6)){
   mat_2b <- mat_2b[,-which(sd_vec <= 1e-6)]
 }
 
-data_list <- list(RNA = t(mat_1b), ADT = t(mat_2b))
-
 set.seed(10)
-jive_results <- r.jive::jive(data = data_list,
-                             rankJ = 30,
-                             rankA = c(30, 18),
-                             method = "given",
-                             showProgress = TRUE)
+jive_results <- jive(mat_1 = mat_1b, 
+                     mat_2 = mat_2b, 
+                     r = 30)
 
 save(jive_results, bm,
      date_of_run, session_info,
