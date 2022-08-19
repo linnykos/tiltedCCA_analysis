@@ -45,7 +45,7 @@ jive <- function(mat_1, mat_2,
     
     mat <- cbind(mat_1 - a_mat_1, mat_2 - a_mat_2)
     obj_vec <- c(obj_vec, 
-                 norm(mat_1 - pred_mat_1 - a_embedding_1, "F")^2 + norm(mat_2 - pred_mat_2 - a_embedding_2, "F")^2)
+                 norm(mat_1 - pred_mat_1 - a_mat_1, "F")^2 + norm(mat_2 - pred_mat_2 - a_mat_2, "F")^2)
     iter <- iter + 1
   }
   
