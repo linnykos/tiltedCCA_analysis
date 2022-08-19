@@ -11,7 +11,7 @@ session_info <- devtools::session_info()
 ####################
 
 set.seed(10)
-umap_res <- Seurat::RunUMAP(jive_results$embedding)
+umap_res <- Seurat::RunUMAP(embedding)
 umap_mat <- umap_res@cell.embeddings
 rownames(umap_mat) <- colnames(bm)
 colnames(umap_mat) <- paste0("jiveCommonUMAP_", 1:ncol(umap_mat))

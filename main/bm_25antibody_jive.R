@@ -28,6 +28,9 @@ if(any(sd_vec <= 1e-6)){
   mat_2b <- mat_2b[,-which(sd_vec <= 1e-6)]
 }
 
+mat_1b <- as.matrix(mat_1b)
+mat_2b <- as.matrix(mat_2b)
+
 set.seed(10)
 jive_results <- jive(mat_1 = mat_1b, 
                      mat_2 = mat_2b, 
