@@ -20,7 +20,7 @@ jive <- function(mat_1, mat_2,
   
   while(iter <= max_iter){
     print(iter)
-    if(iter > 4 && abs(obj_vec[iter-2] - obj_vec[iter-1])/obj_vec[iter-2] <= 1e-6){
+    if(iter > 4 && (obj_vec[iter-2] - obj_vec[iter-1])/obj_vec[iter-2] <= 1e-6){
       break()
     }
     
@@ -36,15 +36,16 @@ jive <- function(mat_1, mat_2,
     proj_1 <- (diag(n) - tcrossprod(svd_res$u)) %*% resid_1
     proj_2 <- (diag(n) - tcrossprod(svd_res$u)) %*% resid_2
     
-    a_svd_1 <- svd_res <- irlba::irlba(proj_1, nv = r_1)
+    a_svd_1 <- irlba::irlba(proj_1, nv = r_1)
     a_embedding_1 <- tiltedCCA:::.mult_mat_vec(a_svd_1$u, a_svd_1$d)
     a_mat_1 <- tcrossprod(a_embedding_1, a_svd_1$v)
-    a_svd_2 <- svd_res <- irlba::irlba(proj_2, nv = r_2)
+    a_svd_2 <- irlba::irlba(proj_2, nv = r_2)
     a_embedding_2 <- tiltedCCA:::.mult_mat_vec(a_svd_2$u, a_svd_2$d)
     a_mat_2 <- tcrossprod(a_embedding_2, a_svd_2$v)
     
     mat <- cbind(mat_1 - a_mat_1, mat_2 - a_mat_2)
-    obj_vec <- c(obj_vec, norm(resid_1, "F")^2 + norm(resid_2, "F")^2)
+    obj_vec <- c(obj_vec, 
+                 norm(mat_1 - pred_mat_1 - a_embedding_1, "F")^2 + norm(mat_2 - pred_mat_2 - a_embedding_2, "F")^2)
     iter <- iter + 1
   }
   
