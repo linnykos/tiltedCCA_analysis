@@ -12,8 +12,8 @@ jive <- function(mat_1, mat_2,
   p1 <- ncol(mat_1)
   p2 <- ncol(mat_2)
   
-  mat_1 <- scale(mat_1, center = T, scale = F)
-  mat_2 <- scale(mat_2, center = T, scale = F)
+  mat_1 <- scale(mat_1, center = T, scale = T)
+  mat_2 <- scale(mat_2, center = T, scale = T)
   svd_res <- tiltedCCA:::.svd_safe(mat = mat_1,
                                    check_stability = T, # boolean
                                    K = min(common_r+r_1, ncol(mat_1)), # positive integer
