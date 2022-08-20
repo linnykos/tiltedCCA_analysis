@@ -14,7 +14,13 @@ session_info <- devtools::session_info()
 num_celltypes <- ceiling(sqrt(2*length(gene_de_list)))
 combn_mat <- combn(num_celltypes, 2)
 stopifnot(ncol(combn_mat) == length(gene_de_list))
-gene_de_list <- list(de_list = gene_de_list, combn_mat = combn_mat, level_vec = 1:num_celltypes)
+
+
+celltype_l3 <- as.character(pbmc$celltype.l2)
+celltype_l3[celltype_l3 %in% c("NK", "NK Proliferating", "NK_CD56bright")] <- "NK_all"
+celltype_l3[celltype_l3 %in% c("B intermediate", "B memory")] <- "B_memory_intermediate"
+celltype_l3[celltype_l3 %in% c("ILC", "ASDC", "CD4 Proliferating", "CD8 Proliferating", "cDC1", "dnT", "Eryth", "HSPC", "Plasmablast")] <- NA
+gene_de_list <- list(de_list = gene_de_list, combn_mat = combn_mat, level_vec = sort(unique(celltype_l3)))
 
 ############
 
@@ -34,6 +40,8 @@ logpval_vec <- sapply(1:length(gene_names), function(k){
     })
     stats::quantile(vec, probs = 0.75)
   })
+  names(celltype_vec) <- gene_de_list$level_vec
+  
   
   max(-log10(celltype_vec))
 })
@@ -71,4 +79,32 @@ tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
                            lwd_axis_ticks = 1.5,
                            lwd_polygon_bold = 5,
                            mark_median_xthres = 10)
+graphics.off()
+
+
+Cell_cycle <- c(cc.genes$s.genes[which(cc.genes$s.genes %in% names(logpval_vec))],
+                cc.genes$g2m.genes[which(cc.genes$g2m.genes %in% names(logpval_vec))])
+
+png("../../../out/figures/main/citeseq_pbmc224_differential_gene_Cell_cycle.png",
+    height = 3500, width = 2500, res = 500, units = "px")
+par(mar = c(5,5,4,1))
+tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
+                           logpval_vec = logpval_vec,
+                           main = "PBMC (CITE-Seq, RNA+224 ADT)\nGene differentiability vs. alignment",
+                           bool_mark_ymedian = F,
+                           bool_polygon_mean = T,
+                           col_points = rgb(0.5, 0.5, 0.5, 0.1),
+                           col_gene_highlight = "black",
+                           cex_axis = 1.5, 
+                           cex_lab = 1.5,
+                           cex_points = 2.5,
+                           density = 10,
+                           gene_names = Cell_cycle,
+                           lty_polygon = 1,
+                           lwd_grid_major = 2,
+                           lwd_grid_minor = 1,
+                           lwd_axis = 1.5,
+                           lwd_axis_ticks = 1.5,
+                           lwd_polygon = 2,
+                           lwd_polygon_bold = 4)
 graphics.off()

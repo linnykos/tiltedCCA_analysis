@@ -14,11 +14,11 @@ celltype_l3[celltype_l3 %in% c("NK", "NK Proliferating", "NK_CD56bright")] <- "N
 celltype_l3[celltype_l3 %in% c("B intermediate", "B memory")] <- "B_memory_intermediate"
 celltype_l3[celltype_l3 %in% c("ILC", "ASDC", "CD4 Proliferating", "CD8 Proliferating", "cDC1", "dnT", "Eryth", "HSPC", "Plasmablast")] <- NA
 
-pbmc$celltype.l3 <- celltype_l3
+pbmc$celltype.l2_custom <- celltype_l3
 print("Working on RNA")
 gene_de_list <- tiltedCCA:::differential_expression(seurat_obj = pbmc,
                                                     assay = "SCT",
-                                                    idents = "celltype.l3",
+                                                    idents = "celltype.l2_custom",
                                                     test_use = "MAST",
                                                     slot = "counts")
 save(gene_de_list, pbmc,
@@ -31,7 +31,7 @@ pbmc[["ADT"]]@var.features <- rownames(pbmc[["ADT"]])
 print("Working on ADT")
 adt_de_list <- tiltedCCA:::differential_expression(seurat_obj = pbmc,
                                                     assay = "ADT",
-                                                    idents = "celltype.l3",
+                                                    idents = "celltype.l2_custom",
                                                     test_use = "wilcox",
                                                     slot = "data")
 
