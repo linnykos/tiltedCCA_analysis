@@ -6,6 +6,7 @@ library(Seurat); library(Signac)
 plot1 <- Seurat::DimPlot(pbmc, reduction = "common_tcca",
                          group.by = "predicted.id", label = TRUE,
                          repel = TRUE, label.size = 2.5,
+                         cols = col_palette,
                          raster=FALSE)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("PBMC (10x, RNA+ATAC)\nCommon subspace"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
@@ -31,3 +32,34 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_pbmc_tcca-umap_
                 plot3, device = "png", width = 6, height = 5, units = "in")
 
 
+###########################
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "common_tcca",
+                         group.by = "predicted.id", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_pbmc_tcca-umap_common_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "umap.rna",
+                         group.by = "predicted.id", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_pbmc_rna-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot1 <- Seurat::DimPlot(pbmc, reduction = "umap.atac",
+                         group.by = "predicted.id", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_pbmc_atac-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)

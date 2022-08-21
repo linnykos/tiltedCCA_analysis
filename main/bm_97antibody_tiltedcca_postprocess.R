@@ -1,4 +1,6 @@
 rm(list=ls())
+library(Seurat)
+
 load("../../../out/main/abseq_bm97_tcca.RData")
 source("bm_97antibody_colorPalette.R")
 
@@ -58,5 +60,25 @@ plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
 plot1 <- plot1 + ggplot2::ggtitle("")
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97_tcca-umap_distinct2_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot1 <- Seurat::DimPlot(bm, reduction = "rna.umap",
+                         group.by = "ct", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97_rna_umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot1 <- Seurat::DimPlot(bm, reduction = "adt.umap",
+                         group.by = "ct", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97_adt-umap_cleaned.png"),
                 plot1, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
