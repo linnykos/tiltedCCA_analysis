@@ -37,7 +37,7 @@ plot1 <-Seurat::DimPlot(bm, reduction = "rna.umap",
                         repel = TRUE, label.size = 2.5)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nRNA clustering"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97_rna-clustering.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97-2000genes_rna-clustering.png"),
                 plot1, device = "png", width = 6.5, height = 5, units = "in")
 
 plot1 <-Seurat::DimPlot(bm, reduction = "adt.umap",
@@ -45,7 +45,7 @@ plot1 <-Seurat::DimPlot(bm, reduction = "adt.umap",
                         repel = TRUE, label.size = 2.5)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nADT clustering"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97_adt-clustering.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97-2000genes_adt-clustering.png"),
                 plot1, device = "png", width = 6.5, height = 5, units = "in")
 
 #########
