@@ -57,10 +57,13 @@ if(any(sd_vec <= 1e-6)){
 }
 cor_mat <- abs(stats::cor(mat_2b))
 diag(cor_mat) <- 0
+cor_mat <- cor_mat[names(rsquare_vec), names(rsquare_vec)]
 
 # compute the layout via a graph
 n <- ncol(cor_mat)
 adj_mat <- matrix(0, n, n)
+colnames(adj_mat) <- colnames(cor_mat)
+rownames(adj_mat) <- rownames(cor_mat)
 # adj_mat[cor_mat >= variable_selection_res$cor_threshold] <- cor_mat[cor_mat >= variable_selection_res$cor_threshold]
 adj_mat[cor_mat >= 0.7] <- 1
 k <- 10
@@ -73,7 +76,7 @@ adj_mat <- (adj_mat + t(adj_mat))/2
 rownames(adj_mat) <- colnames(mat_2b)
 colnames(adj_mat) <- colnames(mat_2b)
 set.seed(10)
-umap_res <- Seurat::RunUMAP(adj_mat, spread = 5, min.dist = 0.1)
+umap_res <- Seurat::RunUMAP(adj_mat, spread = 10, min.dist = 0.1)
 
 cor_power <- 5; max_width <- 3
 g <- igraph::graph.adjacency(adj_mat, mode="undirected")
@@ -153,17 +156,17 @@ vec <- adj_mat["IgD-AB",]; vec[which(vec != 0)]
 
 ################################3
 
-multiSVD_obj2 <- tiltedCCA:::tiltedCCA_decomposition(multiSVD_obj, 
-                                     bool_modality_1_full = F,
-                                     bool_modality_2_full = F,
-                                     verbose = verbose)
-reference_dimred <- tiltedCCA:::.get_tCCAobj(multiSVD_obj2, apply_postDimred = F, what = "common_dimred")
-# reference_dimred <- cbind(reference_dimred)#, mat_2b[,variable_selection_res$selected_variables[1]])
-tiltedCCA:::.linear_regression(bool_include_intercept = T,
-                   bool_center_x = T,
-                   bool_center_y = T,
-                   bool_scale_x = T,
-                   bool_scale_y = T,
-                   return_type = "r_squared", 
-                   x_mat = reference_dimred,
-                   y_vec = mat_2b[,"CD8-AB"])
+# multiSVD_obj2 <- tiltedCCA:::tiltedCCA_decomposition(multiSVD_obj, 
+#                                      bool_modality_1_full = F,
+#                                      bool_modality_2_full = F,
+#                                      verbose = verbose)
+# reference_dimred <- tiltedCCA:::.get_tCCAobj(multiSVD_obj2, apply_postDimred = F, what = "common_dimred")
+# # reference_dimred <- cbind(reference_dimred)#, mat_2b[,variable_selection_res$selected_variables[1]])
+# tiltedCCA:::.linear_regression(bool_include_intercept = T,
+#                    bool_center_x = T,
+#                    bool_center_y = T,
+#                    bool_scale_x = T,
+#                    bool_scale_y = T,
+#                    return_type = "r_squared", 
+#                    x_mat = reference_dimred,
+#                    y_vec = mat_2b[,"CD8-AB"])

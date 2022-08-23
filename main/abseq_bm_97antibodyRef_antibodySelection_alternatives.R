@@ -84,13 +84,28 @@ panel_list <- list(most_DE = panel_1,
                    least_aligned = panel_2,
                    no_tcca = panel_3)
 
+###########################
+
+adt_mat <- t(as.matrix(bm[["AB"]]@scale.data))
+correlation_vec <- sapply(1:ncol(adt_mat), function(j){
+  print(j)
+   
+  df <- data.frame(cbind(adt_mat[,j], multiSVD_obj$svd_1$u))
+  colnames(df)[1] <- "y"
+  lm_res <- stats::lm(y ~ ., data = df)
+  summary(lm_res)$r.squared
+})
+names(correlation_vec) <- colnames(adt_mat)
+correlation_vec <- correlation_vec[!is.nan(correlation_vec)]
+panel_list[["most_uncorrelated"]] <- names(correlation_vec)[order(correlation_vec, decreasing = F)[1:10]]
+
 save(bm, panel_list,
      date_of_run, session_info,
      file = "../../../out/main/abseq_bm97Ref_varSelect_alternatives.RData")
 
 #################
 svd_1 <- multiSVD_obj$svd_1
-for(i in 1:3){
+for(i in 1:4){
   print(paste0("Working on custom panel ", i))
   assay_name <- paste0("AB", i)
   

@@ -65,6 +65,37 @@ tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
                            mark_median_xthres = 10)
 graphics.off()
 
+col_palette_enrichment <- paste0(grDevices::colorRampPalette(c('lightgrey', 'blue'))(100), "33")
+gene_breaks <- seq(1, 5.5, length.out = 100)
+gene_depth <- log10(Matrix::rowSums(mbrain[["RNA"]]@counts[names(rsquare_vec),])+1)
+gene_color <- sapply(gene_depth, function(x){
+  col_palette_enrichment[which.min(abs(gene_breaks - x))]
+})
+ord_idx <- order(gene_depth, decreasing = F)
+
+png("../../../out/figures/main/10x_mouseembryo_differential_gene-colored.png",
+    height = 3500, width = 2500, res = 500, units = "px")
+# par(mar = c(5,5,4,1), bg = NA)
+par(mar = c(5,5,4,1))
+tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec[ord_idx],
+                           logpval_vec = logpval_vec[ord_idx],
+                           main = "Mouse Embryo E18 (10x, RNA+ATAC)\nGene differentiability vs. alignment",
+                           bool_mark_ymedian = T,
+                           col_gene_highlight_border = rgb(255, 205, 87, 255*0.5, maxColorValue = 255),
+                           col_points = gene_color[ord_idx],
+                           cex_axis = 1.5, 
+                           cex_lab = 1.5,
+                           cex_points = 2.5,
+                           lty_polygon = 2,
+                           lwd_grid_major = 2,
+                           lwd_grid_minor = 1,
+                           lwd_axis = 1.5,
+                           lwd_axis_ticks = 1.5,
+                           lwd_polygon_bold = 5,
+                           mark_median_xthres = 10)
+graphics.off()
+
+###################################
 
 Cell_cycle <- c(cc.genes$s.genes[which(cc.genes$s.genes %in% gene_names)],
                 cc.genes$g2m.genes[which(cc.genes$g2m.genes %in% gene_names)])

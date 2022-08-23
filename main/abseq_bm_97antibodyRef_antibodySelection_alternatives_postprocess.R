@@ -35,3 +35,33 @@ for(i in 1:3){
                   plot1, device = "png", width = 11, height = 5, units = "in")
 }
 
+
+for(i in 1:4){
+  print(i)
+  reduction_name <- paste0("adt.umap", i)
+  plot1 <- Seurat::DimPlot(bm, reduction = reduction_name,
+                           group.by = "ct",
+                           cols = col_palette,
+                           raster = FALSE)
+  plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+  plot1 <- plot1 + ggplot2::ggtitle("")
+  plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+  ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_varSelect-alternative", i, "_adt-umap_cleaned.png"),
+                  plot1, device = "png", width = 3, height = 3, units = "in",
+                  dpi = 500)
+  
+  
+  reduction_name <- paste0("consensusUMAP", i)
+  plot1 <- Seurat::DimPlot(bm, reduction = reduction_name,
+                           group.by = "ct",
+                           cols = col_palette,
+                           raster = FALSE)
+  plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+  plot1 <- plot1 + ggplot2::ggtitle("")
+  plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+  ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_varSelect-alternative", i, "_consensusPCA-umap_cleaned.png"),
+                  plot1, device = "png", width = 3, height = 3, units = "in",
+                  dpi = 500)
+}
+
+

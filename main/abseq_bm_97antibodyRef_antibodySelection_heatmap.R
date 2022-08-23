@@ -48,9 +48,8 @@ protein_avg <- scale(protein_avg)
 break_vec <- c(seq(min(protein_avg), 0, length.out = 11), seq(0, max(protein_avg), length.out = 11)[-1])
 break_vec[1] <- break_vec[1]-1
 break_vec[length(break_vec)] <- break_vec[length(break_vec)]+1
-col_vec1 <- grDevices::colorRampPalette(c(rgb(184, 54, 220, maxColorValue = 255), "white"))(11)[-1]
-col_vec2 <- grDevices::colorRampPalette(c("white",  rgb(235, 134, 47, maxColorValue = 255)))(11)[-1]
-col_vec <- c(col_vec1, col_vec2)
+base_palette <- RColorBrewer::brewer.pal(11, name = "RdYlBu")
+col_vec <- rev(grDevices::colorRampPalette(base_palette)(length(break_vec)-1))
 
 png("../../../out/figures/main/abseq_bm97Ref_varSelect_protein-everything_heatmap.png",
     height = 3500, width = 3500*ncol(protein_avg)/nrow(protein_avg), res = 500, units = "px")

@@ -41,6 +41,12 @@ sd_vec <- sparseMatrixStats::colSds(mat_2b)
 if(any(sd_vec <= 1e-6)){
   mat_2b <- mat_2b[,-which(sd_vec <= 1e-6)]
 }
+ab_vec <- colnames(mat_2b)[which(sapply(1:ncol(mat_2b), function(j){
+  quantile(mat_2b[,j], probs = 0.9) > 0
+}))]
+ab_vec <- intersect(ab_vec, names(logpval_vec))
+mat_2b <- mat_2b[,ab_vec]
+logpval_vec <- logpval_vec[ab_vec]
 
 set.seed(10)
 variable_selection_res <- tiltedCCA:::postprocess_distinct_variable_selection(
