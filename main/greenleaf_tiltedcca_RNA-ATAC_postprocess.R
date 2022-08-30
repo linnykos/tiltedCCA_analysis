@@ -44,6 +44,36 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_
 
 ############
 
+plot1 <- Seurat::DimPlot(greenleaf, reduction = "umap",
+                         group.by = "celltype", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_rna-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot1 <- Seurat::DimPlot(greenleaf, reduction = "umap.atac",
+                         group.by = "celltype", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_atac-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot1 <- Seurat::DimPlot(greenleaf, reduction = "common_tcca",
+                         group.by = "celltype", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_RNA-ATA_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
 plot1 <- Seurat::DimPlot(greenleaf, reduction = "common_tcca",
                          group.by = "celltype", 
                          cols = col_palette)
@@ -61,4 +91,6 @@ zz <- zz[-intersect(which(zz[,1] <= 0), which(zz[,2]>0)),]
 zz <- zz[-which(zz[,2] >= 10),]
 zz <- zz[-which(zz[,2] <= -9),]
 nrow(zz)
+
+
 

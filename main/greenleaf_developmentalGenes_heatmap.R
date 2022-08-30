@@ -3,7 +3,7 @@ library(Seurat)
 library(Signac)
 library(tiltedCCA)
 
-load("../../../out/main/10x_greenleaf_tcca_RNA-ATAC.RData")
+load("../../../out/main/10x_greenleaf_tcca_RNA-geneActivity.RData")
 load("../../../out/main/10x_greenleaf_developmentalGenes.RData")
 # load("../../out/main/10x_greenleaf_tcca_RNA-ATAC.RData")
 # load("../../out/main/10x_greenleaf_developmentalGenes.RData")
@@ -120,26 +120,23 @@ for(j in 1:ncol(heatmap_mat_threshold)){
 }
 
 heatmap_mat_threshold <- heatmap_mat_threshold[,which(apply(heatmap_mat_threshold, 2, sd) > 0.1)]
+heatmap_mat_threshold <- scale(heatmap_mat_threshold)
 
 # split the matrices
-scaling_val <- 1
+scaling_val <- 0.5
 heatmap_mat1 <- t(heatmap_mat_threshold[cell_ordering1,])
 heatmap_mat1 <- sign(heatmap_mat1) * abs(heatmap_mat1)^scaling_val #^scaling_grid[which.max(scaling_quality)]
 heatmap_mat2 <- t(heatmap_mat_threshold[cell_ordering2,])
 heatmap_mat2 <- sign(heatmap_mat2) * abs(heatmap_mat2)^scaling_val # ^scaling_grid[which.max(scaling_quality)]
 
-# # remove ROBO2
-heatmap_mat1 <- heatmap_mat1[which(rownames(heatmap_mat1) != "ROBO2"),]
-heatmap_mat2 <- heatmap_mat2[which(rownames(heatmap_mat2) != "ROBO2"),]
+# # # remove ROBO2
+# heatmap_mat1 <- heatmap_mat1[which(rownames(heatmap_mat1) != "ROBO2"),]
+# heatmap_mat2 <- heatmap_mat2[which(rownames(heatmap_mat2) != "ROBO2"),]
 
 # set up the color palette
 num_color <- 100
 base_palette <- RColorBrewer::brewer.pal(11, name = "RdYlBu")
 color_palette <- rev(grDevices::colorRampPalette(base_palette)(100))
-# color_palette <- viridis::viridis(num_color)
-# color_palette1 <- grDevices::colorRampPalette(c(rgb(184, 54, 220, maxColorValue = 255), "white"))(100/2+1)[-1]
-# color_palette2 <- grDevices::colorRampPalette(c("white",  rgb(235, 134, 47, maxColorValue = 255)))(100/2+1)[-1]
-# color_palette <- c(color_palette1, color_palette2)
 color_breaks <- seq(min(c(heatmap_mat1, heatmap_mat2)), 
                     max(c(heatmap_mat1, heatmap_mat2)), 
                     length.out = num_color+1)

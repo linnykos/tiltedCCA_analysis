@@ -1,24 +1,48 @@
-input_obj <- eSVD_obj
-latest_Fit <- eSVD2:::.get_object(eSVD_obj = input_obj,
-                          what_obj = "latest_Fit",
-                          which_fit = NULL)
-covariates <- eSVD2:::.get_object(eSVD_obj = input_obj,
-                          what_obj = "covariates",
-                          which_fit = NULL)
-x_mat <- eSVD2:::.get_object(eSVD_obj = input_obj,
-                     what_obj = "x_mat",
-                     which_fit = latest_Fit)
-y_mat <- eSVD2:::.get_object(eSVD_obj = input_obj,
-                     what_obj = "y_mat",
-                     which_fit = latest_Fit)
-z_mat <- eSVD2:::.get_object(eSVD_obj = input_obj,
-                     what_obj = "z_mat",
-                     which_fit = latest_Fit)
-nat_mat1 <- tcrossprod(x_mat, y_mat)
-nat_mat2 <- tcrossprod(covariates, z_mat)
+input_obj = multiSVD_obj
+bool_use_denoised = T
+bool_include_intercept = T
+bool_use_metacells = F
+bool_use_both_modalities = T
+cell_idx = cell_idx
+cor_threshold = 0.8
+num_variables = 50
+sd_quantile = 0.75
+seurat_obj = greenleaf
+seurat_assay_1 = "SCT"
+seurat_assay_2 = "customGAct"
+seurat_slot = "data"
+verbose = 2
 
-variable = "RPS24"
-vec <- exp(nat_mat1[,variable] + nat_mat2[,variable])
-quantile(vec)
+res <- tiltedCCA:::.smooth_variable_selection_helper(
+  bool_include_intercept = bool_include_intercept,
+  bool_use_denoised = bool_use_denoised,
+  bool_use_metacells = bool_use_metacells,
+  cell_idx = cell_idx,
+  input_assay = 1,
+  input_obj = input_obj,
+  sd_quantile = sd_quantile,
+  seurat_assay = seurat_assay_1,
+  seurat_obj = seurat_obj,
+  seurat_slot = seurat_slot,
+  verbose = verbose
+)
+alignment_vec_1 <- res$alignment_vec
+everything_mat_1 <- res$everything_mat
+sd_vec_1 <- res$sd_vec
 
-quantile(as.numeric(input_obj$dat[,variable]))
+res <- tiltedCCA:::.smooth_variable_selection_helper(
+  bool_include_intercept = bool_include_intercept,
+  bool_use_denoised = bool_use_denoised,
+  bool_use_metacells = bool_use_metacells,
+  cell_idx = cell_idx,
+  input_assay = 2,
+  input_obj = input_obj,
+  sd_quantile = sd_quantile,
+  seurat_assay = seurat_assay_2,
+  seurat_obj = seurat_obj,
+  seurat_slot = seurat_slot,
+  verbose = verbose
+)
+alignment_vec_2 <- res$alignment_vec
+everything_mat_2 <- res$everything_mat
+sd_vec_2 <- res$sd_vec

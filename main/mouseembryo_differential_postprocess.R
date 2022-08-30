@@ -66,8 +66,9 @@ tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
 graphics.off()
 
 col_palette_enrichment <- paste0(grDevices::colorRampPalette(c('lightgrey', 'blue'))(100), "33")
-gene_breaks <- seq(1, 5.5, length.out = 100)
-gene_depth <- log10(Matrix::rowSums(mbrain[["RNA"]]@counts[names(rsquare_vec),])+1)
+gene_breaks <- seq(0, 0.18, length.out = 100)
+gene_depth <- Matrix::rowSums(mbrain[["RNA"]]@counts[names(rsquare_vec),])/ncol(mbrain)
+gene_depth <- log10(gene_depth+1)
 gene_color <- sapply(gene_depth, function(x){
   col_palette_enrichment[which.min(abs(gene_breaks - x))]
 })

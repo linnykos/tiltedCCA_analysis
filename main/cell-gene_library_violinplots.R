@@ -194,3 +194,9 @@ save(gene_depth, ab_depth,
      celltype_depth, celltype_depth_ab, celltype_depth_atac, 
      date_of_run, session_info,
      file = "../../../out/main/cell-gene_library.RData")
+
+######################
+
+sapply(sort(unique(celltype_depth[,2])), function(x){
+  10^quantile(celltype_depth[which(celltype_depth[,2] == x),1])-1
+})
