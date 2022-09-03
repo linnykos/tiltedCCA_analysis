@@ -2,7 +2,7 @@ rm(list=ls())
 library(Seurat); library(Signac)
 
 source("mouseembryo_colorPalette.R")
-load("../../../out/main/10x_mouseembryo_tiltedcca.RData")
+load("../../../out/main/10x_mouseembryo_tiltedcca_RNA-ATAC.RData")
 
 plot1 <- Seurat::DimPlot(mbrain, reduction = "common_tcca",
                          group.by = "label_Savercat", label = TRUE,
@@ -61,15 +61,32 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_rna
                 plot1, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
 
-plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.atac",
+plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn",
                          group.by = "label_Savercat", 
                          cols = col_palette)
 plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
 plot1 <- plot1 + ggplot2::ggtitle("")
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_atac-umap_cleaned.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_wnn-umap_cleaned.png"),
                 plot1, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
 
+plot1 <- Seurat::DimPlot(mbrain, reduction = "consensusUMAP",
+                         group.by = "label_Savercat", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_consensusPCA-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn",
+                         group.by = "label_Savercat", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_wnn-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
 
 plot1 <- Seurat::DimPlot(mbrain, reduction = "common_tcca",
                          group.by = "label_Savercat", 
@@ -80,11 +97,5 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_tcc
                 plot1, device = "png", width = 2, height = 2, units = "in",
                 dpi = 500)
 
-
-zz <- mbrain[["common_tcca"]]@cell.embeddings
-nrow(zz)
-zz <- zz[-intersect(which(zz[,1] >= 5), which(zz[,2] <= 4)),]
-nrow(zz)
-zz <- zz[-which(zz[,2] <= -7),]
-nrow(zz)
+#####################################
 

@@ -3,28 +3,42 @@ library(Seurat)
 library(Signac)
 library(tiltedCCA)
 
-load("../../../out/main/10x_mouseembryo_tiltedcca.RData")
+load("../../../out/main/10x_mouseembryo_tiltedcca_RNA-geneActivity.RData")
 
 set.seed(10)
 date_of_run <- Sys.time()
 session_info <- devtools::session_info()
 
 cell_idx <- unique(c(which(mbrain$Lineage1 == 1), which(mbrain$Lineage2 == 1)))
+
+potential_genes <- sort(intersect(colnames(multiSVD_obj$common_mat_1), 
+                                  colnames(multiSVD_obj$common_mat_2)))
+bool_vec <- sapply(1:length(potential_genes), function(i){
+  if(i %% floor(length(potential_genes)/10) == 0) cat('*')
+  gene_name <- potential_genes[i]
+  quantile(as.numeric(mbrain[["SCT"]]@data[gene_name,cell_idx]), probs = 0.9) > 0
+})
+variable_names <- potential_genes[which(bool_vec)]
+
 selection_res <- tiltedCCA:::postprocess_smooth_variable_selection(
   input_obj = multiSVD_obj,
-  bool_use_denoised = F,
+  bool_use_denoised = T,
   bool_include_intercept = T,
   bool_use_metacells = F,
+  bool_use_both_modalities = T,
   cell_idx = cell_idx,
-  cor_threshold = 0.8,
-  input_assay = 1,
+  cor_threshold = 0.95,
   num_variables = 50,
-  sd_quantile = 0.75,
-  seurat_obj = mbrain,
-  seurat_assay = "SCT",
+  sd_quantile = 0.05,
+  seurat_obj = greenleaf,
+  seurat_assay_1 = "SCT",
+  seurat_assay_2 = "geneActivity",
   seurat_slot = "data",
+  variable_names = variable_names,
   verbose = 2
 )
+sort(selection_res$selected_variables)
+sort(names(selection_res$alignment_1))
 
 Seurat::DefaultAssay(mbrain) <- "SCT"
 plot1 <- Seurat::FeaturePlot(mbrain, 

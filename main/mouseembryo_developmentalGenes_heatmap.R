@@ -3,20 +3,10 @@ library(Seurat)
 library(Signac)
 library(tiltedCCA)
 
-# temporary switch
-load("../../../out/main/10x_mouseembryo_preprocessed.RData")
-mbrain2 <- mbrain
-
-load("../../../out/main/10x_mouseembryo_tiltedcca.RData")
+load("../../../out/main/10x_mouseembryo_tiltedcca_RNA-geneActivity.RData")
 load("../../../out/main/10x_mouseembryo_developmentalGenes.RData")
 # load("../../out/main/10x_mouseembryo_tiltedcca.RData")
 # load("../../out/main/10x_mouseembryo_developmentalGenes.RData")
-
-# temporary switch
-mbrain$Lineage1 <- mbrain2$Lineage1
-mbrain$Lineage2 <- mbrain2$Lineage2
-mbrain$Lineage3 <- mbrain2$Lineage3
-mbrain$pseudotime <- mbrain2$pseudotime
 
 set.seed(10)
 date_of_run <- Sys.time()
@@ -132,7 +122,7 @@ for(j in 1:ncol(heatmap_mat_threshold)){
 heatmap_mat_threshold <- heatmap_mat_threshold[,which(apply(heatmap_mat_threshold, 2, sd) > 0.1)]
 
 # split the matrices
-scaling_val <- 1
+scaling_val <- 0.5
 heatmap_mat1 <- t(heatmap_mat_threshold[cell_ordering1,])
 heatmap_mat1 <- sign(heatmap_mat1) * abs(heatmap_mat1)^scaling_val #^scaling_grid[which.max(scaling_quality)]
 heatmap_mat2 <- t(heatmap_mat_threshold[cell_ordering2,])
@@ -166,11 +156,15 @@ max_cell_idx <- apply(tmp, 1, function(vec){
   quant_threshold <- quantile(np_res$p[,1,1], probs = 0.7)
   median(np_res$x[which(np_res$p[,1,1] >= quant_threshold)])
 })
-names(max_cell_idx) <- rownames(tmp) 
+names(max_cell_idx) <- rownames(tmp)
 gene_ordering2b <- intersect(gene_ordering2, rownames(heatmap_mat2))
 stopifnot(all(sort(gene_ordering2b) == sort(names(max_cell_idx))))
 heatmap_mat1[gene_ordering2b,] <- heatmap_mat1[names(max_cell_idx)[order(max_cell_idx, decreasing = F)],]
 heatmap_mat2[gene_ordering2b,] <- heatmap_mat2[names(max_cell_idx)[order(max_cell_idx, decreasing = F)],]
+
+# manual ordering
+heatmap_mat1[1:42,] <- heatmap_mat1[c(setdiff(1:42, c(19,35)), 19, 35),] 
+heatmap_mat2[1:42,] <- heatmap_mat2[c(setdiff(1:42, c(19,35)), 19, 35),] 
 
 # set up the color palette
 num_color <- 100
@@ -217,8 +211,8 @@ lines(x = c(0,1), y = rep(y_val, 2), col = "white", lwd = 4)
 lines(x = c(0,1), y = rep(y_val, 2), lty = 2, lwd = 3.5)
 graphics.off()
 
-gene_ordering1c <- gene_ordering1b[which(gene_ordering1b %in% rownames(heatmap_mat1))]
-gene_ordering2c <- gene_ordering2b[which(gene_ordering2b %in% rownames(heatmap_mat1))]
+gene_ordering1c <- rownames(heatmap_mat1)[which(rownames(heatmap_mat1) %in% gene_ordering1b)]
+gene_ordering2c <- rownames(heatmap_mat1)[which(rownames(heatmap_mat1) %in% gene_ordering2b)]
 sink("../../../out/main/10x_mouseembryo_developmentalGenes_heatmapOrder.txt")
 for(i in 1:length(gene_ordering1c)){
   cat(paste0(i, ": ", gene_ordering1c[i]))

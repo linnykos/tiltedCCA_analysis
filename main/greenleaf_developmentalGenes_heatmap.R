@@ -120,7 +120,6 @@ for(j in 1:ncol(heatmap_mat_threshold)){
 }
 
 heatmap_mat_threshold <- heatmap_mat_threshold[,which(apply(heatmap_mat_threshold, 2, sd) > 0.1)]
-heatmap_mat_threshold <- scale(heatmap_mat_threshold)
 
 # split the matrices
 scaling_val <- 0.5
@@ -128,10 +127,6 @@ heatmap_mat1 <- t(heatmap_mat_threshold[cell_ordering1,])
 heatmap_mat1 <- sign(heatmap_mat1) * abs(heatmap_mat1)^scaling_val #^scaling_grid[which.max(scaling_quality)]
 heatmap_mat2 <- t(heatmap_mat_threshold[cell_ordering2,])
 heatmap_mat2 <- sign(heatmap_mat2) * abs(heatmap_mat2)^scaling_val # ^scaling_grid[which.max(scaling_quality)]
-
-# # # remove ROBO2
-# heatmap_mat1 <- heatmap_mat1[which(rownames(heatmap_mat1) != "ROBO2"),]
-# heatmap_mat2 <- heatmap_mat2[which(rownames(heatmap_mat2) != "ROBO2"),]
 
 # set up the color palette
 num_color <- 100

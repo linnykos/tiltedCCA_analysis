@@ -3,7 +3,7 @@ library(Seurat)
 library(Signac)
 library(tiltedCCA)
 
-load("../../../out/main/10x_mouseembryo_tiltedcca.RData")
+load("../../../out/main/10x_mouseembryo_tiltedcca_RNA-ATAC.RData")
 source("mouseembryo_colorPalette.R")
 
 set.seed(10)

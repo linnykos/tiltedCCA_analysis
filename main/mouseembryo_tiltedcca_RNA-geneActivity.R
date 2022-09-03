@@ -1,8 +1,8 @@
 rm(list=ls())
-load("../../../out/main/10x_mouseembryo_preprocessed.RData")
-
 library(Seurat); library(Signac)
 library(tiltedCCA)
+
+load("../../../out/main/10x_mouseembryo_preprocessed.RData")
 
 set.seed(10)
 date_of_run <- Sys.time()
@@ -44,10 +44,10 @@ multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
                                          latent_k = 20,
-                                         num_neigh = 30,
+                                         num_neigh = 60,
                                          bool_cosine = T,
                                          bool_intersect = F,
-                                         min_deg = 30,
+                                         min_deg = 60,
                                          verbose = 2)
 tmp <- mbrain; tmp_mat <- multiSVD_obj$laplacian_list$common_laplacian
 colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
@@ -75,7 +75,7 @@ multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
 save(multiSVD_obj, mbrain,
      date_of_run, session_info,
      file = "../../../out/main/10x_mouseembryo_tiltedcca_RNA-geneActivity.RData")
-
+ 
 ########################
 
 set.seed(10)

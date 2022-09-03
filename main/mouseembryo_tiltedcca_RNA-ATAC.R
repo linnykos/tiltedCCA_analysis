@@ -1,8 +1,8 @@
 rm(list=ls())
-load("../../../out/main/10x_mouseembryo_preprocessed.RData")
-
 library(Seurat); library(Signac)
 library(tiltedCCA)
+
+load("../../../out/main/10x_mouseembryo_preprocessed.RData")
 
 set.seed(10)
 date_of_run <- Sys.time()
