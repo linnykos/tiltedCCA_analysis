@@ -44,29 +44,29 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_RNA
                 dpi = 500)
 
 set.seed(10)
-greenleaf <- Seurat::FindMultiModalNeighbors(greenleaf, 
-                                             reduction.list = list("pca", "pcaCustomGAct"), 
-                                             weighted.nn.name = "weighted.nn2",
-                                             dims.list = list(1:50, 2:50))
+mbrain <- Seurat::FindMultiModalNeighbors(mbrain, 
+                                          reduction.list = list("pca", "pca.ga"), 
+                                          weighted.nn.name = "weighted.nn2",
+                                          dims.list = list(1:50, 2:50))
 set.seed(10)
-greenleaf <- Seurat::RunUMAP(greenleaf, nn.name = "weighted.nn2", reduction.name = "umap.wnn2", 
-                             reduction.key = "wnnUMAP2_")
+mbrain <- Seurat::RunUMAP(mbrain, nn.name = "weighted.nn2", reduction.name = "umap.wnn2", 
+                          reduction.key = "wnnUMAP2_")
 
-plot1 <- Seurat::DimPlot(greenleaf, reduction = "umap.wnn2",
-                         group.by = "celltype", 
+plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn2",
+                         group.by = "label_Savercat", 
                          cols = col_palette)
 plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
 plot1 <- plot1 + ggplot2::ggtitle("")
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_wnn-umap_RNA-geneActivity_cleaned.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_wnn-umap_RNA-geneActivity_cleaned.png"),
                 plot1, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
 
 # consensus pca
-Seurat::DefaultAssay(greenleaf) <- "SCT"
-mat_1 <- Matrix::t(greenleaf[["SCT"]]@data[Seurat::VariableFeatures(object = greenleaf),])
-Seurat::DefaultAssay(greenleaf) <- "customGAct"
-mat_2 <- Matrix::t(greenleaf[["customGAct"]]@data[Seurat::VariableFeatures(object = greenleaf),])
+Seurat::DefaultAssay(mbrain) <- "SCT"
+mat_1 <- Matrix::t(mbrain[["SCT"]]@data[Seurat::VariableFeatures(object = mbrain),])
+Seurat::DefaultAssay(mbrain) <- "geneActivity"
+mat_2 <- Matrix::t(mbrain[["geneActivity"]]@data[Seurat::VariableFeatures(object = mbrain),])
 
 mat_1b <- mat_1
 sd_vec <- sparseMatrixStats::colSds(mat_1b)
@@ -90,24 +90,24 @@ consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = mat_1b, mat_2 = mat_2b,
                                            verbose = 1)
 consensus_dimred <- consensus_pca$dimred_consensus
 colnames(consensus_dimred) <- paste0("consensusPCA2_", 1:ncol(consensus_dimred))
-greenleaf[["consensusPCA2"]] <- Seurat::CreateDimReducObject(consensus_dimred, 
-                                                             assay = "SCT")
+mbrain[["consensusPCA2"]] <- Seurat::CreateDimReducObject(consensus_dimred, 
+                                                          assay = "SCT")
 
 set.seed(10)
 umap_res <- Seurat::RunUMAP(consensus_pca$dimred_consensus)
 umap_mat <- umap_res@cell.embeddings
-rownames(umap_mat) <- colnames(greenleaf)
+rownames(umap_mat) <- colnames(mbrain)
 colnames(umap_mat) <- paste0("consensusUMAP2_", 1:ncol(umap_mat))
-greenleaf[["consensusUMAP2"]] <- Seurat::CreateDimReducObject(umap_mat, 
-                                                              assay = "SCT")
+mbrain[["consensusUMAP2"]] <- Seurat::CreateDimReducObject(umap_mat, 
+                                                           assay = "SCT")
 
-plot1 <- Seurat::DimPlot(greenleaf, reduction = "consensusUMAP2",
-                         group.by = "celltype", 
+plot1 <- Seurat::DimPlot(mbrain, reduction = "consensusUMAP2",
+                         group.by = "label_Savercat", 
                          cols = col_palette)
 plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
 plot1 <- plot1 + ggplot2::ggtitle("")
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_consensusPCA-umap_RNA-geneActivity_cleaned.png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_consensusPCA-umap_RNA-geneActivity_cleaned.png"),
                 plot1, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
 

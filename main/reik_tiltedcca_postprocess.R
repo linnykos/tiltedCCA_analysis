@@ -68,3 +68,21 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_reik_tcca-umap_
                 plot1, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
 
+plot1 <- Seurat::DimPlot(reik, reduction = "umap.wnn",
+                         group.by = "celltype", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_reik_wnn-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
+plot1 <- Seurat::DimPlot(reik, reduction = "consensusUMAP",
+                         group.by = "celltype", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_reik_consensusPCA-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
