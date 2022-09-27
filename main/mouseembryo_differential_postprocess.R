@@ -98,8 +98,10 @@ graphics.off()
 
 ###################################
 
-Cell_cycle <- c(cc.genes$s.genes[which(cc.genes$s.genes %in% gene_names)],
-                cc.genes$g2m.genes[which(cc.genes$g2m.genes %in% gene_names)])
+df <- read.csv("~/project/tiltedCCA/data/mouse_cell_cycling/41467_2022_30545_MOESM5_ESM.txt", 
+               header = F)
+Cell_cycle <- toupper(df[,1])
+Cell_cycle <- intersect(Cell_cycle, names(rsquare_vec))
 
 png(paste0("../../../out/figures/main/10x_mouseembryo_differential_gene_Cell_cycle.png"),
     height = 3500, width = 2500, res = 500, units = "px")

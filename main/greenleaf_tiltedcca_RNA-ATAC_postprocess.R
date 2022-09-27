@@ -3,7 +3,6 @@ library(Seurat); library(Signac)
 
 source("greenleaf_colorPalette.R")
 load("../../../out/main/10x_greenleaf_tcca_RNA-ATAC.RData")
-# load("../../../out/Writeup14n/10x_greenleaf_tcca_RNA-ATAC.RData")
 
 plot1 <- Seurat::DimPlot(greenleaf, reduction = "common_tcca",
                          group.by = "celltype", label = TRUE,
@@ -102,4 +101,60 @@ plot1 <- plot1 + ggplot2::ggtitle("")
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_RNA-ATA_cleaned-smaller.png"),
                 plot1, device = "png", width = 2, height = 2, units = "in",
                 dpi = 500)
+
+#################################################
+
+keep_vec <- rep(1, ncol(greenleaf))
+keep_vec[greenleaf$celltype %in% c("EC/Peric.", "IN1", "IN2", "IN3", "mGPC/OPC", "SP")] <- 0
+greenleaf$keep <- keep_vec
+greenleaf <- subset(greenleaf, keep == 1)
+
+greenleaf[["umap.atac"]]@cell.embeddings <- tiltedCCA:::.rotate_matrix(
+  source_mat = greenleaf[["umap"]]@cell.embeddings,
+  target_mat = greenleaf[["umap.atac"]]@cell.embeddings
+)
+
+keep_vec <- rep(1, ncol(greenleaf))
+keep_vec[greenleaf[["umap"]]@cell.embeddings[,2]>=5] <- 0
+keep_vec[greenleaf[["umap"]]@cell.embeddings[,2]<=-11] <- 0
+keep_vec[greenleaf[["umap.atac"]]@cell.embeddings[,2]>=5.5] <- 0
+keep_vec[greenleaf[["umap.atac"]]@cell.embeddings[,2]<=-11] <- 0
+greenleaf$keep <- keep_vec
+greenleaf <- subset(greenleaf, keep == 1)
+
+greenleaf[["umap.atac"]]@cell.embeddings <- tiltedCCA:::.rotate_matrix(
+  source_mat = greenleaf[["umap"]]@cell.embeddings,
+  target_mat = greenleaf[["umap.atac"]]@cell.embeddings
+)
+
+plot1 <- Seurat::DimPlot(greenleaf, reduction = "umap.atac",
+                         group.by = "celltype", 
+                         cols = col_palette, pt.size = 1.5)
+plot1 <- plot1 + Seurat::NoLegend() 
+plot1 <- plot1 + ggplot2::ggtitle("") + ggplot2::ylab("ATAC UMAP 2") + ggplot2::xlab("ATAC UMAP 1")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_atac-umap_slides.png"),
+                plot1, device = "png", width = 4, height = 4, units = "in")
+
+plot1 <- Seurat::DimPlot(greenleaf, reduction = "umap",
+                         group.by = "celltype", 
+                         cols = col_palette, pt.size = 1.5)
+plot1 <- plot1 + Seurat::NoLegend() 
+plot1 <- plot1 + ggplot2::ggtitle("") + ggplot2::ylab("RNA UMAP 2") + ggplot2::xlab("RNA UMAP 1")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_rna-umap_slides.png"),
+                plot1, device = "png", width = 4, height = 4, units = "in")
+
+
+greenleaf[["common_tcca"]]@cell.embeddings <- tiltedCCA:::.rotate_matrix(
+  source_mat = greenleaf[["umap"]]@cell.embeddings,
+  target_mat = greenleaf[["common_tcca"]]@cell.embeddings
+)
+
+plot1 <- Seurat::DimPlot(greenleaf, reduction = "common_tcca",
+                         group.by = "celltype", 
+                         cols = col_palette, pt.size = 1.5)
+plot1 <- plot1 + Seurat::NoLegend() 
+plot1 <- plot1 + ggplot2::ggtitle("") + ggplot2::ylab("Common UMAP 2") + ggplot2::xlab("Common UMAP 1")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_greenleaf_tcca_RNA-ATAC_common-umap_slides.png"),
+                plot1, device = "png", width = 4, height = 4, units = "in")
+
 

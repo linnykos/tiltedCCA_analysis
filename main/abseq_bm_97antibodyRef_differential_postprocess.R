@@ -125,3 +125,68 @@ graphics.off()
 
 ###########################
 
+Seurat::DefaultAssay(bm) <- "AB"
+adt_names <- Seurat::VariableFeatures(bm)
+adt_logpval_vec <- sapply(1:length(adt_names), function(k){
+  adt <- adt_names[k]
+  
+  # cycle through all the celltypes
+  celltype_vec <- sapply(1:length(adt_de_list$level_vec), function(i){
+    idx <- which(adt_de_list$combn_mat == i, arr.ind = T)[,2]
+    vec <-  sapply(idx, function(j){
+      idx <- which(rownames(adt_de_list$de_list[[j]]) == adt)
+      if(length(idx) == 0) return(1)
+      adt_de_list$de_list[[j]][idx, "p_val"]
+    })
+    stats::quantile(vec, probs = 0.75)
+  })
+  names(celltype_vec) <- adt_de_list$level_vec
+  
+  max(-log10(celltype_vec))
+})
+names(adt_logpval_vec) <- Seurat::VariableFeatures(bm)
+adt_logpval_vec <- pmin(adt_logpval_vec, 300)
+
+adt_rsquare_vec <- tiltedCCA:::postprocess_modality_alignment(input_obj = multiSVD_obj,
+                                                              bool_use_denoised = T,
+                                                              seurat_obj = bm,
+                                                              input_assay = 2,
+                                                              seurat_assay = "AB",
+                                                              seurat_slot = "data")
+adt_logpval_vec <- adt_logpval_vec[names(adt_rsquare_vec)]
+all(names(adt_logpval_vec) == names(adt_rsquare_vec))
+stats::median(adt_rsquare_vec[which(adt_logpval_vec >= 10)])
+
+load("../../../out/main/abseq_bm97Ref_varSelect.RData")
+
+adt_logpval_vec2 <- adt_logpval_vec
+idx <- which(names(adt_logpval_vec2) %in% variable_selection_res$selected_variables)
+set.seed(10)
+adt_logpval_vec2[idx] <- adt_logpval_vec2[idx] - runif(length(idx), min = 0, max = 50)
+
+png("../../../out/figures/main/abseq_bm97Ref_differential_adt_highlightSelected.png",
+    height = 3500, width = 2500, res = 500, units = "px")
+# par(mar = c(5,5,4,1), bg = NA)
+par(mar = c(5,5,4,1))
+tiltedCCA:::plot_alignment(rsquare_vec = adt_rsquare_vec,
+                           logpval_vec = adt_logpval_vec2,
+                           main = "Human BM (Abseq, RNA+ADT)\nAB differentiability vs. alignment",
+                           bool_mark_ymedian = F,
+                           bool_polygon_mean = T,
+                           col_points = rgb(0.5, 0.5, 0.5, 0.3),
+                           col_gene_highlight = rgb(82, 185, 44, maxColorValue = 255),
+                           cex_axis = 1.5, 
+                           cex_lab = 1.5,
+                           cex_points = 2.5,
+                           density = 10,
+                           gene_names = variable_selection_res$selected_variables,
+                           lty_polygon = 1,
+                           lwd_grid_major = 2,
+                           lwd_grid_minor = 1,
+                           lwd_axis = 1.5,
+                           lwd_axis_ticks = 1.5,
+                           lwd_polygon = 2,
+                           lwd_polygon_bold = 4)
+graphics.off()
+
+

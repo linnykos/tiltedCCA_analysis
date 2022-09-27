@@ -61,6 +61,15 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_rna
                 plot1, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
 
+plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.atac",
+                         group.by = "label_Savercat", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_atac-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
 plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn",
                          group.by = "label_Savercat", 
                          cols = col_palette)
@@ -76,15 +85,6 @@ plot1 <- Seurat::DimPlot(mbrain, reduction = "consensusUMAP",
 plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
 plot1 <- plot1 + ggplot2::ggtitle("")
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_consensusPCA-umap_cleaned.png"),
-                plot1, device = "png", width = 3, height = 3, units = "in",
-                dpi = 500)
-
-plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.wnn",
-                         group.by = "label_Savercat", 
-                         cols = col_palette)
-plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
-plot1 <- plot1 + ggplot2::ggtitle("")
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_wnn-umap_cleaned.png"),
                 plot1, device = "png", width = 3, height = 3, units = "in",
                 dpi = 500)
 

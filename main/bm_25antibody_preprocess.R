@@ -66,3 +66,5 @@ plot1 <- plot1 + Seurat::NoLegend()
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_wnn_violin.png"),
                 plot1, device = "png", width = 15, height = 5, units = "in",
                 dpi = 500)
+
+##################################

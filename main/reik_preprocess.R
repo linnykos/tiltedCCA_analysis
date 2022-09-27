@@ -50,6 +50,24 @@ reik <- Seurat::RunUMAP(reik, dims = 1:50)
 save(reik, date_of_run, session_info,
      file = "../../../out/main/10x_reik_preprocessed.RData")
 
+
+var_before_all <- sparseMatrixStats::rowSds(reik[["RNA"]]@counts)
+var_after_all <- sparseMatrixStats::rowSds(reik[["RNA"]]@data)
+var_after_selected <- sparseMatrixStats::rowSds(reik[["RNA"]]@data[reik[["RNA"]]@var.features,])
+
+round(quantile(var_before_all),2)
+round(quantile(var_after_all),2)
+round(quantile(var_after_selected),2)
+
+png(paste0("../../../out/figures/main/10x_reik_histogram_variance.png"),
+    height = 1500, width = 4500, units = "px", res = 500)
+par(mfrow = c(1,3))
+hist(var_before_all, breaks = 50, col = "gray", main = "Std before normalizing (all genes)")
+hist(var_after_all, breaks = 50, col = "gray", main = "Std after normalizing (all genes)")
+hist(var_after_selected, breaks = 50, col = "gray", main = "Std after normalizing (HV genes)")
+graphics.off()
+
+
 ############
 
 reik_atac <- ArchR::loadArchRProject(path = "~/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR")

@@ -295,7 +295,7 @@ png("../../../out/figures/main/citeseq_bm25_differential_protein.png",
 par(mar = c(5,5,4,1))
 tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
                            logpval_vec = logpval_vec,
-                           main = "PBMC (CITE-Seq, RNA+224 ADT)\nProtein differentiability vs. alignment",
+                           main = "Human BM (CITE-Seq, RNA+25 ADT)\nProtein differentiability vs. alignment",
                            bool_mark_ymedian = T,
                            col_gene_highlight_border = rgb(255, 205, 87, 255*0.5, maxColorValue = 255),
                            col_points = rgb(0.5, 0.5, 0.5, 0.1),
@@ -311,3 +311,29 @@ tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
                            mark_median_xthres = 10,
                            xlim = c(1, max(log10(logpval_vec))))
 graphics.off()
+
+png("../../../out/figures/main/citeseq_bm25_differential_protein_green.png",
+    height = 3500, width = 2500, res = 500, units = "px")
+par(mar = c(5,5,4,1))
+tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
+                           logpval_vec = logpval_vec,
+                           main = "Human BM (CITE-Seq, RNA+25 ADT)\nProtein differentiability vs. alignment",
+                           bool_mark_ymedian = F,
+                           bool_polygon_mean = T,
+                           col_points = rgb(0.5, 0.5, 0.5, 0.1),
+                           col_gene_highlight = rgb(82, 185, 44, maxColorValue = 255),
+                           cex_axis = 1.5, 
+                           cex_lab = 1.5,
+                           cex_points = 2.5,
+                           density = 10,
+                           gene_names = bm[["ADT"]]@var.features,
+                           lty_polygon = 1,
+                           lwd_grid_major = 2,
+                           lwd_grid_minor = 1,
+                           lwd_axis = 1.5,
+                           lwd_axis_ticks = 1.5,
+                           lwd_polygon = 2,
+                           lwd_polygon_bold = 4,
+                           xlim = c(0, max(log10(logpval_vec))))
+graphics.off()
+

@@ -1,4 +1,8 @@
 rm(list=ls())
+
+load("../../../out/main/citeseq_bm25_preprocessed.RData")
+ab_vec <- bm[["ADT"]]@var.features
+
 load("../../../out/main/abseq_bm97_differential.RData")
 load("../../../out/main/abseq_bm97_tcca.RData")
 source("bm_97antibody_colorPalette.R")
@@ -127,7 +131,6 @@ graphics.off()
 
 ###########################
 
-
 Seurat::DefaultAssay(bm) <- "AB"
 adt_names <- Seurat::VariableFeatures(bm)
 adt_logpval_vec <- sapply(1:length(adt_names), function(k){
@@ -181,3 +184,42 @@ tiltedCCA:::plot_alignment(rsquare_vec = adt_rsquare_vec,
                            lwd_polygon_bold = 5,
                            mark_median_xthres = 10)
 graphics.off()
+
+
+ab_vec2 <- paste0(ab_vec, "-AB")
+ab_vec_notin <- ab_vec2[which(!ab_vec2 %in% rownames(bm[["AB"]]))]
+ab_vec_notin 
+# [1] "CD127-IL7Ra-AB" "CD161-AB"       "CD197-CCR7-AB"  "CD278-ICOS-AB" 
+# [5] "CD45RO-AB"      "CD57-AB"        "CD79b-AB"       "CD8a-AB"       
+# [9] "HLA.DR-AB"
+sort(rownames(bm[["AB"]]))
+ab_vec_other <- c("CD127-AB", "CD197-AB", "CD278-AB",
+                  "CD8-AB", "CD45RA-AB")
+ab_vec_new <- c(ab_vec_other, ab_vec2[which(ab_vec2 %in% rownames(bm[["AB"]]))])
+all(ab_vec_new %in% rownames(bm[["AB"]]))
+
+png("../../../out/figures/main/abseq_bm97_differential_adt_highlight25.png",
+    height = 3500, width = 2500, res = 500, units = "px")
+# par(mar = c(5,5,4,1), bg = NA)
+par(mar = c(5,5,4,1))
+tiltedCCA:::plot_alignment(rsquare_vec = adt_rsquare_vec,
+                           logpval_vec = adt_logpval_vec,
+                           main = "Human BM (Abseq, RNA+ADT)\nAB differentiability vs. alignment",
+                           bool_mark_ymedian = F,
+                           bool_polygon_mean = T,
+                           col_points = rgb(0.5, 0.5, 0.5, 0.1),
+                           col_gene_highlight = rgb(82, 185, 44, maxColorValue = 255),
+                           cex_axis = 1.5, 
+                           cex_lab = 1.5,
+                           cex_points = 2.5,
+                           density = 10,
+                           gene_names = ab_vec_new,
+                           lty_polygon = 1,
+                           lwd_grid_major = 2,
+                           lwd_grid_minor = 1,
+                           lwd_axis = 1.5,
+                           lwd_axis_ticks = 1.5,
+                           lwd_polygon = 2,
+                           lwd_polygon_bold = 4)
+graphics.off()
+

@@ -143,6 +143,22 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/celldepth_atac_viol
                 plot1, device = "png", width = 5, height = 3, units = "in",
                 dpi = 500)
 
+celltype_depth_atac2 <- celltype_depth_atac
+celltype_depth_atac2 <- celltype_depth_atac2[celltype_depth_atac2[,"dataset"] %in% c("PBMC10x", "Greenleaf"),]
+plot1 <- ggplot2::ggplot(celltype_depth_atac2, ggplot2::aes(x=dataset, y=len)) + 
+  ggplot2::geom_violin(trim=FALSE, fill="gray")+
+  ggplot2::geom_boxplot(width=0.1, outlier.shape = NA)+
+  ggplot2::theme(
+    panel.background = ggplot2::element_rect(fill='transparent'),
+    plot.background = ggplot2::element_rect(fill='transparent', color=NA),
+    axis.line = ggplot2::element_line(size = 0.5, colour = "black"),
+    legend.background = ggplot2::element_rect(fill='transparent'),
+    legend.box.background = ggplot2::element_rect(fill='transparent')
+  )
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/celldepth_atac_violin-cleaned.png"),
+                plot1, device = "png", width = 2, height = 3, units = "in",
+                dpi = 500)
+
 ################
 
 gene_depth <- data.frame(

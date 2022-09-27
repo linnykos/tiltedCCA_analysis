@@ -39,11 +39,12 @@ color_vec <- sapply(mbrain$alignment, function(val){
   color_palette[which.min(abs(color_breaks - val))]
 })
 
+names(alignment_vec) <- colnames(mbrain)
+
 save(color_vec, alignment_vec,
      scaling_grid, scaling_quality,
      date_of_run, session_info,
      file = "../../../out/main/10x_mouseembryo_steadystate.RData")
-
 
 png(paste0("../../../out/figures/main/10x_mouseembryo_tcca_steadystate-full.png"),
     height = 3000, width = 3000, units = "px", res = 500)

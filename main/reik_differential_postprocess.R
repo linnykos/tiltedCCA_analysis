@@ -45,6 +45,9 @@ rsquare_vec <- tiltedCCA:::postprocess_modality_alignment(input_obj = multiSVD_o
 all(names(logpval_vec) == names(rsquare_vec))
 stats::median(rsquare_vec[which(logpval_vec >= 10)])
 
+save(logpval_vec, rsquare_vec, date_of_run,
+     file = "../../../out/main/10x_reik_differential_postprocess.RData")
+
 png("../../../out/figures/main/10x_reik_differential_gene.png",
     height = 3500, width = 2500, res = 500, units = "px")
 par(mar = c(5,5,4,1))
@@ -101,10 +104,16 @@ graphics.off()
 
 names(rsquare_vec) <- toupper(names(rsquare_vec))
 names(logpval_vec) <- toupper(names(logpval_vec))
-gene_names <- toupper(gene_names)
-Cell_cycle <- c(cc.genes$s.genes[which(cc.genes$s.genes %in% gene_names)],
-                cc.genes$g2m.genes[which(cc.genes$g2m.genes %in% gene_names)])
-length(Cell_cycle)
+# gene_names <- toupper(gene_names)
+# Cell_cycle <- c(cc.genes$s.genes[which(cc.genes$s.genes %in% gene_names)],
+#                 cc.genes$g2m.genes[which(cc.genes$g2m.genes %in% gene_names)])
+# length(Cell_cycle)
+
+df <- read.csv("~/project/tiltedCCA/data/mouse_cell_cycling/41467_2022_30545_MOESM5_ESM.txt", 
+               header = F)
+Cell_cycle <- toupper(df[,1])
+Cell_cycle <- intersect(Cell_cycle, names(rsquare_vec))
+
 
 png("../../../out/figures/main/10x_reik_differential_gene_Cell_cycle.png",
     height = 3500, width = 2500, res = 500, units = "px")

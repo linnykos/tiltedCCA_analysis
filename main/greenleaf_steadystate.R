@@ -40,6 +40,8 @@ color_vec <- sapply(greenleaf$alignment, function(val){
   color_palette[which.min(abs(color_breaks - val))]
 })
 
+names(alignment_vec) <- colnames(greenleaf)
+
 save(color_vec, alignment_vec,
      scaling_grid, scaling_quality,
      date_of_run, session_info,
@@ -183,4 +185,47 @@ for(i in 1:ncol(pred_diff_mat)){
   axis(2, label = F, cex.axis = 1.25, cex.lab = 1.25, lwd = 2)
   graphics.off()
 }
+
+#############################################
+
+keep_vec <- rep(1, ncol(greenleaf))
+keep_vec[greenleaf$celltype %in% c("EC/Peric.", "IN1", "IN2", "IN3", "mGPC/OPC", "SP")] <- 0
+greenleaf$keep <- keep_vec
+greenleaf <- subset(greenleaf, keep == 1)
+
+greenleaf[["umap.atac"]]@cell.embeddings <- tiltedCCA:::.rotate_matrix(
+  source_mat = greenleaf[["umap"]]@cell.embeddings,
+  target_mat = greenleaf[["umap.atac"]]@cell.embeddings
+)
+
+keep_vec <- rep(1, ncol(greenleaf))
+keep_vec[greenleaf[["umap"]]@cell.embeddings[,2]>=5] <- 0
+keep_vec[greenleaf[["umap"]]@cell.embeddings[,2]<=-11] <- 0
+keep_vec[greenleaf[["umap.atac"]]@cell.embeddings[,2]>=5.5] <- 0
+keep_vec[greenleaf[["umap.atac"]]@cell.embeddings[,2]<=-11] <- 0
+greenleaf$keep <- keep_vec
+greenleaf <- subset(greenleaf, keep == 1)
+
+greenleaf[["common_tcca"]]@cell.embeddings <- tiltedCCA:::.rotate_matrix(
+  source_mat = greenleaf[["umap"]]@cell.embeddings,
+  target_mat = greenleaf[["common_tcca"]]@cell.embeddings
+)
+
+
+color_breaks <- seq(min(greenleaf$alignment), max(greenleaf$alignment), length.out = num_color)
+color_vec <- sapply(greenleaf$alignment, function(val){
+  color_palette[which.min(abs(color_breaks - val))]
+})
+
+png(paste0("../../../out/figures/main/10x_greenleaf_tcca_steadystate-full_slides.png"),
+    height = 2000, width = 2000, units = "px", res = 500)
+par(mar = c(0.5,0.5,0.5,0.5))
+plot(x = greenleaf[["common_tcca"]]@cell.embeddings[,1],
+     y = greenleaf[["common_tcca"]]@cell.embeddings[,2],
+     col = color_vec, pch = 16,
+     main = "",
+     xaxt = "n", yaxt = "n", bty = "n")
+graphics.off()
+
+
 

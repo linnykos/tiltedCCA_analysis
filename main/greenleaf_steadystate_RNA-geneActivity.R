@@ -53,3 +53,15 @@ axis(side = 1)
 axis(side = 2)
 graphics.off()
 
+
+png(paste0("../../../out/figures/main/10x_greenleaf_tcca_steadystate_RNA-geneActivity_cleaned.png"),
+    height = 2000, width = 2000, units = "px", res = 500)
+par(mar = c(0.5,0.5,0.5,0.5))
+plot(x = greenleaf[["common_tcca"]]@cell.embeddings[,1],
+     y = greenleaf[["common_tcca"]]@cell.embeddings[,2],
+     col = color_vec, pch = 16,
+     main = "",
+     xaxt = "n", yaxt = "n", bty = "n")
+graphics.off()
+
+

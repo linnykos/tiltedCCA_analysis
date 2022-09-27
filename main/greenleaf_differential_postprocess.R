@@ -125,3 +125,43 @@ tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
                            lwd_polygon = 2,
                            lwd_polygon_bold = 4)
 graphics.off()
+
+############################
+
+go_df <- readxl::read_xlsx(
+  path = "~/project/tiltedCCA/data/GO_terms/GO_term_summary_20220906_012056.xlsx",
+  sheet = "Sheet0"
+)
+go_df <- as.data.frame(go_df)
+neurogenesis_genes <- sort(toupper(unique(go_df[,"Symbol"])))
+
+neurogenesis_idx <- which(names(logpval_vec) %in% neurogenesis_genes)
+length(neurogenesis_idx)
+quantile(logpval_vec[neurogenesis_idx])
+
+neurogenesis_idx2 <- neurogenesis_idx[which(logpval_vec[neurogenesis_idx] >= 10)]
+
+png(paste0("../../../out/figures/main/10x_greenleaf_differential_gene_neurogenesis.png"),
+    height = 3500, width = 2500, res = 500, units = "px")
+par(mar = c(5,5,4,1))
+tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
+                           logpval_vec = logpval_vec,
+                           main = "Human brain (10x, RNA+ATAC)\nGene differentiability vs. alignment",
+                           bool_mark_ymedian = F,
+                           bool_polygon_mean = T,
+                           col_points = rgb(0.5, 0.5, 0.5, 0.1),
+                           col_gene_highlight = rgb(191, 75, 222, maxColorValue = 255),
+                           cex_axis = 1.5, 
+                           cex_lab = 1.5,
+                           cex_points = 2.5,
+                           density = 10,
+                           gene_names = names(logpval_vec)[neurogenesis_idx],
+                           lty_polygon = 1,
+                           lwd_grid_major = 2,
+                           lwd_grid_minor = 1,
+                           lwd_axis = 1.5,
+                           lwd_axis_ticks = 1.5,
+                           lwd_polygon = 2,
+                           lwd_polygon_bold = 4)
+graphics.off()
+

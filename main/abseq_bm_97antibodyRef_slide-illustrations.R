@@ -99,7 +99,7 @@ bm[["common_tccaUp"]]@cell.embeddings <- tiltedCCA:::.rotate_matrix(
 )
 plot1 <- Seurat::DimPlot(bm, reduction = "common_tccaUp",
                          group.by = "ct", 
-                         cols = col_palette, pt.size = 1.5)
+                         cols = col_palette, pt.size = 0.05)
 plot1 <- plot1 + Seurat::NoLegend() 
 plot1 <- plot1 + ggplot2::ggtitle("") + ggplot2::ylab("Common UMAP 2") + ggplot2::xlab("Common UMAP 1")
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_tcca-illustration_tiltup.png"),
@@ -113,7 +113,7 @@ bm[["common_tccaDown"]]@cell.embeddings <- tiltedCCA:::.rotate_matrix(
 )
 plot1 <- Seurat::DimPlot(bm, reduction = "common_tccaDown",
                          group.by = "ct", 
-                         cols = col_palette, pt.size = 1.5)
+                         cols = col_palette, pt.size = 0.05)
 plot1 <- plot1 + Seurat::NoLegend() 
 plot1 <- plot1 + ggplot2::ggtitle("") + ggplot2::ylab("Common UMAP 2") + ggplot2::xlab("Common UMAP 1")
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_tcca-illustration_tiltdown.png"),

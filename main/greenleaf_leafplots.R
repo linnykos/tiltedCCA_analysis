@@ -297,6 +297,60 @@ for(gene in secondary_genes){
   graphics.off()
 }
 
+
+for(gene in secondary_genes){
+  png(paste0("../../out/figures/main/10x_greenleaf_leafplot_mainplot_seuratGActivity_original_", gene, ".png"),
+      height = 1500, width = 1500, units = "px", res = 500)
+  par(mar = c(0.5,0.5,0.5,0.5))
+  set.seed(10)
+  idx <- sample(1:n)
+  
+  x_vec1 <- atac_mat[,paste0("ATAC-", gene)]
+  x_vec2 <- pred_atac_mat[,paste0("ATAC-", gene)]
+  y_vec1 <- rna_mat[,gene]
+  y_vec2 <- pred_rna_mat[,gene]
+  
+  x_mean <- mean(x_vec2); x_vec1 <- x_vec1- x_mean; x_vec2 <- x_vec2 - x_mean
+  x_sd <- sd(x_vec2); x_vec1 <- x_vec1/x_sd; x_vec2 <- x_vec2/x_sd
+  y_mean <- mean(y_vec2); y_vec1 <- y_vec1- y_mean; y_vec2 <- y_vec2 - y_mean
+  y_sd <- sd(y_vec2); y_vec1 <- y_vec1/y_sd; y_vec2 <- y_vec2/y_sd
+  
+  plot(x = x_vec1[idx], y = y_vec1[idx],
+       pch = 16, col = color_vec_trans[idx], cex = 1.5,
+       xlim = quantile(x_vec1, probs = c(0.005, 0.995)),
+       ylim = quantile(y_vec1, probs = c(0.005, 0.995)),
+       xlab = "", ylab = "",
+       xaxt = "n", yaxt = "n", bty = "n")
+  axis(1, labels = F, cex.axis = 2.5, cex.lab = 2.5, lwd = 2.5)
+  axis(2, labels = F, cex.axis = 2.5, cex.lab = 2.5, lwd = 2.5)
+  
+  points(x = x_vec2[idx], 
+         y = y_vec2[idx], 
+         pch = 16, col = "white", cex = 4)
+  points(x = rev(x_vec2), 
+         y = rev(y_vec2), 
+         pch = 16, col = rev(color_vec), cex = 3)
+  
+  points(x = x_vec2[1], 
+         y = y_vec2[1],
+         pch = 16, col = "white", cex = 6)
+  points(x = x_vec2[1], 
+         y = y_vec2[1], 
+         pch = 16, col = color_vec[1], cex = 5)
+  
+  x_right <- mean(x_vec1[x_vec1 >= quantile(x_vec1, probs = 0.9)])
+  x_left <- mean(x_vec1[x_vec1 <= quantile(x_vec1, probs = 0.1)])
+  y_top <- mean(y_vec1[y_vec1 >= quantile(y_vec1, probs = 0.9)])
+  y_bot <- mean(y_vec1[y_vec1 <= quantile(y_vec1, probs = 0.1)])
+  
+  slope <- (y_top-y_bot)/(x_right-x_left)
+  intercept <- y_top - slope*x_right
+  x_left2 <- -1e4; x_right2 <- 1e4
+  y_bot2 <- slope*x_left2+intercept; y_top2 <- slope*x_right2+intercept
+  lines(c(x_right2,x_left2), c(y_top2, y_bot2), lwd = 5, lty = 2)
+  graphics.off()
+}
+
 ############################################
 
 # library(quantreg)
@@ -393,6 +447,129 @@ for(gene in main_genes){
   axis(1, cex.axis = 2, cex.lab = 1.5, lwd = 3)
   axis(2, cex.axis = 2, cex.lab = 1.5, lwd = 3)
   
+  graphics.off()
+}
+
+##################################
+
+# plots for the slides:
+
+n <- nrow(rna_mat)
+color_vec <- rev(grDevices::colorRampPalette(c(rgb(191, 74, 223, maxColorValue = 255),
+                                               rgb(0.8, 0.8, 0.8),
+                                               rgb(239, 158, 88, maxColorValue = 255)))(n))
+example_color <- rgb(1,1,1,0.5)
+color_vec_trans <- sapply(color_vec, function(x){
+  paste0(x, substr(example_color, start = 8, stop = 10))
+})
+
+
+main_genes <- c("EOMES", "NTRK2", "KCNH8", "WNT11")
+
+for(gene in main_genes){
+  png(paste0("../../out/figures/main/10x_greenleaf_leafplot_slides_seuratGActivity_common_", gene, ".png"),
+      height = 1500, width = 1500, units = "px", res = 500)
+  par(mar = c(2.5,2.5,0.5,0.5))
+  set.seed(10)
+  idx <- sample(1:n)
+  
+  x_vec1 <- atac_common[,paste0("ATAC-", gene)]
+  x_vec2 <- pred_atac_common[,paste0("ATAC-", gene)]
+  y_vec1 <- rna_common[,gene]
+  y_vec2 <- pred_rna_common[,gene]
+  
+  x_mean <- mean(x_vec2); x_vec1 <- x_vec1- x_mean; x_vec2 <- x_vec2 - x_mean
+  x_sd <- sd(x_vec2); x_vec1 <- x_vec1/x_sd; x_vec2 <- x_vec2/x_sd
+  y_mean <- mean(y_vec2); y_vec1 <- y_vec1- y_mean; y_vec2 <- y_vec2 - y_mean
+  y_sd <- sd(y_vec2); y_vec1 <- y_vec1/y_sd; y_vec2 <- y_vec2/y_sd
+  
+  plot(x = x_vec1[idx], y = y_vec1[idx],
+       pch = 16, col = color_vec_trans[idx], cex = 0.75,
+       xlim = quantile(x_vec1, probs = c(0.005, 0.995)),
+       ylim = quantile(y_vec1, probs = c(0.005, 0.995)),
+       xlab = "", ylab = "",
+       xaxt = "n", yaxt = "n", bty = "n")
+  axis(1, cex.axis = 1.25, cex.lab = 1.25, lwd = 2)
+  axis(2, cex.axis = 1.25, cex.lab = 1.25, lwd = 2)
+  
+  points(x = x_vec2[idx], 
+         y = y_vec2[idx], 
+         pch = 16, col = "white", cex = 2)
+  points(x = rev(x_vec2), 
+         y = rev(y_vec2), 
+         pch = 16, col = rev(color_vec), cex = 1)
+  
+  points(x = x_vec2[1], 
+         y = y_vec2[1],
+         pch = 16, col = "white", cex = 4)
+  points(x = x_vec2[1], 
+         y = y_vec2[1], 
+         pch = 16, col = color_vec[1], cex = 3)
+  
+  x_right <- mean(x_vec1[x_vec1 >= quantile(x_vec1, probs = 0.9)])
+  x_left <- mean(x_vec1[x_vec1 <= quantile(x_vec1, probs = 0.1)])
+  y_top <- mean(y_vec1[y_vec1 >= quantile(y_vec1, probs = 0.9)])
+  y_bot <- mean(y_vec1[y_vec1 <= quantile(y_vec1, probs = 0.1)])
+  
+  slope <- (y_top-y_bot)/(x_right-x_left)
+  intercept <- y_top - slope*x_right
+  x_left2 <- -1e4; x_right2 <- 1e4
+  y_bot2 <- slope*x_left2+intercept; y_top2 <- slope*x_right2+intercept
+  lines(c(x_right2,x_left2), c(y_top2, y_bot2), lwd = 2, lty = 2)
+  graphics.off()
+}
+
+
+for(gene in main_genes){
+  png(paste0("../../out/figures/main/10x_greenleaf_leafplot_slides_seuratGActivity_original_", gene, ".png"),
+      height = 1500, width = 1500, units = "px", res = 500)
+  par(mar = c(2.5,2.5,0.5,0.5))
+  set.seed(10)
+  idx <- sample(1:n)
+  
+  x_vec1 <- atac_mat[,paste0("ATAC-", gene)]
+  x_vec2 <- pred_atac_mat[,paste0("ATAC-", gene)]
+  y_vec1 <- rna_mat[,gene]
+  y_vec2 <- pred_rna_mat[,gene]
+  
+  x_mean <- mean(x_vec2); x_vec1 <- x_vec1- x_mean; x_vec2 <- x_vec2 - x_mean
+  x_sd <- sd(x_vec2); x_vec1 <- x_vec1/x_sd; x_vec2 <- x_vec2/x_sd
+  y_mean <- mean(y_vec2); y_vec1 <- y_vec1- y_mean; y_vec2 <- y_vec2 - y_mean
+  y_sd <- sd(y_vec2); y_vec1 <- y_vec1/y_sd; y_vec2 <- y_vec2/y_sd
+  
+  plot(x = x_vec1[idx], y = y_vec1[idx],
+       pch = 16, col = color_vec_trans[idx], cex = 0.75,
+       xlim = quantile(x_vec1, probs = c(0.005, 0.995)),
+       ylim = quantile(y_vec1, probs = c(0.005, 0.995)),
+       xlab = "", ylab = "",
+       xaxt = "n", yaxt = "n", bty = "n")
+  axis(1, cex.axis = 1.25, cex.lab = 1.25, lwd = 2)
+  axis(2, cex.axis = 1.25, cex.lab = 1.25, lwd = 2)
+  
+  points(x = x_vec2[idx], 
+         y = y_vec2[idx], 
+         pch = 16, col = "white", cex = 2)
+  points(x = rev(x_vec2), 
+         y = rev(y_vec2), 
+         pch = 16, col = rev(color_vec), cex = 1)
+  
+  points(x = x_vec2[1], 
+         y = y_vec2[1],
+         pch = 16, col = "white", cex = 4)
+  points(x = x_vec2[1], 
+         y = y_vec2[1], 
+         pch = 16, col = color_vec[1], cex = 3)
+  
+  x_right <- mean(x_vec1[x_vec1 >= quantile(x_vec1, probs = 0.9)])
+  x_left <- mean(x_vec1[x_vec1 <= quantile(x_vec1, probs = 0.1)])
+  y_top <- mean(y_vec1[y_vec1 >= quantile(y_vec1, probs = 0.9)])
+  y_bot <- mean(y_vec1[y_vec1 <= quantile(y_vec1, probs = 0.1)])
+  
+  slope <- (y_top-y_bot)/(x_right-x_left)
+  intercept <- y_top - slope*x_right
+  x_left2 <- -1e4; x_right2 <- 1e4
+  y_bot2 <- slope*x_left2+intercept; y_top2 <- slope*x_right2+intercept
+  lines(c(x_right2,x_left2), c(y_top2, y_bot2), lwd = 2, lty = 2)
   graphics.off()
 }
 

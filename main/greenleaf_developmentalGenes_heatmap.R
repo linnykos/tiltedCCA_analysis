@@ -25,12 +25,36 @@ x_vec2 <- greenleaf$pseudotime[lineage_idx2[ordering2]]
 names(x_vec1) <- NULL
 names(x_vec2) <- NULL
 
+# construct the matrix that we'll be doing changepoints on
+cell_vec <- colnames(greenleaf)[sort(unique(c(lineage_idx1, lineage_idx2)))]
+tmp_mat <- greenleaf[["SCT"]]@data[sort(unique(c(greenleaf[["SCT"]]@var.features, selected_variables))),cell_vec]
+tmp_mat <- t(as.matrix(tmp_mat))
+gene_vec <- sort(unique(c(colnames(tmp_mat)[which(matrixStats::colSds(tmp_mat) >= 0.01)], selected_variables)))
+tmp_mat <- tmp_mat[,gene_vec]
+tmp_mat <- t(scale(tmp_mat))
+svd_res <- irlba::irlba(tmp_mat, k = 50)
+full_mat <- tcrossprod(eSVD2:::.mult_mat_vec(svd_res$u, svd_res$d), svd_res$v)
+rownames(full_mat) <- gene_vec
+colnames(full_mat) <- cell_vec
+
+# threshold the values
+for(j in 1:nrow(full_mat)){
+  max_val <- quantile(full_mat[j,], probs = .9)
+  min_val <- quantile(full_mat[j,], probs = .1)
+  if(abs(max_val - min_val) <= .1){
+    max_val <- quantile(full_mat[j,], probs = .95)
+    min_val <- quantile(full_mat[j,], probs = .05)
+  }
+  full_mat[j,] <- pmax(pmin(full_mat[j,], max_val), min_val)
+  full_mat[j,] <- (full_mat[j,] - min_val)/(max_val - min_val)
+}
+
 variable_summary <- sapply(1:length(selected_variables), function(i){
   print(paste0("Working on gene ", i, " out of ", length(selected_variables)))
   gene <- selected_variables[i]
   
-  y_vec1 <- greenleaf[["SCT"]]@data[gene,lineage_idx1[ordering1]]
-  y_vec2 <- greenleaf[["SCT"]]@data[gene,lineage_idx2[ordering2]]
+  y_vec1 <- full_mat[gene,colnames(greenleaf)[lineage_idx1[ordering1]]]
+  y_vec2 <- full_mat[gene,colnames(greenleaf)[lineage_idx2[ordering2]]]
   names(y_vec1) <- NULL
   names(y_vec2) <- NULL
   
@@ -45,12 +69,15 @@ variable_summary <- sapply(1:length(selected_variables), function(i){
   pseudotime2 <- np_res2$x[which.max(np_res2$p[,1,1])]
   
   if(max_val1 > max_val2){
-    return(c(Lineage = 1, pseudotime = pseudotime1))
+    return(c(Lineage = 1, pseudotime = pseudotime1, 
+             max_val1 = max_val1, max_val2 = max_val2))
   } else {
-    return(c(Lineage = 2, pseudotime = pseudotime2))
+    return(c(Lineage = 2, pseudotime = pseudotime2, 
+             max_val1 = max_val1, max_val2 = max_val2))
   }
 })
 variable_summary <- t(variable_summary)
+table(variable_summary[,"Lineage"])
 rownames(variable_summary) <- selected_variables
 
 sapply(unique(greenleaf$celltype), function(celltype){
@@ -68,12 +95,10 @@ for(i in 1:nrow(variable_summary)){
 }
 
 # extract the relevant matrix
-lineage_idx_all <- sort(unique(c(lineage_idx1, lineage_idx2)))
-heatmap_mat <- greenleaf[["SCT"]]@data[selected_variables,lineage_idx_all]
-heatmap_mat <- as.matrix(heatmap_mat)
-
-# normalize the cells in the matrix
-heatmap_mat <- scale(t(heatmap_mat))
+lineage_name_all <- colnames(greenleaf)[sort(unique(c(lineage_idx1, lineage_idx2)))]
+heatmap_mat <- full_mat[selected_variables,lineage_name_all]
+# heatmap_mat <- greenleaf[["SCT"]]@data[selected_variables,lineage_idx_all]
+heatmap_mat <- t(as.matrix(heatmap_mat))
 
 # order the genes in the matrix
 tmp1 <- which(variable_summary[,"Lineage"] == 1)
@@ -107,46 +132,64 @@ tmp2 <- which(df_mat[,"Lineage"] == 2)
 cell_ordering2 <- rownames(df_mat)[tmp2[order(df_mat[tmp2,"pseudotime"], decreasing = F)]]
 cell_ordering <- c(cell_ordering1, cell_ordering2)
 
-# threshold the values
-heatmap_mat_threshold <- heatmap_mat
-for(j in 1:ncol(heatmap_mat_threshold)){
-  max_val <- quantile(heatmap_mat_threshold[,j], probs = .9)
-  min_val <- quantile(heatmap_mat_threshold[,j], probs = .1)
-  if(abs(max_val - min_val) <= .1){
-    max_val <- quantile(heatmap_mat_threshold[,j], probs = .95)
-    min_val <- quantile(heatmap_mat_threshold[,j], probs = .05)
-  }
-  heatmap_mat_threshold[,j] <- pmax(pmin(heatmap_mat_threshold[,j], max_val), min_val)
-}
-
-heatmap_mat_threshold <- heatmap_mat_threshold[,which(apply(heatmap_mat_threshold, 2, sd) > 0.1)]
-
 # split the matrices
-scaling_val <- 0.5
-heatmap_mat1 <- t(heatmap_mat_threshold[cell_ordering1,])
+scaling_val <- 1
+heatmap_mat1 <- t(heatmap_mat[cell_ordering1,])
 heatmap_mat1 <- sign(heatmap_mat1) * abs(heatmap_mat1)^scaling_val #^scaling_grid[which.max(scaling_quality)]
-heatmap_mat2 <- t(heatmap_mat_threshold[cell_ordering2,])
+heatmap_mat2 <- t(heatmap_mat[cell_ordering2,])
 heatmap_mat2 <- sign(heatmap_mat2) * abs(heatmap_mat2)^scaling_val # ^scaling_grid[which.max(scaling_quality)]
 
+# # manual ordering
+all(rownames(heatmap_mat1)[1:length(gene_ordering1)] == gene_ordering1)
+all(rownames(heatmap_mat2)[(length(gene_ordering1)+1):nrow(heatmap_mat2)] == gene_ordering2)
+
+heatmap_mat1b <- heatmap_mat1; heatmap_mat2b <- heatmap_mat2
+gene_ordering1b <- gene_ordering1; gene_ordering2b <- gene_ordering2
+heatmap_mat1b[(6:10),] <- heatmap_mat1b[c(10,6:9),]
+heatmap_mat2b[(6:10),] <- heatmap_mat2b[c(10,6:9),]
+rownames(heatmap_mat1b)[6:10] <- rownames(heatmap_mat1b)[c(10,6:9)]
+rownames(heatmap_mat2b) <- rownames(heatmap_mat1b)
+gene_ordering1b[6:10] <- gene_ordering1b[c(10,6:9)]
+
+heatmap_mat1b[(11:14),] <- heatmap_mat1b[c(14,11:13),]
+heatmap_mat2b[(11:14),] <- heatmap_mat2b[c(14,11:13),]
+rownames(heatmap_mat1b)[11:14] <- rownames(heatmap_mat1b)[c(14,11:13)]
+rownames(heatmap_mat2b) <- rownames(heatmap_mat1b)
+gene_ordering1b[(11:14)] <- gene_ordering1b[c(14,11:13)]
+
+gene_ordering2b <- c(gene_ordering2b[1], gene_ordering1b[c(38:40, 35)], gene_ordering2b[-1])
+gene_ordering1b <- gene_ordering1b[c(1:34,36:37)]
+heatmap_mat1b[(38:41),] <- heatmap_mat1b[c(41,38:40),]
+heatmap_mat2b[(38:41),] <- heatmap_mat2b[c(41,38:40),]
+rownames(heatmap_mat1b)[(38:41)] <- rownames(heatmap_mat1b)[c(41,38:40)]
+rownames(heatmap_mat2b) <- rownames(heatmap_mat1b)
+heatmap_mat1b[c(1:41),] <- heatmap_mat1b[c(1:34,36:41,35),]
+heatmap_mat2b[c(1:41),] <- heatmap_mat2b[c(1:34,36:41,35),]
+rownames(heatmap_mat1b)[c(1:41)] <- rownames(heatmap_mat1b)[c(1:34,36:41,35)]
+rownames(heatmap_mat2b) <- rownames(heatmap_mat1b)
+all(rownames(heatmap_mat1b)[1:length(gene_ordering1b)] == gene_ordering1b)
+all(rownames(heatmap_mat2b)[(length(gene_ordering1b)+1):nrow(heatmap_mat2b)] == gene_ordering2b)
+
 # set up the color palette
-num_color <- 100
-base_palette <- RColorBrewer::brewer.pal(11, name = "RdYlBu")
-color_palette <- rev(grDevices::colorRampPalette(base_palette)(100))
-color_breaks <- seq(min(c(heatmap_mat1, heatmap_mat2)), 
-                    max(c(heatmap_mat1, heatmap_mat2)), 
-                    length.out = num_color+1)
+base_palette <- rev(RColorBrewer::brewer.pal(11, name = "RdYlBu"))
+color_palette <- c(grDevices::colorRampPalette(base_palette[1:5])(5),
+                   grDevices::colorRampPalette(base_palette[5:8])(70),
+                   grDevices::colorRampPalette(base_palette[8:11])(25))
+color_breaks <- seq(min(c(heatmap_mat1b, heatmap_mat2b)), 
+                    max(c(heatmap_mat1b, heatmap_mat2b)), 
+                    length.out = length(color_palette)+1)
 
 height <- 1500
 png(paste0("../../../out/figures/main/10x_greenleaf_developmentalGenes_heatmap1.png"),
     height = height, width = round(height*1.8/1.2*.8), units = "px", res = 500)
 par(mar = c(0,0,0,0))
-image(tiltedCCA:::.rotate(heatmap_mat1), xaxs = "i", yaxs = "i",
+image(tiltedCCA:::.rotate(heatmap_mat1b), xaxs = "i", yaxs = "i",
       col = color_palette, breaks = color_breaks,
       main = "",
       xaxt = "n", yaxt = "n", bty = "n", xlab = "", ylab = "")
 
-num_down <- length(which(gene_ordering1 %in% rownames(heatmap_mat1)))
-num_total <- nrow(heatmap_mat1)
+num_down <- length(which(gene_ordering1b %in% rownames(heatmap_mat1b)))
+num_total <- nrow(heatmap_mat1b)
 y_val <- 1-num_down*(1/(num_total-1))+1/(2*(num_total-1))
 lines(x = c(0,1), y = rep(y_val, 2), col = "white", lwd = 4)
 lines(x = c(0,1), y = rep(y_val, 2), lty = 2, lwd = 3.5)
@@ -155,50 +198,68 @@ graphics.off()
 png(paste0("../../../out/figures/main/10x_greenleaf_developmentalGenes_heatmap2.png"),
     height = height, width = round(height*1.8/1.2*.2), units = "px", res = 500)
 par(mar = c(0,0,0,0))
-image(tiltedCCA:::.rotate(heatmap_mat2),
+image(tiltedCCA:::.rotate(heatmap_mat2b),
       col = color_palette, breaks = color_breaks,
       main = "",
       xaxt = "n", yaxt = "n", bty = "n", xlab = "", ylab = "")
 
-num_down <- length(which(gene_ordering1 %in% rownames(heatmap_mat1)))
-num_total <- nrow(heatmap_mat1)
+num_down <- length(which(gene_ordering1b %in% rownames(heatmap_mat2b)))
+num_total <- nrow(heatmap_mat2b)
 y_val <- 1-num_down*(1/(num_total-1))+1/(2*(num_total-1))
 lines(x = c(0,1), y = rep(y_val, 2), col = "white", lwd = 4)
 lines(x = c(0,1), y = rep(y_val, 2), lty = 2, lwd = 3.5)
 graphics.off()
 
-gene_ordering1b <- gene_ordering1[which(gene_ordering1 %in% rownames(heatmap_mat1))]
-gene_ordering2b <- gene_ordering2[which(gene_ordering2 %in% rownames(heatmap_mat1))]
+gene_ordering1c <- rownames(heatmap_mat1b)[which(rownames(heatmap_mat1b) %in% gene_ordering1b)]
+gene_ordering2c <- rownames(heatmap_mat1b)[which(rownames(heatmap_mat1b) %in% gene_ordering2b)]
 sink("../../../out/main/10x_greenleaf_developmentalGenes_heatmapOrder.txt")
-for(i in 1:length(gene_ordering1b)){
-  cat(paste0(i, ": ", gene_ordering1b[i]))
+for(i in 1:length(gene_ordering1c)){
+  cat(paste0(i, ": ", gene_ordering1c[i]))
   cat("\n")
 }
 cat("\n")
 cat("====")
 cat("\n")
-for(i in 1:length(gene_ordering2b)){
-  cat(paste0(i+length(gene_ordering1b), ": ", gene_ordering2b[i]))
+for(i in 1:length(gene_ordering2c)){
+  cat(paste0(i+length(gene_ordering1c), ": ", gene_ordering2c[i]))
   cat("\n")
 }
 sink()
+
+sink("../../../out/main/10x_greenleaf_developmentalGenes_heatmapOrder_gene_unformatted.txt")
+for(x in rownames(heatmap_mat1b)){
+  cat(paste0(x, "\n"))
+}
+sink()
+
+sink("../../../out/main/10x_greenleaf_developmentalGenes_heatmapOrder_cell1_unformatted.txt")
+for(x in colnames(heatmap_mat1b)){
+  cat(paste0(x, "\n"))
+}
+sink()
+
+sink("../../../out/main/10x_greenleaf_developmentalGenes_heatmapOrder_cell2_unformatted.txt")
+for(x in colnames(heatmap_mat2b)){
+  cat(paste0(x, "\n"))
+}
+sink()
+
 
 ##################################
 
 # steady state plot
 # load("../../../out/main/10x_greenleaf_steadystate.RData")
-load("../../out/main/10x_greenleaf_steadystate.RData")
+load("../../../out/main/10x_greenleaf_steadystate.RData")
 
-names(alignment_vec) <- colnames(greenleaf)
 alignment_vec1 <- alignment_vec[colnames(heatmap_mat1)]
 df1 <- data.frame(y = alignment_vec1, x = 1:length(alignment_vec1))
 np_res1 <- npregfast::frfast(y ~ x, data = df1)
 col <- viridis::viridis(5)[3]
 
 height <- 350
-png(paste0("../../out/figures/main/10x_greenleaf_steadystate_forHeatmap1.png"),
-    height = height, width = height*1800/360, units = "px", res = 500)
-par(mar = c(0.1,1,0.1,0))
+png(paste0("../../../out/figures/main/10x_greenleaf_steadystate_forHeatmap1.png"),
+    height = height, width = height*2000/360, units = "px", res = 500)
+par(mar = c(0.1,1,0.1,0), bg = NA)
 y <- np_res1$p[,1,1]; n <- length(y)
 ylim <- quantile(alignment_vec1, probs = c(0.1,0.95))
 ylim[1] <- min(ylim[1], min(y)); ylim[2] <- max(ylim[2], max(y))
@@ -208,7 +269,7 @@ tmp[which(tmp >= ylim[2]-tol)] <- NA
 plot(x = seq(0, 1, length = length(alignment_vec1)),
      y = tmp, 
      ylim = ylim,
-     col = rgb(0.5, 0.5, 0.5, 0.1), main = "", 
+     col = rgb(0.5, 0.5, 0.5, 0.2), main = "", 
      xaxt = "n", yaxt = "n", bty = "n", xlab = "", ylab = "",
      pch = 16)
 lines(x = seq(0, 1, length = n), y = y, lwd = 9, col = "white")
@@ -234,16 +295,16 @@ x_subset <- x_full[colnames(heatmap_mat2)]
 predicted_y <- stats::predict(np_res2, newdata = data.frame(x = x_subset))
 predicted_y <- predicted_y$Estimation[,"Pred"]
 
-png(paste0("../../out/figures/main/10x_greenleaf_steadystate_forHeatmap2.png"),
-    height = height, width = height*1700/360/.8*.2, units = "px", res = 500)
-par(mar = c(0.1,0.1,0.1,0))
+png(paste0("../../../out/figures/main/10x_greenleaf_steadystate_forHeatmap2.png"),
+    height = height, width = height*1900/360/.8*.2, units = "px", res = 500)
+par(mar = c(0.1,0.1,0.1,0), bg = NA)
 n <- length(x_subset)
 tmp <- alignment_vec2_subset; tol <- .01
 tmp[which(tmp <= ylim[1]+tol)] <- NA
 tmp[which(tmp >= ylim[2]-tol)] <- NA
 plot(x = seq(0, 1, length = n),
      y = tmp, 
-     col = rgb(0.5, 0.5, 0.5, 0.1), main = "", 
+     col = rgb(0.5, 0.5, 0.5, 0.2), main = "", 
      ylim = ylim,
      xaxt = "n", yaxt = "n", bty = "n", xlab = "", ylab = "",
      pch = 16)

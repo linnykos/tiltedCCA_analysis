@@ -33,6 +33,16 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_RNA
 
 ############################
 
+plot1 <- Seurat::DimPlot(mbrain, reduction = "umap.ga",
+                         group.by = "label_Savercat", 
+                         cols = col_palette)
+plot1 <- plot1 + Seurat::NoLegend() + Seurat::NoAxes()
+plot1 <- plot1 + ggplot2::ggtitle("")
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/10x_mouseembryo_geneActivity-umap_cleaned.png"),
+                plot1, device = "png", width = 3, height = 3, units = "in",
+                dpi = 500)
+
 plot1 <- Seurat::DimPlot(mbrain, reduction = "common_tcca",
                          group.by = "label_Savercat", 
                          cols = col_palette)
