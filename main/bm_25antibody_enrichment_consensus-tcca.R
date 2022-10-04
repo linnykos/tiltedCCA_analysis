@@ -63,6 +63,8 @@ names(x_vec) <- cell_enrichment_res$enrichment_common$df[,"celltype"]
 y_vec <- consensus_enrichment$enrichment$df[,"value"]
 names(y_vec) <- consensus_enrichment$enrichment$df[,"celltype"]
 
+round(cbind(x_vec, y_vec),2)
+
 png("../../../out/figures/main/bm_25antibody_consensusPCA-tCCA_enrichment.png",
     height = 2500, width = 2500, res = 500, units = "px")
 par(mar = c(4, 4, 0.5, 0.5))
@@ -70,19 +72,78 @@ plot(NA, xlim = c(0,1), ylim = c(0,1),
      main = "", xlab = "", ylab = "",
      xaxt = "n", yaxt = "n", bty = "n", asp = T)
 for(x in seq(0,1,by=0.1)){
-  lines(rep(x,2), c(-10,10), col = "gray", lty = 3)
+  lines(rep(x,2), c(-10,10), col = "gray", lty = 3, lwd = 2)
 }
 for(y in seq(0,1,by=0.1)){
-  lines(c(-10,10), rep(y,2), col = "gray", lty = 3)
+  lines(c(-10,10), rep(y,2), col = "gray", lty = 3, lwd = 2)
 }
-lines(c(-10,10), c(-10,10), col = 2, lty = 2, lwd = 2)
+lines(c(-10,10), c(-10,10), col = 2, lty = 2, lwd = 3)
 
 col_vec <- col_palette[names(x_vec)]
 points(x_vec, y_vec, col = 1, cex = 4, pch = 16)
 points(x_vec, y_vec, col = "white", cex = 3, pch = 16)
 points(x_vec, y_vec, col = col_vec, cex = 2.5, pch = 16)
 
-axis(1, cex.axis = 1.25, cex.lab = 1.25, lwd = 2)
-axis(2, cex.axis = 1.25, cex.lab = 1.25, lwd = 2)
+axis(1, cex.axis = 1.25, cex.lab = 1.25)
+axis(2, cex.axis = 1.25, cex.lab = 1.25)
+
+graphics.off()
+
+###########################
+
+
+rna_dimred <- tiltedCCA:::.mult_mat_vec(multiSVD_obj$svd_1$u, multiSVD_obj$svd_1$d)
+rna_enrichment <- tiltedCCA:::postprocess_cell_enrichment(
+  input_obj = rna_dimred, 
+  membership_vec = membership_vec, 
+  num_neigh = multiSVD_obj$param$snn_num_neigh,
+  bool_cosine = multiSVD_obj$param$snn_bool_cosine,
+  bool_intersect = multiSVD_obj$param$snn_bool_intersect,
+  max_subsample = 1000,
+  min_deg = multiSVD_obj$param$snn_min_deg,
+  verbose = 1
+)
+
+adt_dimred <- tiltedCCA:::.mult_mat_vec(multiSVD_obj$svd_2$u, multiSVD_obj$svd_2$d)
+adt_enrichment <- tiltedCCA:::postprocess_cell_enrichment(
+  input_obj = adt_dimred, 
+  membership_vec = membership_vec, 
+  num_neigh = multiSVD_obj$param$snn_num_neigh,
+  bool_cosine = multiSVD_obj$param$snn_bool_cosine,
+  bool_intersect = multiSVD_obj$param$snn_bool_intersect,
+  max_subsample = 1000,
+  min_deg = multiSVD_obj$param$snn_min_deg,
+  verbose = 1
+)
+
+
+x_vec <- rna_enrichment$enrichment$df[,"value"]
+names(x_vec) <- rna_enrichment$enrichment$df[,"celltype"]
+y_vec <- adt_enrichment$enrichment$df[,"value"]
+names(y_vec) <- adt_enrichment$enrichment$df[,"celltype"]
+
+round(cbind(x_vec, y_vec),2)
+
+png("../../../out/figures/main/bm_25antibody_rna-adt_enrichment.png",
+    height = 2500, width = 2500, res = 500, units = "px")
+par(mar = c(4, 4, 0.5, 0.5))
+plot(NA, xlim = c(0,1), ylim = c(0,1),
+     main = "", xlab = "", ylab = "",
+     xaxt = "n", yaxt = "n", bty = "n", asp = T)
+for(x in seq(0,1,by=0.1)){
+  lines(rep(x,2), c(-10,10), col = "gray", lty = 3, lwd = 2)
+}
+for(y in seq(0,1,by=0.1)){
+  lines(c(-10,10), rep(y,2), col = "gray", lty = 3, lwd = 2)
+}
+lines(c(-10,10), c(-10,10), col = 2, lty = 2, lwd = 3)
+
+col_vec <- col_palette[names(x_vec)]
+points(x_vec, y_vec, col = 1, cex = 4, pch = 16)
+points(x_vec, y_vec, col = "white", cex = 3, pch = 16)
+points(x_vec, y_vec, col = col_vec, cex = 2.5, pch = 16)
+
+axis(1, cex.axis = 1.25, cex.lab = 1.25)
+axis(2, cex.axis = 1.25, cex.lab = 1.25)
 
 graphics.off()

@@ -23,6 +23,9 @@ cbind(cell_enrichment_res$enrichment_common$df[,1], round(cell_enrichment_res$en
 cbind(cell_enrichment_res$enrichment_distinct_1$df[,1], round(cell_enrichment_res$enrichment_distinct_1$df[,2],2))
 cbind(cell_enrichment_res$enrichment_distinct_2$df[,1], round(cell_enrichment_res$enrichment_distinct_2$df[,2],2))
 
+cbind(cell_enrichment_res$enrichment_common$df[,c(1:2)], cell_enrichment_res$enrichment_distinct_1$df[,2])
+cbind(cell_enrichment_res$enrichment_common$df[,c(1:2)], cell_enrichment_res$enrichment_distinct_2$df[,2])
+
 save(cell_enrichment_res, 
      date_of_run, session_info,
      file = "../../../out/main/citeseq_bm25_cell_enrichment.RData")

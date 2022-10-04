@@ -16,6 +16,7 @@ num_celltypes <- ceiling(sqrt(2*length(gene_de_list)))
 combn_mat <- combn(num_celltypes, 2)
 stopifnot(ncol(combn_mat) == length(gene_de_list))
 gene_de_list <- list(de_list = gene_de_list, combn_mat = combn_mat, level_vec = 1:num_celltypes)
+
 ############
 
 Seurat::DefaultAssay(bm) <- "RNA"

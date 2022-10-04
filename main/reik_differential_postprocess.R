@@ -3,8 +3,10 @@ library(Seurat)
 library(Signac)
 library(tiltedCCA)
 
+load("../../../out/main/10x_reik_differential2.RData")
+cellcycle_de_list <- gene_de_list
 load("../../../out/main/10x_reik_differential.RData")
-load("../../../out/main/10x_reik_tiltedcca.RData")
+load("../../../out/main/10x_reik_tiltedcca2.RData")
 
 set.seed(10)
 date_of_run <- Sys.time()
@@ -36,12 +38,38 @@ logpval_vec <- sapply(1:length(gene_names), function(k){
 names(logpval_vec) <- Seurat::VariableFeatures(reik)
 logpval_vec <- pmin(logpval_vec, 300)
 
+gene_names2 <- rownames(cellcycle_de_list$de_list[[1]])
+logpval_vec2 <- sapply(1:length(gene_names2), function(k){
+  if(k %% floor(length(gene_names2)/10) == 0) cat('*')
+  gene <- gene_names2[k]
+  
+  # cycle through all the celltypes
+  celltype_vec <- sapply(1:length(cellcycle_de_list$level_vec), function(i){
+    idx <- which(cellcycle_de_list$combn_mat == i, arr.ind = T)[,2]
+    vec <-  sapply(idx, function(j){
+      idx <- which(rownames(cellcycle_de_list$de_list[[j]]) == gene)
+      if(length(idx) == 0) return(1)
+      cellcycle_de_list$de_list[[j]][idx, "p_val"]
+    })
+    stats::quantile(vec, probs = 0.75)
+  })
+  names(celltype_vec) <- cellcycle_de_list$level_vec
+  # round(celltype_vec, 2)
+  
+  max(-log10(celltype_vec))
+})
+names(logpval_vec2) <- gene_names2
+logpval_vec2 <- pmin(logpval_vec2, 300)
+logpval_vec2 <- logpval_vec2[which(!names(logpval_vec2) %in% names(logpval_vec))]
+logpval_vec <- c(logpval_vec, logpval_vec2)
+
 rsquare_vec <- tiltedCCA:::postprocess_modality_alignment(input_obj = multiSVD_obj,
                                                           bool_use_denoised = T,
                                                           seurat_obj = reik,
                                                           input_assay = 1,
                                                           seurat_assay = "RNA",
                                                           seurat_slot = "data")
+rsquare_vec <- rsquare_vec[names(logpval_vec)]
 all(names(logpval_vec) == names(rsquare_vec))
 stats::median(rsquare_vec[which(logpval_vec >= 10)])
 
@@ -102,6 +130,9 @@ graphics.off()
 
 #################3
 
+
+load("../../../out/main/10x_mouseembryo_tiltedcca.RData")
+
 names(rsquare_vec) <- toupper(names(rsquare_vec))
 names(logpval_vec) <- toupper(names(logpval_vec))
 # gene_names <- toupper(gene_names)
@@ -113,7 +144,7 @@ df <- read.csv("~/project/tiltedCCA/data/mouse_cell_cycling/41467_2022_30545_MOE
                header = F)
 Cell_cycle <- toupper(df[,1])
 Cell_cycle <- intersect(Cell_cycle, names(rsquare_vec))
-
+Cell_cycle <- intersect(Cell_cycle, toupper(mbrain[["SCT"]]@var.features))
 
 png("../../../out/figures/main/10x_reik_differential_gene_Cell_cycle.png",
     height = 3500, width = 2500, res = 500, units = "px")
