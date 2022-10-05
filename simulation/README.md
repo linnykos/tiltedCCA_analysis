@@ -9,8 +9,8 @@ last section of this README of all the system/package dependencies used when cre
 
 ## Simulation 1: Modality 1 separates cells into 3 clusters, and Modality 2 does not
 
-|                                                                    |
-|--------------------------------------------------------------------|
+|                                                     |
+|-----------------------------------------------------|
 | ![simulation1_data.png](fig/simulation1_data.png) |
 
 ## Simulation 2: Both modalities separate the 5 cell-types into 3 clusters in different ways
