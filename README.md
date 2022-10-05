@@ -222,9 +222,15 @@ The following shows the suggested package versions that the developer (GitHub us
 
 # References
 [1] Stuart, T. et al. Comprehensive integration of single-cell data. Cell 177, 1888–1902 (2019).
+
 [2] Triana, S. et al. Single-cell proteo-genomic reference maps of the hematopoietic system enable the purification and massive profiling of precisely defined cell states. Nature immunology 22, 1577–1589 (2021).
+
 [3] Hao, Y. et al. Integrated analysis of multimodal single-cell data. Cell 184, 3573–3587 (2021).
+
 [4] Trevino, A. E. et al. Chromatin and gene-regulatory dynamics of the developing human cerebral cortex at single-cell resolution. Cell (2021).
+
 [5] Argelaguet, R. et al. Decoding gene regulation in the mouse embryo using single-cell multi-omics. bioRxiv (2022).
+
 [6] Hounkpe, B. W., Chenou, F., de Lima, F. & De Paula, E. V. HRT atlas v1. 0 database: Redefining human and mouse housekeeping genes and candidate reference transcripts by mining massive rna-seq datasets. Nucleic Acids Research 49, D947–D955 (2021).
+
 [7] Riba, A. et al. Cell cycle gene regulation dynamics revealed by RNA velocity and deep-learning. Nature Communications 13, 1–13 (2022).
