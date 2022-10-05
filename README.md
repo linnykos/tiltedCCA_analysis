@@ -9,6 +9,12 @@ This code was developed and tested primarily on R 4.1.2. on a Macbook (macOS 11.
 The data analysis requires several additional packages in order to run all the analyses, in addition to those needed to install `tiltedCCA`. These include `ArchR`, `igraph`, `MAST`, `MOFA2`,  `Signac`. See the 
 last section of this README to see where (i.e., CRAN, Bioconductor, or GitHub) to download all such packages.
 
+# Small simulated dataset to demo the software
+
+# Data
+
+# Reproducing the results
+
 # Setup
 
 The following shows the suggested package versions that the developer (GitHub username: linnykos) used when developing the Tilted-CCA package.
