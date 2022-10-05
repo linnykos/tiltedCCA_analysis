@@ -17,9 +17,9 @@ See https://github.com/linnykos/tiltedCCA_analysis/tree/master/simulation for th
 
 All data used in our paper publicly available. 
 * The human bone marrow CITE-seq data[1] is available in the R package `SeuratData` under `bmcite`.
-* The human bone marrow Abseq data[2] (both, either equipped with the whole transcriptome or of only 461 genes) is availabe at https://figshare.com/projects/Single-cell_proteo-genomic\_reference_maps\_of\_the\_human\_hematopoietic\_system/94469, under `WTA\_projected.rds` or `Healthy.rds` respectively. 
+* The human bone marrow Abseq data[2] (both, either equipped with the whole transcriptome or of only 461 genes) is availabe at https://figshare.com/projects/Single-cell_proteo-genomic_reference_maps_of_the_human_hematopoietic_system/94469, under `WTA_projected.rds` or `Healthy.rds` respectively. 
 * The human PBMC CITE-seq data[3] is available at https://atlas.fredhutch.org/nygc/multimodal-pbmc/.
-* The human PBMC 10x Multiome data is available at https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc\_granulocyte_sorted_10k. 
+* The human PBMC 10x Multiome data is available at https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc_granulocyte_sorted_10k. 
 * The human brain development 10x Multiome data[4] is available at https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE162170 and https://github.com/GreenleafLab/brainchromatin.
 * The mouse brain development 10x Multiome data is available at https://www.10xgenomics.com/resources/datasets/fresh-embryonic-e-18-mouse-brain-5-k-1-standard-2-0-0.
 * The mouse embryo development 10x Multiome data[5]
