@@ -69,7 +69,7 @@ while Modality 2 separates the cyan cells from the red+blue cells from the green
 
 Consensus PCA for this data cleanly separates all five cell-types. Again, quantifying "union of information" is a useful and complementary perspective to what Tilted-CCA does. The "union" gives perspective on what axes of variation are contained across both modalities, while Tilted-CCA's common embeddings gives perspective on what axes of variation are shared between both modalities.
 
-<img src="https://raw.githubusercontent.com/linnykos/tiltedCCA_analysis/master/simulation/fig/simulation1_consensuspca.png" width="400">
+<img src="https://raw.githubusercontent.com/linnykos/tiltedCCA_analysis/master/simulation/fig/simulation2_consensuspca.png" width="400">
 
 # Setup
 
