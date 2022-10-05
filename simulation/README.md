@@ -11,30 +11,71 @@ Broadly speaking, Tilted-CCA is a pipeline of 6 different function calls. The pr
 
 * **Step 1 (Initializing low-rank representation of each modality, `create_multiSVD`):** We compute the leading PCs of each modality here. There can be a different number of latent dimensions for each modality. Here, the additional parameters dictate how to compute the leading PCs (for example, should the features be scaled/center before or after the computing the PCs? Which PCs should be used downstream? This would be useful since for ATAC data, it is common to not use the first leading PC.)
 
+This typically looks like the following.
+```R
+multiSVD_obj <- tiltedCCA::create_multiSVD(mat_1 = mat_1, mat_2 = mat_2,
+                                            dims_1 = 1:2, dims_2 = 1:2,
+                                            center_1 = F, center_2 = F,
+                                            normalize_row = T,
+                                            normalize_singular_value = F,
+                                            recenter_1 = F, recenter_2 = F,
+                                            rescale_1 = F, rescale_2 = F,
+                                            scale_1 = F, scale_2 = F)
+```
+
 The output of this step is a `multiSVD` object, which will continually be updated as we feed it as input and get an updated object after each of the following function calls. It currently has elements `svd_1`, `svd_2`, `default_assay`, and `param`. 
 
 * **Step 2 (Passing helping information, `form_metacells`):** We pass (optional) large clustering structure or meta-cells here. The former is designed to help aid Tilted-CCA assess what the "intersection of information" is, and the latter is designed for handling large datasets with more than 10,000 cells. If no large structuring structure is needed, the practitioner can simply pass in `large_clustering_1=NULL` and `large_clustering_2=NULL`. If no meta-cells are needed, the practitioner can simply pass in `num_metacells=NULL`.
+
+
+This typically looks like the following.
+```R
+multiSVD_obj <- tiltedCCA::form_metacells(input_obj = multiSVD_obj,
+                                           large_clustering_1 = clustering_1, 
+                                           large_clustering_2 = clustering_2,
+                                           num_metacells = NULL)
+```
 
 The updated `multiSVD` object will now have an additional element: `metacell_obj`.
 
 * **Step 3 (Creating shared nearest neighbor (SNN) graphs, `compute_snns`):** We compute the SNN graphs for both modalities and the target common manifold (computed based on both modality's SNN graph). These graphs dictate how Tilted-CCA represents the information in each modality, and each node of the graph represents a cell/meta-cell. Here, the additional parameters dictate the specific details on how these graphs are constructed. The two important parameters `latent_k` (i.e., the dimensionality of the graph Laplacian eigenbases, which is used when optimizing the tilt) and `num_neigh` (i.e., the number of neighbors for each cell in either modality).
 
+This typically looks like the following.
+```R
+multiSVD_obj <- tiltedCCA::compute_snns(input_obj = multiSVD_obj,
+                                         latent_k = 2,
+                                         num_neigh = 10,
+                                         bool_cosine = T,
+                                         bool_intersect = T,
+                                         min_deg = 1)
+```
+
 The updated `multiSVD` object will now have additional elements: `snn_list` and `laplacian_list`.
 
 * **Step 4 (Initializing Tilted-CCA, `tiltedCCA`):** We compute the CCA between both modalities and initialize the tilt across all latent dimensions to a particular value. Recall that CCA's solution can be directly computed using the PC's from each modality. If there are different number of latent dimensions for each modality, Tilted-CCA will have a latent dimensionality (i.e., via CCA) equal to the smaller of the two.
+
+```R
+multiSVD_obj <- tiltedCCA::tiltedCCA(input_obj = multiSVD_obj)
+```
 
 The updated `multiSVD` object will now have additional elements: `cca_obj` and `tcca_obj`.
 
 * **Step 5 (Tuning the tilt across each latent dimension, `fine_tuning`):** We tune the tilt across each latent dimension. This is the main computational bottleneck of Tilted-CCA, as an optimization is performed cyclically (i.e., the tilt for each latent dimension is updated in sequence, with a few epochs cycling through all latent dimensions). 
 
+```R
+multiSVD_obj <- tiltedCCA::fine_tuning(input_obj = multiSVD_obj)
+```
+
 There is no new obvious element added to `multiSVD`, but the representation of the common and distinct embeddings is updated upon this function's completion. For example, `multiSVD_obj$tcca_obj$tilt_perc` now is a vector, denoting the tilt of the common vector for each latent dimension.
 
 * **Step 6 (Completing the decomposition, `tiltedCCA_decomposition`):** Given the tilts of common vectors across all latent dimensions, we now recover the full cell-by-feature decomposition of each modality. Here, the additional parameters dictate whether you want the decompositions to be cell-by-feature or cell-by-PC. The latter is desirable especially if you are analyzing ATAC data, where the cell-by-feature would be a dense matrix with many hundred-of-thousand features (which would be too memory intensive).
 
+```R
+multiSVD_obj <- tiltedCCA::tiltedCCA_decomposition(multiSVD_obj)
+```
+
 The updated `multiSVD` object will now have additional elements: `common_mat_1` and `distint_mat_1` (or `common_dimred_1` and `distinct_dimred_1` if `bool_modality_1_full=F`)
 and `common_mat_2` and `distint_mat_2` (or `common_dimred_2` and `distinct_dimred_2` if `bool_modality_2_full=F`)
-
-
 
 ## Simulation 1: Modality 1 separates cells into 3 clusters, and Modality 2 does not
 
