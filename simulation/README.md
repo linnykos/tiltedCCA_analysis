@@ -9,7 +9,7 @@ last section of this README of all the system/package dependencies used when cre
 
 Broadly speaking, Tilted-CCA is a pipeline of 6 different function calls. The procedure starts by assuming there are two data matrices, `mat_1` and `mat_2`, (either `matrix` or `dgCMatrix`) with the same number of rows (i.e., the same cells), but possibly different features. We advise making sure each row/column of either matrix has non-zero variance prior to using this pipeline.
 
-* Step 1 (Initializing low-rank representation of each modality, `create_multiSVD`): We compute the leading PCs of each modality here. There can be a different number of latent dimensions for each modality. Here, the additional parameters dictate how to compute the leading PCs (for example, should the features be scaled/center before or after the computing the PCs? Which PCs should be used downstream? This would be useful since for ATAC data, it is common to not use the first leading PC.)
+* **Step 1 (Initializing low-rank representation of each modality, `create_multiSVD`):** We compute the leading PCs of each modality here. There can be a different number of latent dimensions for each modality. Here, the additional parameters dictate how to compute the leading PCs (for example, should the features be scaled/center before or after the computing the PCs? Which PCs should be used downstream? This would be useful since for ATAC data, it is common to not use the first leading PC.)
 
 The output of this step is a `multiSVD` object, which will continually be updated as we feed it as input and get an updated object after each of the following function calls. It currently has elements `svd_1`, `svd_2`, `default_assay`, and `param`. 
 
