@@ -42,7 +42,7 @@ See https://github.com/linnykos/tiltedCCA_analysis/blob/master/simulation/simula
 
 The following shows each modality based on their leading 2 PCs respectively, where the cells are colored by the true cell-types.
 
-![simulation1_data.png](fig/simulation1_data.png)
+<img src="https://raw.githubusercontent.com/linnykos/tiltedCCA_analysis/master/simulation/fig/simulation1_data.png" width="48">
 
 The following shows Tilted-CCA's common (i.e., shared axes of variation between both modalities) and distinct (i.e., axes of variation unique to a modality, after the common axes have been accounted for) axes of variation, where the cells are colored by the true cell-types. Here, observe that the common embedding does not really contain information to separate the cell-types -- this is desirable, as all the cell-type separation information are unique to Modality 1 (hence, appearing in the Modality 1's distinct embedding). The common embedding demonstrates the "intersection of information."
 
