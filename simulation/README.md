@@ -11,7 +11,7 @@ last section of this README of all the system/package dependencies used when cre
 
 |                                                                    |
 |--------------------------------------------------------------------|
-| ![simulation1_data.png](fig/simulation1_data) |
+| ![simulation1_data.png](fig/simulation1_data.png) |
 
 ## Simulation 2: Both modalities separate the 5 cell-types into 3 clusters in different ways
 
