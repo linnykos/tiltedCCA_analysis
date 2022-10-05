@@ -52,6 +52,7 @@ colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
 # Step 2: Apply Tilted-CCA
 ################################
 
+set.seed(10)
 multiSVD_obj <- tiltedCCA::create_multiSVD(mat_1 = mat_1, mat_2 = mat_2,
                                             dims_1 = 1:2, dims_2 = 1:2,
                                             center_1 = F, center_2 = F,
@@ -79,6 +80,7 @@ multiSVD_obj <- tiltedCCA::tiltedCCA_decomposition(multiSVD_obj)
 # Step 3: Plot the data
 ################################
 
+# png("simulation2_data.png", height = 1200, width = 2000, res = 300, units = "px")
 par(mfrow = c(1,2))
 plot(multiSVD_obj$svd_1$u[,1], multiSVD_obj$svd_1$u[,2],
      main = "Modality 1",
@@ -88,6 +90,7 @@ plot(multiSVD_obj$svd_2$u[,1], multiSVD_obj$svd_2$u[,2],
      main = "Modality 2",
      xlab = "PCA's dim. 1", ylab = "PCA's dim. 2",
      pch = 16, col = true_cluster, asp = T)
+# graphics.off()
 
 ################################
 # Step 4: Plot Tilted-CCA's result
@@ -95,6 +98,7 @@ plot(multiSVD_obj$svd_2$u[,1], multiSVD_obj$svd_2$u[,2],
 
 names(multiSVD_obj)
 
+# png("simulation2_tcca.png", height = 1200, width = 3000, res = 300, units = "px")
 par(mfrow = c(1,3))
 plot(multiSVD_obj$tcca_obj$common_score[,1], multiSVD_obj$tcca_obj$common_score[,2],
      main = "Common embedding",
@@ -108,12 +112,12 @@ plot(multiSVD_obj$tcca_obj$distinct_score_2[,1], multiSVD_obj$tcca_obj$distinct_
      main = "Modality 2's distinct embedding",
      xlab = "Distinct-2's dim. 1", ylab = "Distinct-2's dim. 2",
      pch = 16, col = true_cluster, asp = T)
+# graphics.off()
 
 ################################
 # Step 5: For comparison, plot Consensus PCA
 ################################
 
-par(mfrow = c(1,1))
 set.seed(10)
 consensus_pca <- tiltedCCA::consensus_pca(mat_1 = mat_1, mat_2 = mat_2,
                                            dims_1 = 1:2, dims_2 = 1:2,
@@ -126,7 +130,11 @@ consensus_pca <- tiltedCCA::consensus_pca(mat_1 = mat_1, mat_2 = mat_2,
                                            scale_1 = F, scale_2 = F,
                                            scale_consensus = F,
                                            verbose = 0)
+
+# png("simulation2_consensuspca.png", height = 1200, width = 1200, res = 300, units = "px")
+par(mfrow = c(1,1))
 plot(consensus_pca$dimred_consensus[,1], consensus_pca$dimred_consensus[,2],
      main = "Consensus PCA embedding",
      xlab = "Consensus PCA's dim. 1", ylab = "Consensus PCA's dim. 2",
      pch = 16, col = true_cluster, asp = T)
+# graphics.off()
