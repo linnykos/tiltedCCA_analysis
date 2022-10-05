@@ -1,17 +1,27 @@
 # Purpose
 
-This repository contains all the preprocessing and analyses for the paper "Quantifying common and distinct information in single-cell multimodal data with Tilted-CCA", in order to illustrate Tilted-CCA. See the companion GitHub package https://github.com/linnykos/tiltedCCA , which contains the primary R functions for the standalone method.
+This repository contains all the preprocessing and analyses for the paper "Quantifying common and distinct information in single-cell multimodal data with Tilted-CCA", in order to illustrate Tilted-CCA. See the companion GitHub package https://github.com/linnykos/tiltedCCA, which contains the primary R functions for the standalone method.
 
 This code was developed and tested primarily on R 4.1.2. on a Macbook (macOS 11.6.8 Big Sur) equipped with an i7 processor.
 
 # Dependencies to run all code
 
-The data analysis requires several additional packages in order to run all the analyses, in addition to those needed to install `tiltedCCA`. These include `ArchR`, `igraph`, `MAST`, `MOFA2`,  `Signac`. See the 
+The data analysis requires several additional packages in order to run all the analyses, in addition to those needed to install `tiltedCCA`. These include `ArchR`, `igraph`, `MAST`, `MOFA2`, `SeuratData`, `Signac`. See the 
 last section of this README to see where (i.e., CRAN, Bioconductor, or GitHub) to download all such packages.
 
 # Small simulated dataset to demo the software
 
 # Data
+
+All data used in our paper publicly available. Specifically, the human bone marrow CITE-seq data[1] is available in the R package `SeuratData` under `bmcite`.
+The human bone marrow Abseq data[2] (both, either equipped with the whole transcriptome or of only 461 genes) is availabe at https://figshare.com/projects/Single-cell_proteo-genomic\_reference_maps\_of\_the\_human\_hematopoietic\_system/94469, under `WTA\_projected.rds` or `Healthy.rds` respectively. 
+The human PBMC CITE-seq data[3] is available at https://atlas.fredhutch.org/nygc/multimodal-pbmc/.
+The human PBMC 10x Multiome data is available at https://support.10xgenomics.com/single-cell-multiome-atac-gex/datasets/1.0.0/pbmc\_granulocyte_sorted_10k. 
+The human brain development 10x Multiome data[4] is available at https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE162170 and https://github.com/GreenleafLab/brainchromatin.
+The mouse brain development 10x Multiome data is available at https://www.10xgenomics.com/resources/datasets/fresh-embryonic-e-18-mouse-brain-5-k-1-standard-2-0-0.
+The mouse embryo development 10x Multiome data[5]
+is available at https://github.com/rargelaguet/mouse_organogenesis_10x_multiome_publication. The majority of the computational tools used in this manuscript consisted of Seurat (v4.1.1), Signac (v1.7.0), and Slingshot (v2.3.1). We derived the cell-cycle genes for humans via `Seurat::cc.genes`, while we used the lists of human housekeeping genes[6] or mouse cell-cycling genes[7] from particular published work.
+
 
 # Reproducing the results
 
@@ -46,6 +56,7 @@ The following shows the suggested package versions that the developer (GitHub us
  BiocParallel           1.28.3     2021-12-09 [1] Bioconductor
  Biostrings             2.62.0     2021-10-26 [1] Bioconductor
  bitops                 1.0-7      2021-04-24 [1] CRAN (R 4.1.2)
+ bmcite.SeuratData    * 0.3.0      2022-04-12 [1] local
  brio                   1.1.3      2021-11-30 [1] CRAN (R 4.1.2)
  cachem                 1.0.6      2021-08-19 [1] CRAN (R 4.1.2)
  callr                  3.7.1      2022-07-13 [1] CRAN (R 4.1.2)
@@ -141,6 +152,7 @@ The following shows the suggested package versions that the developer (GitHub us
  quadprog             * 1.5-8      2019-11-20 [1] CRAN (R 4.1.2)
  R6                     2.5.1      2021-08-19 [1] CRAN (R 4.1.2)
  RANN                 * 2.6.1      2019-01-08 [1] CRAN (R 4.1.2)
+ rappdirs               0.3.3      2021-01-31 [1] CRAN (R 4.1.2)
  RColorBrewer         * 1.1-3      2022-04-03 [1] CRAN (R 4.1.2)
  Rcpp                 * 1.0.9      2022-07-08 [1] CRAN (R 4.1.2)
  RcppAnnoy              0.0.19     2021-07-30 [1] CRAN (R 4.1.2)
@@ -165,6 +177,7 @@ The following shows the suggested package versions that the developer (GitHub us
  sctransform            0.3.3      2022-01-13 [1] CRAN (R 4.1.2)
  sessioninfo            1.2.2      2021-12-06 [1] CRAN (R 4.1.2)
  Seurat               * 4.1.1      2022-05-02 [1] CRAN (R 4.1.2)
+ SeuratData           * 0.2.1      2022-04-12 [1] Github (satijalab/seurat-data@cf04099)
  SeuratObject         * 4.1.0      2022-05-01 [1] CRAN (R 4.1.2)
  shiny                  1.7.2      2022-07-19 [1] CRAN (R 4.1.2)
  Signac               * 1.7.0      2022-06-01 [1] CRAN (R 4.1.2)
@@ -199,3 +212,12 @@ The following shows the suggested package versions that the developer (GitHub us
  zlibbioc               1.40.0     2021-10-26 [1] Bioconductor
  zoo                    1.8-10     2022-04-15 [1] CRAN (R 4.1.2)
 ```
+
+# References
+[1] Stuart, T. et al. Comprehensive integration of single-cell data. Cell 177, 1888–1902 (2019).
+[2] Triana, S. et al. Single-cell proteo-genomic reference maps of the hematopoietic system enable the purification and massive profiling of precisely defined cell states. Nature immunology 22, 1577–1589 (2021).
+[3] Hao, Y. et al. Integrated analysis of multimodal single-cell data. Cell 184, 3573–3587 (2021).
+[4] Trevino, A. E. et al. Chromatin and gene-regulatory dynamics of the developing human cerebral cortex at single-cell resolution. Cell (2021).
+[5] Argelaguet, R. et al. Decoding gene regulation in the mouse embryo using single-cell multi-omics. bioRxiv (2022).
+[6] Hounkpe, B. W., Chenou, F., de Lima, F. & De Paula, E. V. HRT atlas v1. 0 database: Redefining human and mouse housekeeping genes and candidate reference transcripts by mining massive rna-seq datasets. Nucleic Acids Research 49, D947–D955 (2021).
+[7] Riba, A. et al. Cell cycle gene regulation dynamics revealed by RNA velocity and deep-learning. Nature Communications 13, 1–13 (2022).
