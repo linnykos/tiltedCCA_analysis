@@ -42,16 +42,16 @@ See https://github.com/linnykos/tiltedCCA_analysis/blob/master/simulation/simula
 
 The following shows each modality based on their leading 2 PCs respectively, where the cells are colored by the true cell-types.
 
-![simulation1_data.png](fig/simulation1_data.png | width=200)
+![simulation1_data.png](fig/simulation1_data.png)
 
 The following shows Tilted-CCA's common (i.e., shared axes of variation between both modalities) and distinct (i.e., axes of variation unique to a modality, after the common axes have been accounted for) axes of variation, where the cells are colored by the true cell-types. Here, observe that the common embedding does not really contain information to separate the cell-types -- this is desirable, as all the cell-type separation information are unique to Modality 1 (hence, appearing in the Modality 1's distinct embedding). The common embedding demonstrates the "intersection of information."
 
-![simulation1_tcca.png](fig/simulation1_tcca.png | width=300)
+![simulation1_tcca.png](fig/simulation1_tcca.png)
 
 In contrast with Tilted-CCA's "intersection of information," we demonstrate Consensus PCA, which is a prototypical method illustrating the "union of information" where a low-dimensional embedding is constructed for multimodal data by combining the leading axes of variation from each modality.
 These embeddings are useful to visualize the "best of both worlds" (i.e., having cell-type separation that best combines both modalities), but is not useful for to understand the shared and distinct signals between the two modalities. Here, observe that the three cell-types are clearly separated by Consensus PCA.
 
-![simulation1_consensuspca.png](fig/simulation1_consensuspca.png | width=100)
+![simulation1_consensuspca.png](fig/simulation1_consensuspca.png)
 
 ## Simulation 2: Both modalities separate the 5 cell-types into 3 clusters in different ways
 
