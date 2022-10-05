@@ -38,7 +38,7 @@ colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
 # Step 2: Apply Tilted-CCA
 ################################
 
-multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1, mat_2 = mat_2,
+multiSVD_obj <- tiltedCCA::create_multiSVD(mat_1 = mat_1, mat_2 = mat_2,
                                             dims_1 = 1:2, dims_2 = 1:2,
                                             center_1 = F, center_2 = F,
                                             normalize_row = T,
@@ -46,20 +46,20 @@ multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1, mat_2 = mat_2,
                                             recenter_1 = F, recenter_2 = F,
                                             rescale_1 = F, rescale_2 = F,
                                             scale_1 = F, scale_2 = F)
-multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
+multiSVD_obj <- tiltedCCA::form_metacells(input_obj = multiSVD_obj,
                                            large_clustering_1 = clustering_1, 
                                            large_clustering_2 = clustering_2,
                                            num_metacells = NULL)
-multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
+multiSVD_obj <- tiltedCCA::compute_snns(input_obj = multiSVD_obj,
                                          latent_k = 2,
                                          num_neigh = 10,
                                          bool_cosine = T,
                                          bool_intersect = T,
                                          min_deg = 1)
-multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj)
-multiSVD_obj <- tiltedCCA:::fine_tuning(input_obj = multiSVD_obj,
+multiSVD_obj <- tiltedCCA::tiltedCCA(input_obj = multiSVD_obj)
+multiSVD_obj <- tiltedCCA::fine_tuning(input_obj = multiSVD_obj,
                                         verbose = 0)
-multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(multiSVD_obj)
+multiSVD_obj <- tiltedCCA::tiltedCCA_decomposition(multiSVD_obj)
 
 ################################
 # Step 3: Plot the data
