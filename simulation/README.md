@@ -55,19 +55,21 @@ These embeddings are useful to visualize the "best of both worlds" (i.e., having
 
 ## Simulation 2: Both modalities separate the 5 cell-types into 3 clusters in different ways
 
-See https://github.com/linnykos/tiltedCCA_analysis/blob/master/simulation/simulation_2.R for this simulation.
+See https://github.com/linnykos/tiltedCCA_analysis/blob/master/simulation/simulation_2.R for this simulation. In this simulation, there are 500 cells across two modalities of 10 features each. There are 5 true cell-types, but each modality can only differentiate these cell-types into 3 clusters. Modality 1 separates the cyan cells from the red+black cells from the green+blue cells,
+while Modality 2 separates the cyan cells from the red+blue cells from the green+black cells.
 
-|                                                     |
-|-----------------------------------------------------|
-| ![simulation2_data.png](fig/simulation2_data.png) |
+The following shows each modality based on their leading 2 PCs respectively, where the cells are colored by the true cell-types.
 
-|                                                     |
-|-----------------------------------------------------|
-| ![simulation2_tcca.png](fig/simulation2_tcca.png) |
+<img src="https://raw.githubusercontent.com/linnykos/tiltedCCA_analysis/master/simulation/fig/simulation2_data.png" width="800">
 
-|                                                     |
-|-----------------------------------------------------|
-| ![simulation2_consensuspca.png](fig/simulation2_consensuspca.png) |
+The following shows Tilted-CCA's common (demonstrating the "intersection of information") and distinct axes of variation, where the cells are colored by the true cell-types. Here, observe that the common embedding shows the information that both modalities agree upon -- the cyan cells are separable from all other cell-types. The distinct information then illustrates what is distinct for each modality: Modality 1 separates the cyan cells from the red+black cells from the green+blue cells,
+while Modality 2 separates the cyan cells from the red+blue cells from the green+black cells.
+
+<img src="https://raw.githubusercontent.com/linnykos/tiltedCCA_analysis/master/simulation/fig/simulation2_tcca.png" width="1200">
+
+Consensus PCA for this data cleanly separates all five cell-types. Again, quantifying "union of information" is a useful and complementary perspective to what Tilted-CCA does. The "union" gives perspective on what axes of variation are contained across both modalities, while Tilted-CCA's common embeddings gives perspective on what axes of variation are shared between both modalities.
+
+<img src="https://raw.githubusercontent.com/linnykos/tiltedCCA_analysis/master/simulation/fig/simulation1_consensuspca.png" width="400">
 
 # Setup
 
@@ -89,5 +91,43 @@ The following shows the suggested package versions that the developer (GitHub us
  pandoc   1.12.3.1 @ /usr/bin/pandoc
 
 ─ Packages ──────────────────────── package           * version   date (UTC) lib source
- brio                1.1.3     2021-11-30 [1] CRAN (R 4.0.2) cachem              1.0.6     2021-08-19 [1] CRAN (R 4.0.2) callr               3.7.0     2021-04-20 [1] CRAN (R 4.0.2) cli                 3.2.0     2022-02-14 [1] CRAN (R 4.0.5) crayon              1.5.1     2022-03-26 [1] CRAN (R 4.0.5) desc                1.4.2     2022-09-08 [1] CRAN (R 4.0.5) devtools            2.4.3     2021-11-30 [1] CRAN (R 4.0.2) ellipsis            0.3.2     2021-04-29 [1] CRAN (R 4.0.2) fastmap             1.1.0     2021-01-25 [1] CRAN (R 4.0.2) fs                  1.5.2     2021-12-08 [1] CRAN (R 4.0.2) glue                1.6.2     2022-02-24 [1] CRAN (R 4.0.5) irlba               2.3.5     2021-12-06 [1] CRAN (R 4.0.2) lattice             0.20-45   2021-09-22 [1] CRAN (R 4.0.2) lifecycle           1.0.1     2021-09-24 [1] CRAN (R 4.0.2) magrittr            2.0.3     2022-03-30 [1] CRAN (R 4.0.5) MASS                7.3-56    2022-03-23 [1] CRAN (R 4.0.5) Matrix              1.4-1     2022-03-23 [1] CRAN (R 4.0.5) MatrixGenerics      1.2.1     2021-01-30 [1] Bioconductor matrixStats         0.61.0    2021-09-17 [1] CRAN (R 4.0.2) memoise             2.0.1     2021-11-26 [1] CRAN (R 4.0.2) pkgbuild            1.3.1     2021-12-20 [1] CRAN (R 4.0.2) pkgload             1.2.4     2021-11-30 [1] CRAN (R 4.0.2) prettyunits         1.1.1     2020-01-24 [1] CRAN (R 4.0.2) processx            3.5.3     2022-03-25 [1] CRAN (R 4.0.5) ps                  1.6.0     2021-02-28 [1] CRAN (R 4.0.2) purrr               0.3.4     2020-04-17 [1] CRAN (R 4.0.2) quadprog            1.5-8     2019-11-20 [1] CRAN (R 4.0.2) R6                  2.5.1     2021-08-19 [1] CRAN (R 4.0.2) RANN                2.6.1     2019-01-08 [1] CRAN (R 4.0.2) Rcpp                1.0.8.3   2022-03-17 [1] CRAN (R 4.0.5) remotes             2.4.2     2021-11-30 [1] CRAN (R 4.0.2) rlang               1.0.2     2022-03-04 [1] CRAN (R 4.0.5) rprojroot           2.0.3     2022-04-02 [1] CRAN (R 4.0.5) RSpectra            0.16-0    2019-12-01 [1] CRAN (R 4.0.2) sessioninfo         1.2.2     2021-12-06 [1] CRAN (R 4.0.5) sparseMatrixStats   1.2.1     2021-02-02 [1] Bioconductor testthat            3.1.3     2022-03-29 [1] CRAN (R 4.0.5) tiltedCCA         * 1.0.0.001 2022-10-05 [1] local usethis             2.1.6     2022-05-25 [1] CRAN (R 4.0.5) withr               2.5.0     2022-03-03 [1] CRAN (R 4.0.5)
+ cachem        1.0.6      2021-08-19 [1] CRAN (R 4.1.2)
+ callr         3.7.1      2022-07-13 [1] CRAN (R 4.1.2)
+ cli           3.3.0      2022-04-25 [1] CRAN (R 4.1.2)
+ crayon        1.5.1      2022-03-26 [1] CRAN (R 4.1.2)
+ devtools      2.4.4      2022-07-20 [1] CRAN (R 4.1.2)
+ digest        0.6.29     2021-12-01 [1] CRAN (R 4.1.2)
+ ellipsis      0.3.2      2021-04-29 [1] CRAN (R 4.1.2)
+ fastmap       1.1.0      2021-01-25 [1] CRAN (R 4.1.2)
+ fs            1.5.2      2021-12-08 [1] CRAN (R 4.1.2)
+ glue          1.6.2      2022-02-24 [1] CRAN (R 4.1.2)
+ htmltools     0.5.3      2022-07-18 [1] CRAN (R 4.1.2)
+ htmlwidgets   1.5.4      2021-09-08 [1] CRAN (R 4.1.2)
+ httpuv        1.6.5      2022-01-05 [1] CRAN (R 4.1.2)
+ later         1.3.0      2021-08-18 [1] CRAN (R 4.1.2)
+ lifecycle     1.0.1      2021-09-24 [1] CRAN (R 4.1.2)
+ magrittr      2.0.3      2022-03-30 [1] CRAN (R 4.1.2)
+ memoise       2.0.1      2021-11-26 [1] CRAN (R 4.1.2)
+ mime          0.12       2021-09-28 [1] CRAN (R 4.1.2)
+ miniUI        0.1.1.1    2018-05-18 [1] CRAN (R 4.1.2)
+ pkgbuild      1.3.1      2021-12-20 [1] CRAN (R 4.1.2)
+ pkgload       1.3.0      2022-06-27 [1] CRAN (R 4.1.2)
+ prettyunits   1.1.1      2020-01-24 [1] CRAN (R 4.1.2)
+ processx      3.7.0      2022-07-07 [1] CRAN (R 4.1.2)
+ profvis       0.3.7      2020-11-02 [1] CRAN (R 4.1.2)
+ promises      1.2.0.1    2021-02-11 [1] CRAN (R 4.1.2)
+ ps            1.7.0      2022-04-23 [1] CRAN (R 4.1.2)
+ purrr         0.3.4      2020-04-17 [1] CRAN (R 4.1.2)
+ R6            2.5.1      2021-08-19 [1] CRAN (R 4.1.2)
+ Rcpp          1.0.9      2022-07-08 [1] CRAN (R 4.1.2)
+ remotes       2.4.2      2021-11-30 [1] CRAN (R 4.1.2)
+ rlang         1.0.4      2022-07-12 [1] CRAN (R 4.1.2)
+ sessioninfo   1.2.2      2021-12-06 [1] CRAN (R 4.1.2)
+ shiny         1.7.2      2022-07-19 [1] CRAN (R 4.1.2)
+ stringi       1.7.8      2022-07-11 [1] CRAN (R 4.1.2)
+ stringr       1.4.0      2019-02-10 [1] CRAN (R 4.1.2)
+ tiltedCCA   * 0.0.0.0114 2022-09-06 [1] local
+ urlchecker    1.0.1      2021-11-30 [1] CRAN (R 4.1.2)
+ usethis       2.1.6      2022-05-25 [1] CRAN (R 4.1.2)
+ xtable        1.8-4      2019-04-21 [1] CRAN (R 4.1.2)
 ```
