@@ -6,7 +6,7 @@ This code was developed and tested primarily on R 4.1.2. on a Macbook (macOS 11.
 
 # Dependencies to run all code
 
-The data analysis requires several additional packages in order to run all the analyses, in addition to those needed to install `tiltedCCA`. These include `ArchR`, `igraph`, `MAST`, `MOFA2`, `SeuratData`, `Signac`. See the 
+The data analysis requires several additional packages in order to run all the analyses, in addition to those needed to install `tiltedCCA`. These include `ArchR`, `igraph`, `MAST`, `MOFA2`, `SeuratData`, `Signac`, and `slingshot`. See the 
 last section of this README to see where (i.e., CRAN, Bioconductor, or GitHub) to download all such packages.
 
 # Small simulated dataset to demo the software
@@ -143,6 +143,7 @@ The following shows the suggested package versions that the developer (GitHub us
  png                    0.1-7      2013-12-03 [1] CRAN (R 4.1.2)
  polyclip               1.10-0     2019-03-14 [1] CRAN (R 4.1.2)
  prettyunits            1.1.1      2020-01-24 [1] CRAN (R 4.1.2)
+ princurve            * 2.1.6      2021-01-18 [1] CRAN (R 4.1.2)
  processx               3.7.0      2022-07-07 [1] CRAN (R 4.1.2)
  profvis                0.3.7      2020-11-02 [1] CRAN (R 4.1.2)
  progressr              0.10.1     2022-06-03 [1] CRAN (R 4.1.2)
@@ -182,6 +183,7 @@ The following shows the suggested package versions that the developer (GitHub us
  shiny                  1.7.2      2022-07-19 [1] CRAN (R 4.1.2)
  Signac               * 1.7.0      2022-06-01 [1] CRAN (R 4.1.2)
  SingleCellExperiment * 1.16.0     2021-10-26 [1] Bioconductor
+ slingshot            * 2.3.1      2022-04-25 [1] Github (kstreet13/slingshot@cf69e1a)
  sp                   * 1.5-0      2022-06-05 [1] CRAN (R 4.1.2)
  sparseMatrixStats    * 1.6.0      2021-10-26 [1] Bioconductor
  spatstat.core          2.4-2      2022-04-01 [1] CRAN (R 4.1.2)
@@ -200,6 +202,7 @@ The following shows the suggested package versions that the developer (GitHub us
  tidyr                  1.2.0      2022-02-01 [1] CRAN (R 4.1.2)
  tidyselect             1.1.2      2022-02-21 [1] CRAN (R 4.1.2)
  tiltedCCA            * 0.0.0.0114 2022-09-06 [1] local
+ TrajectoryUtils      * 1.2.0      2021-10-26 [1] Bioconductor
  urlchecker             1.0.1      2021-11-30 [1] CRAN (R 4.1.2)
  usethis                2.1.6      2022-05-25 [1] CRAN (R 4.1.2)
  utf8                   1.2.2      2021-07-24 [1] CRAN (R 4.1.2)
