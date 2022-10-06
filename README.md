@@ -58,11 +58,11 @@ All the code to reproduce the analyses in the paper are located in the `main` fo
 
 * Figure 3c: After running Tilted-CCA on the human bone marrow CITE-seq data, the differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_differential_postprocess.R
 
-* Figure 3e (Human PBMC CITE-seq data): To run Tilted-CCA see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_tiltedcca-2000genes.R. The differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_differential_postprocess.R
+* Figure 3e (Human PBMC CITE-seq data): To run Tilted-CCA see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_tiltedcca-2000genes.R. The differential-expression for genes and antibodies is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_differential_postprocess.R
 
 * Figure 3e (Human PBMC 10x Multiome): To run Tilted-CCA see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_10x_tiltedcca-2000genes.R. The differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_10x_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_10x_differential-2000genes_postprocess.R
 
-* Figure 3e (Human brain development 10x Multiome): To run Tilted-CCA see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_tiltedcca_RNA-ATAC.R. The differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_differential_postprocess.R
+* Figure 3e (Human brain development 10x Multiome): To run Tilted-CCA (RNA+ATAC) see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_tiltedcca_RNA-ATAC.R. The differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_differential_postprocess.R
 
 * Figure 4a: The plots were all created during preprocessing (see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_preprocess.R).
 
@@ -74,17 +74,89 @@ All the code to reproduce the analyses in the paper are located in the `main` fo
 
 * Figure 4e: The alternative antibody panels for the human bone marrow Abseq data (461 genes) are computed via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_alternatives.R. These results are combined with the selected antibodies via Tilted-CCA and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_enrichment.R
 
-* Figure 5a,f,g: To run Tilted-CCA on the human brain development 10x Multiome data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_tiltedcca_RNA-ATAC.R. The synchrony scores are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_steadystate.R
+* Figure 5a,f,g: To run Tilted-CCA (RNA+ATAC) on the human brain development 10x Multiome data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_tiltedcca_RNA-ATAC.R. The synchrony scores are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_steadystate.R
 
 * Figure 5b,c: To run Tilted-CCA on the mouse embryo development 10x Multiome data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/reik_tiltedcca.R. The synchrony scores are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/reik_steadystate.R
 
-* Figure 5d,e: To run Tilted-CCA on the mouse brain development 10x Multiome data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_tiltedcca_RNA-geneActivity.R. The synchrony scores are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_steadystate.R
+* Figure 5d,e: To run Tilted-CCA (RNA+ATAC) on the mouse brain development 10x Multiome data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_tiltedcca_RNA-geneActivity.R. The synchrony scores are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_steadystate.R
 
-* Figure 5j: After running Tilted-CCA on the mouse brain development 10x Multiome data, the developmentally-informative genes are selected via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_developmentalGenes.R, and the heatmap is plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_developmentalGenes_heatmap.R
+* Figure 5j: To run Tilted-CCA (RNA+ChromatinActivity) on the mouse brain development 10x Multiome data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_tiltedcca_RNA-geneActivity.R. The developmentally-informative genes are selected via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_developmentalGenes.R, and the heatmap is plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_developmentalGenes_heatmap.R
 
-* Figure 5k: After running Tilted-CCA on the human brain development 10x Multiome data, the developmentally-informative genes are selected via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_developmentalGenes.R, and the heatmap is plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_developmentalGenes_heatmap.R
+* Figure 5k: To run Tilted-CCA (RNA+ChromatinActivity) on the human brain development 10x Multiome data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_tiltedcca_RNA-geneActivity.R. The developmentally-informative genes are selected via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_developmentalGenes.R, and the heatmap is plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_developmentalGenes_heatmap.R
 
-* Figure 6: After running Tilted-CCA on the human brain development 10x Multiome data, the phase portraits are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_leafplots.R. The corresponding 
+* Figure 6: After running Tilted-CCA on the human brain development 10x Multiome data, the phase portraits are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_leafplots.R. 
+
+* Extended Figure 1a: Consensus PCA is applied on the human bone marrow CITE-seq data via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_consensusPca.R
+
+* Extended Figure 1b: JIVE is applied on the human bone marrow CITE-seq data via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_jive.R
+
+* Extended Figure 1c: scAI is applied on the human bone marrow CITE-seq data via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_scai.R
+
+* Extended Figure 1d: MOFA+ is applied on the human bone marrow CITE-seq data via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_mofa.R
+
+* Extended Figure 1e,f: WNN is applied on the human bone marrow CITE-seq data during preprocessing, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_preprocess.R
+
+* Extended Figure 1g: DCCA is applied on the human bone marrow CITE-seq data via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_dcca.R
+
+* Extended Figure 2a: After running Tilted-CCA on the human bone marrow CITE-seq data, the cell enrichment plots are constructed via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_cell_enrichment.R
+
+* Extended Figure 2b: After running Consensus PCA and Tilted-CCA on the human bone marrow CITE-seq data, the cell enrichment plots are constructed via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_enrichment_consensus-tcca.R
+
+* Extended Figure 2c: These alignment-differentiability plots are made in the same script that produces Figure 3c
+
+* Extended Figure 2d: The violin plots of the ATAC libraries is plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/cell-gene_library_violinplots.R
+
+* Extended Figure 2e (Human PBMC 10x Multiome): The plot is made in the same script that produces Figure 3e (Human PBMC 10x Multiome)
+
+* Extended Figure 2e (Mouse brain development 10x Multiome): After running Tilted-CCA on the mouse brain development 10x Multiome data, the differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_differential_postprocess.R
+
+* Extended Figure 2e (Mouse embryo development 10x Multiome): After running Tilted-CCA on the mouse embryo development 10x Multiome data, the differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/reik_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/reik_differential_postprocess.R
+
+* Extended Figure 3a: After running Tilted-CCA on the human bone marrow Abseq data (whole transcriptome), the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_97antibody_tiltedcca_postprocess.R
+
+* Extended Figure 3b: After running Tilted-CCA on the human PBMC CITE-seq data, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_tiltedcca_postprocess.R
+
+* Extended Figure 3c: After running Tilted-CCA on the human PBMC 10x Multiome data, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_10x_tiltedcca_postprocess.R
+
+* Extended Figure 4a: After running Tilted-CCA on the human bone marrow Abseq data (461 genes), the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_tcca_postprocess.R
+
+* Extended Figure 4b: After running Tilted-CCA on the human bone marrow Abseq data (461 genes) and selecting the antibodies, the feature plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_postprocess.R
+
+* Extended Figure 4c: After running Tilted-CCA on the human bone marrow Abseq data (461 genes), the differential-expression for antibodies is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_differential_postprocess.R
+
+* Extended Figure 4d,e: After designing the alternative antibody panels, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_alternatives_postprocess.R
+
+* Extended Figure 5a: After running Tilted-CCA on the mouse embryo development 10x Multiome data, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/reik_tiltedcca_postprocess.R
+
+* Extended Figure 5b: After running Tilted-CCA (RNA+ATAC) on the mouse brain development 10x Multiome data, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_tiltedcca_RNA-ATAC_postprocess.R
+
+* Extended Figure 5c: After running Tilted-CCA (RNA+ChromatinActivity) on the mouse brain development 10x Multiome data, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_tiltedcca_RNA-geneActivity_postprocess.R
+
+* Extended Figure 5d: After running Tilted-CCA (RNA+ATAC) on the human brain development 10x Multiome data, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_tiltedcca_RNA-ATAC_postprocess.R
+
+* Extended Figure 5e: After running Tilted-CCA (RNA+ChromatinActivity) on the human brain development 10x Multiome data, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_tiltedcca_RNA-geneActivity_postprocess.R
+
+* Extended Figure 6a (Mouse brain development, 10x Multiome): After running Tilted-CCA (RNA+Chromatin Activity), the plot is created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_steadystate_geneActivity.R
+
+* Extended Figure 6a (Human brain development, 10x Multiome): After running Tilted-CCA (RNA+Chromatin Activity), the plot is created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_steadystate_RNA-geneActivity.R
+
+* Extended Figure 6b (Mouse brain development, 10x Multiome): After selected the genes and ordering them to construct Figure 5j, the heatmap is created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_developmentalGenes_heatmap-geneActivity.R
+
+* Extended Figure 6b (Human brain development, 10x Multiome): After selected the genes and ordering them to construct Figure 5k, the heatmap is created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_developmentalGenes_heatmap-geneActivity.R
+
+* Extended Figure 6c: After selected the genes to construct Figure 5k, the phase portraits are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_leafplots_additional.R
+
+* Supplementary Figure 1: After running scAI on the human bone marrow CITE-seq data, the plot is created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_scai_postprocess.R
+
+* Supplementary Figure 2a,c (Human bone marrow CITE-seq): This plot is created in the same script that produces Figure 3c
+
+* Supplementary Figure 2a,c (Human bone marrow Abseq, whole transcriptome): After running Tilted-CCA,  the differential-expression for genes and antibodies is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_97antibody_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_97antibody_differential_postprocess.R
+
+* Supplementary Figure 2b (Human bone marrow Abseq, whole transcriptome): To run Tilted-CCA for only 25 antibodies for the protein modality, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_97antibody_tiltedcca-25antibodies.R. Afterwards, combine with the differential expression of each gene as calculated for Supplementary Figure 2a. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_97antibody_differential_postprocess.R
+
+* Supplementary Figure 2b (Human PBMC CITE-seq): To run Tilted-CCA for only 25 antibodies for the protein modality, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_tiltedcca-25antibodies.R. Afterwards, combine with the differential expression of each gene as calculated for Figure 3e. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_differential-25antibodies_postprocess.R
+
+* Supplementary Figure 2c (Human PBMC CITE-seq): This plot is created in the same script that produces Figure 3e
 
 
 # Setup
