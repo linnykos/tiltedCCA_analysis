@@ -38,7 +38,7 @@ All the code to reproduce the analyses in the paper are located in the `main` fo
 * Human bone marrow Abseq (461 genes): See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_preprocess.R
 * Human PBMC CITE-seq: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_preprocess.R
 * Human PBMC 10x Multiome: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_10x_preprocess.R
-* Human brain development 10x Multiome: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_preprocess.R
+* Human brain development 10x Multiome: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_preprocess.R and https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_preprocess_customGeneActivity.R
 * Mouse brain development 10x Multiome: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_preprocess.R
 * Mouse embryo development 10x Multiome: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/reik_preprocess.R
 
@@ -73,6 +73,19 @@ All the code to reproduce the analyses in the paper are located in the `main` fo
 * Figure 4d: After selecting the antibodies for the human bone marrow Abseq data (461 genes), the heatmap is plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_graph.R
 
 * Figure 4e: The alternative antibody panels for the human bone marrow Abseq data (461 genes) are computed via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_alternatives.R. These results are combined with the selected antibodies via Tilted-CCA and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_enrichment.R
+
+* Figure 5a,f,g: To run Tilted-CCA on the human brain development 10x Multiome data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_tiltedcca_RNA-ATAC.R. The synchrony scores are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_steadystate.R
+
+* Figure 5b,c: To run Tilted-CCA on the mouse embryo development 10x Multiome data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/reik_tiltedcca.R. The synchrony scores are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/reik_steadystate.R
+
+* Figure 5d,e: To run Tilted-CCA on the mouse brain development 10x Multiome data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_tiltedcca_RNA-geneActivity.R. The synchrony scores are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_steadystate.R
+
+* Figure 5j: After running Tilted-CCA on the mouse brain development 10x Multiome data, the developmentally-informative genes are selected via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_developmentalGenes.R, and the heatmap is plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_developmentalGenes_heatmap.R
+
+* Figure 5k: After running Tilted-CCA on the human brain development 10x Multiome data, the developmentally-informative genes are selected via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_developmentalGenes.R, and the heatmap is plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_developmentalGenes_heatmap.R
+
+* Figure 6: After running Tilted-CCA on the human brain development 10x Multiome data, the phase portraits are computed and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_leafplots.R. The corresponding 
+
 
 # Setup
 
