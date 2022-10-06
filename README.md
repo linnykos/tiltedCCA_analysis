@@ -33,7 +33,7 @@ The majority of the computational tools used in this manuscript consisted of Seu
 
 The following shows the suggested package versions that the developer (GitHub username: linnykos) used when developing the Tilted-CCA package.
 
-```
+```R
 > devtools::session_info()
 ─ Session info ─────────────────────────────────────────────────────
  setting  value
@@ -205,7 +205,7 @@ The following shows the suggested package versions that the developer (GitHub us
  tibble                 3.1.8      2022-07-22 [1] CRAN (R 4.1.2)
  tidyr                  1.2.0      2022-02-01 [1] CRAN (R 4.1.2)
  tidyselect             1.1.2      2022-02-21 [1] CRAN (R 4.1.2)
- tiltedCCA            * 0.0.0.0114 2022-09-06 [1] local
+ tiltedCCA            * 1.0.0.001  2022-09-06 [1] local
  TrajectoryUtils      * 1.2.0      2021-10-26 [1] Bioconductor
  urlchecker             1.0.1      2021-11-30 [1] CRAN (R 4.1.2)
  usethis                2.1.6      2022-05-25 [1] CRAN (R 4.1.2)

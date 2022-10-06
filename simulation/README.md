@@ -116,7 +116,7 @@ Consensus PCA for this data cleanly separates all five cell-types. Again, quanti
 
 The following shows the suggested package versions that the developer (GitHub username: linnykos) used when developing the Tilted-CCA package.
 
-```
+```R
 > devtools::session_info()
 ─ Session info ─────────────────────────────────────────────────────
  setting  value
@@ -167,7 +167,7 @@ The following shows the suggested package versions that the developer (GitHub us
  shiny         1.7.2      2022-07-19 [1] CRAN (R 4.1.2)
  stringi       1.7.8      2022-07-11 [1] CRAN (R 4.1.2)
  stringr       1.4.0      2019-02-10 [1] CRAN (R 4.1.2)
- tiltedCCA   * 0.0.0.0114 2022-09-06 [1] local
+ tiltedCCA   * 1.0.0.001  2022-09-06 [1] local
  urlchecker    1.0.1      2021-11-30 [1] CRAN (R 4.1.2)
  usethis       2.1.6      2022-05-25 [1] CRAN (R 4.1.2)
  xtable        1.8-4      2019-04-21 [1] CRAN (R 4.1.2)
