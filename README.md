@@ -29,6 +29,51 @@ The majority of the computational tools used in this manuscript consisted of Seu
 
 # Reproducing the results
 
+All the code to reproduce the analyses in the paper are located in the `main` folder. We first enumerate all the code to preprocess the data, and then we enumerate the code to reproduce the figures. When reproducing the code, the specific filepaths and filenames will differ from your setup.
+
+## Preprocessing the data
+
+* Human bone marrow CITE-seq: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_preprocess.R
+* Human bone marrow Abseq (Full transcriptome): See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_97antibody_preprocess.R
+* Human bone marrow Abseq (461 genes): See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_preprocess.R
+* Human PBMC CITE-seq: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_preprocess.R
+* Human PBMC 10x Multiome: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_10x_preprocess.R
+* Human brain development 10x Multiome: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_preprocess.R
+* Mouse brain development 10x Multiome: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/mouseembryo_preprocess.R
+* Mouse embryo development 10x Multiome: See https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/reik_preprocess.R
+
+## Reproducing the figures
+
+* Figure 1a,f: To run Tilted-CCA on the human bone marrow CITE-seq data, see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_tiltedcca.R. The UMAPs for the RNA, protein and Tilted-CCA are plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_tiltedcca_postprocess.R. 
+
+* Figure 1c: The Consensus PCA results and plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_consensusPca.R
+
+* Figure 1d: After running Tilted-CCA on the human bone marrow CITE-seq data, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_2dplots.R 
+
+* Figure 2a: The results and plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_tiltedcca_extremeExamples.R
+
+* Figure 3a: After running Tilted-CCA on the human bone marrow CITE-seq data, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_tiltedcca_postprocess.R.  
+
+* Figure 3b: After running Tilted-CCA on the human bone marrow CITE-seq data, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_cell_enrichment.R. 
+
+* Figure 3c: After running Tilted-CCA on the human bone marrow CITE-seq data, the differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/bm_25antibody_differential_postprocess.R
+
+* Figure 3e (Human PBMC CITE-seq data): To run Tilted-CCA see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_tiltedcca-2000genes.R. The differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_224antibody_differential_postprocess.R
+
+* Figure 3e (Human PBMC 10x Multiome): To run Tilted-CCA see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_10x_tiltedcca-2000genes.R. The differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_10x_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/pbmc_10x_differential-2000genes_postprocess.R
+
+* Figure 3e (Human brain development 10x Multiome): To run Tilted-CCA see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_tiltedcca_RNA-ATAC.R. The differential-expression for genes is computed in https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_differential.R. Then, the plots are created via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/greenleaf_differential_postprocess.R
+
+* Figure 4a: The plots were all created during preprocessing (see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_preprocess.R).
+
+* Figure 4b: To run Tilted-CCA on the human bone marrow Abseq data (461 genes), see https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_tcca.R. Each antibody's differential-expression of the distinct component is computed via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_differential-distinct.R. Then, both results are used when selecting the 10 antibodies and plots are made via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection.R
+
+* Figure 4c: After selecting the antibodies for the human bone marrow Abseq data (461 genes), the heatmap is plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_heatmap.R
+
+* Figure 4d: After selecting the antibodies for the human bone marrow Abseq data (461 genes), the heatmap is plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_graph.R
+
+* Figure 4e: The alternative antibody panels for the human bone marrow Abseq data (461 genes) are computed via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_alternatives.R. These results are combined with the selected antibodies via Tilted-CCA and plotted via https://github.com/linnykos/tiltedCCA_analysis/blob/master/main/abseq_bm_97antibodyRef_antibodySelection_enrichment.R
+
 # Setup
 
 The following shows the suggested package versions that the developer (GitHub username: linnykos) used when developing the Tilted-CCA package.
