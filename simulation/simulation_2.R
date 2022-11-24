@@ -6,25 +6,34 @@ set.seed(10)
 # Step 1: Generate the data, where Modality 1 is informative, but not Modality 2
 ################################
 
+semicircle_func <- function(angle1, angle2, n, radius){
+  angle_vec <- runif(n, min = min(angle1, angle2), max = max(angle1, angle2))
+  cbind(radius * cos(angle_vec), radius * sin(angle_vec))
+}
+
 n_each <- 100
 true_cluster <- rep(1:5, each = n_each)
 mat_1 <- do.call(rbind, lapply(1:5, function(i){
   if(i %in% c(1,2)){
-    MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    semicircle_func(-pi/2, -pi/4, n = n_each, radius = 10) + 
+    MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2))  
   } else if(i %in% c(3,4)) {
-    MASS::mvrnorm(n = n_each, mu = c(12,0), Sigma = diag(2)) 
+    semicircle_func(pi/4, pi/2, n = n_each, radius = 10) + 
+    MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
   } else {
-    MASS::mvrnorm(n = n_each, mu = c(0,12), Sigma = diag(2)) 
+    MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
   }
 }))
 
 mat_2 <- do.call(rbind, lapply(1:5, function(i){
   if(i %in% c(1,3)){
+    semicircle_func(-pi/2, -pi/4, n = n_each, radius = 10) + 
     MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
   } else if(i %in% c(2,4)) {
-    MASS::mvrnorm(n = n_each, mu = c(12,0), Sigma = diag(2)) 
+    semicircle_func(pi/4, pi/2, n = n_each, radius = 10) + 
+    MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
   } else {
-    MASS::mvrnorm(n = n_each, mu = c(0,12), Sigma = diag(2)) 
+    MASS::mvrnorm(n = n_each, mu = c(0,2), Sigma = diag(2)) 
   }
 }))
 
@@ -97,13 +106,15 @@ plot(multiSVD_obj$svd_2$u[,1], multiSVD_obj$svd_2$u[,2],
 ################################
 
 names(multiSVD_obj)
+# image(t(multiSVD_obj$cca_obj$score_1))
+# multiSVD_obj$tcca_obj$tilt_perc
 
 # png("simulation2_tcca.png", height = 1200, width = 3000, res = 300, units = "px")
 par(mfrow = c(1,3))
 plot(multiSVD_obj$tcca_obj$common_score[,1], multiSVD_obj$tcca_obj$common_score[,2],
      main = "Common embedding",
      xlab = "Common's dim. 1", ylab = "Common's dim. 2",
-     pch = 16, col = true_cluster, asp = T)
+     pch = 16, col = true_cluster, asp = F)
 plot(multiSVD_obj$tcca_obj$distinct_score_1[,1], multiSVD_obj$tcca_obj$distinct_score_1[,2],
      main = "Modality 1's distinct embedding",
      xlab = "Distinct-1's dim. 1", ylab = "Distinct-1's dim. 2",
