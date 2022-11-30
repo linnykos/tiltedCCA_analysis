@@ -53,7 +53,7 @@ multiSVD_obj <- tiltedCCA::form_metacells(input_obj = multiSVD_obj,
                                            num_metacells = NULL)
 multiSVD_obj <- tiltedCCA::compute_snns(input_obj = multiSVD_obj,
                                          latent_k = 2,
-                                         num_neigh = 10,
+                                         num_neigh = 15,
                                          bool_cosine = T,
                                          bool_intersect = T,
                                          min_deg = 1)
@@ -84,20 +84,25 @@ plot(multiSVD_obj$svd_2$u[,1], multiSVD_obj$svd_2$u[,2],
 
 names(multiSVD_obj)
 
-# png("simulation1_tcca.png", height = 1200, width = 3000, res = 300, units = "px")
+height <- 1000
+cex <- 1.3; cex.main <- 1.5
+# png("simulation1_tcca.png", height = height, width = 3000/1200*height, res = 300, units = "px")
 par(mfrow = c(1,3))
 plot(multiSVD_obj$tcca_obj$common_score[,1], multiSVD_obj$tcca_obj$common_score[,2],
      main = "Common embedding",
      xlab = "Common's dim. 1", ylab = "Common's dim. 2",
-     pch = 16, col = true_cluster, asp = T)
+     pch = 16, col = true_cluster, asp = T,
+     cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
 plot(multiSVD_obj$tcca_obj$distinct_score_1[,1], multiSVD_obj$tcca_obj$distinct_score_1[,2],
-     main = "Modality 1's distinct embedding",
+     main = "Modality 1's distinct embed.",
      xlab = "Distinct-1's dim. 1", ylab = "Distinct-1's dim. 2",
-     pch = 16, col = true_cluster, asp = T)
+     pch = 16, col = true_cluster, asp = T,
+     cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
 plot(multiSVD_obj$tcca_obj$distinct_score_2[,1], multiSVD_obj$tcca_obj$distinct_score_2[,2],
-     main = "Modality 2's distinct embedding",
+     main = "Modality 2's distinct embed.",
      xlab = "Distinct-2's dim. 1", ylab = "Distinct-2's dim. 2",
-     pch = 16, col = true_cluster, asp = T)
+     pch = 16, col = true_cluster, asp = T,
+     cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
 # graphics.off()
 
 ################################
@@ -117,7 +122,7 @@ consensus_pca <- tiltedCCA:::consensus_pca(mat_1 = mat_1, mat_2 = mat_2,
                                            scale_consensus = F,
                                            verbose = 0)
 
-# png("simulation1_consensuspca.png", height = 1200, width = 1200, res = 300, units = "px")
+# png("simulation1_consensuspca.png", height = 1200, width = 1000, res = 300, units = "px")
 par(mfrow = c(1,1))
 plot(consensus_pca$dimred_consensus[,1], consensus_pca$dimred_consensus[,2],
      main = "Consensus PCA embedding",

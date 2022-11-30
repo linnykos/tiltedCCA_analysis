@@ -6,34 +6,25 @@ set.seed(10)
 # Step 1: Generate the data, where Modality 1 is informative, but not Modality 2
 ################################
 
-semicircle_func <- function(angle1, angle2, n, radius){
-  angle_vec <- runif(n, min = min(angle1, angle2), max = max(angle1, angle2))
-  cbind(radius * cos(angle_vec), radius * sin(angle_vec))
-}
-
 n_each <- 100
 true_cluster <- rep(1:5, each = n_each)
 mat_1 <- do.call(rbind, lapply(1:5, function(i){
   if(i %in% c(1,2)){
-    semicircle_func(-pi/2, -pi/4, n = n_each, radius = 10) + 
-    MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2))  
+    MASS::mvrnorm(n = n_each, mu = c(10,10,0), Sigma = diag(3))  
   } else if(i %in% c(3,4)) {
-    semicircle_func(pi/4, pi/2, n = n_each, radius = 10) + 
-    MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    MASS::mvrnorm(n = n_each, mu = c(0,0,0), Sigma = diag(3)) 
   } else {
-    MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    MASS::mvrnorm(n = n_each, mu = c(0,0,10), Sigma = diag(3)) 
   }
 }))
 
 mat_2 <- do.call(rbind, lapply(1:5, function(i){
   if(i %in% c(1,3)){
-    semicircle_func(-pi/2, -pi/4, n = n_each, radius = 10) + 
-    MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    MASS::mvrnorm(n = n_each, mu = c(10,10,0), Sigma = diag(3)) 
   } else if(i %in% c(2,4)) {
-    semicircle_func(pi/4, pi/2, n = n_each, radius = 10) + 
-    MASS::mvrnorm(n = n_each, mu = c(0,0), Sigma = diag(2)) 
+    MASS::mvrnorm(n = n_each,mu = c(0,0,0), Sigma = diag(3)) 
   } else {
-    MASS::mvrnorm(n = n_each, mu = c(0,2), Sigma = diag(2)) 
+    MASS::mvrnorm(n = n_each, mu = c(0,0,10), Sigma = diag(3)) 
   }
 }))
 
@@ -43,8 +34,8 @@ svd_1 <- svd(mat_1)
 svd_2 <- svd(mat_2)
 
 p_1 <- 10; p_2 <- 10
-svd_v_1 <- tiltedCCA::generate_random_orthogonal(p_1, 2)
-svd_v_2 <- tiltedCCA::generate_random_orthogonal(p_2, 2)
+svd_v_1 <- tiltedCCA::generate_random_orthogonal(p_1, 3)
+svd_v_2 <- tiltedCCA::generate_random_orthogonal(p_2, 3)
 
 mat_1 <- tcrossprod(svd_1$u %*% diag(svd_1$d), svd_v_1)
 mat_2 <- tcrossprod(svd_2$u %*% diag(svd_2$d), svd_v_2)
@@ -63,7 +54,7 @@ colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
 
 set.seed(10)
 multiSVD_obj <- tiltedCCA::create_multiSVD(mat_1 = mat_1, mat_2 = mat_2,
-                                            dims_1 = 1:2, dims_2 = 1:2,
+                                            dims_1 = 1:3, dims_2 = 1:3,
                                             center_1 = F, center_2 = F,
                                             normalize_row = T,
                                             normalize_singular_value = F,
@@ -109,20 +100,33 @@ names(multiSVD_obj)
 # image(t(multiSVD_obj$cca_obj$score_1))
 # multiSVD_obj$tcca_obj$tilt_perc
 
-# png("simulation2_tcca.png", height = 1200, width = 3000, res = 300, units = "px")
+svd_func <- function(mat){
+  svd_res <- svd(mat)
+  svd_res$u[,1:2] %*% diag(svd_res$d[1:2])
+}
+
+height <- 1000
+cex <- 1.3; cex.main <- 1.5
+# png("simulation2_tcca.png", height = height, width = 3000/1200*height, res = 300, units = "px")
 par(mfrow = c(1,3))
-plot(multiSVD_obj$tcca_obj$common_score[,1], multiSVD_obj$tcca_obj$common_score[,2],
+tmp <- svd_func(multiSVD_obj$tcca_obj$common_score)
+plot(tmp[,1], tmp[,2],
      main = "Common embedding",
      xlab = "Common's dim. 1", ylab = "Common's dim. 2",
-     pch = 16, col = true_cluster, asp = F)
-plot(multiSVD_obj$tcca_obj$distinct_score_1[,1], multiSVD_obj$tcca_obj$distinct_score_1[,2],
+     pch = 16, col = true_cluster, asp = T,
+     cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
+tmp <- svd_func(multiSVD_obj$tcca_obj$distinct_score_1)
+plot(tmp[,1], tmp[,2],
      main = "Modality 1's distinct embedding",
      xlab = "Distinct-1's dim. 1", ylab = "Distinct-1's dim. 2",
-     pch = 16, col = true_cluster, asp = T)
-plot(multiSVD_obj$tcca_obj$distinct_score_2[,1], multiSVD_obj$tcca_obj$distinct_score_2[,2],
+     pch = 16, col = true_cluster, asp = T,
+     cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
+tmp <- svd_func(multiSVD_obj$tcca_obj$distinct_score_2)
+plot(tmp[,1], tmp[,2],
      main = "Modality 2's distinct embedding",
      xlab = "Distinct-2's dim. 1", ylab = "Distinct-2's dim. 2",
-     pch = 16, col = true_cluster, asp = T)
+     pch = 16, col = true_cluster, asp = T,
+     cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
 # graphics.off()
 
 ################################
@@ -142,7 +146,7 @@ consensus_pca <- tiltedCCA::consensus_pca(mat_1 = mat_1, mat_2 = mat_2,
                                            scale_consensus = F,
                                            verbose = 0)
 
-# png("simulation2_consensuspca.png", height = 1200, width = 1200, res = 300, units = "px")
+# png("simulation2_consensuspca.png", height = 1200, width = 1000, res = 300, units = "px")
 par(mfrow = c(1,1))
 plot(consensus_pca$dimred_consensus[,1], consensus_pca$dimred_consensus[,2],
      main = "Consensus PCA embedding",
