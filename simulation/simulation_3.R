@@ -122,7 +122,7 @@ multiSVD_obj <- tiltedCCA::compute_snns(input_obj = multiSVD_obj,
                                         min_deg = 0)
 multiSVD_obj <- tiltedCCA::tiltedCCA(input_obj = multiSVD_obj,
                                      enforce_boundary = F,
-                                     fix_tilt_perc = 1)
+                                     fix_tilt_perc = 0)
 multiSVD_obj <- tiltedCCA::fine_tuning(input_obj = multiSVD_obj,
                                        verbose = 0)
 multiSVD_obj <- tiltedCCA::tiltedCCA_decomposition(multiSVD_obj)
