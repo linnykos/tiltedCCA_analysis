@@ -83,6 +83,32 @@ tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
                            mark_median_xthres = 10)
 graphics.off()
 
+
+png("../../../out/figures/main/citeseq_bm25_differential_gene-cleaned.png",
+    height = 3500, width = 2500, res = 500, units = "px")
+# par(mar = c(5,5,4,1), bg = NA)
+par(mar = c(5,5,4,1))
+tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
+                           logpval_vec = logpval_vec,
+                           main = "Human BM (CITE-Seq, RNA+ADT)\nGene differentiability vs. alignment",
+                           bool_mark_ymedian = F,
+                           bool_polygon_mean = F,
+                           col_gene_highlight_border = rgb(255, 205, 87, 255*0.5, maxColorValue = 255),
+                           col_points = rgb(0.6, 0.6, 0.6, 0.1),
+                           cex_axis = 1.5, 
+                           cex_lab = 1.5,
+                           cex_points = 2.5,
+                           lty_polygon = 2,
+                           lwd_grid_major = 2,
+                           lwd_grid_minor = 1,
+                           lwd_axis = 1.5,
+                           lwd_axis_ticks = 1.5,
+                           lwd_polygon_bold = 5,
+                           mark_median_xthres = 10)
+graphics.off()
+
+########################
+
 col_palette_enrichment <- paste0(grDevices::colorRampPalette(c('lightgrey', 'blue'))(100), "33")
 gene_breaks <- seq(0, 0.18, length.out = 100)
 gene_depth <- Matrix::rowSums(bm[["RNA"]]@counts[names(rsquare_vec),])/ncol(bm)
@@ -338,3 +364,33 @@ tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
                            xlim = c(0, max(log10(logpval_vec))))
 graphics.off()
 
+######################################
+
+col_palette2 <- col_palette 
+source("bm_97antibodyRef_colorPalette.R")
+col_palette2["CD4 Naive"] <- col_palette["CD4+ naive T cells"]
+
+i <- which(names(gene_list) == "CD4 Naive")
+png(paste0("../../../out/figures/main/citeseq_bm25_differential_gene-alt_", names(gene_list)[i], ".png"),
+    height = 3500, width = 2500, res = 500, units = "px")
+par(mar = c(5,5,4,1))
+tiltedCCA:::plot_alignment(rsquare_vec = rsquare_vec,
+                           logpval_vec = logpval_vec,
+                           main = paste0("Human BM (CITE-Seq, RNA+ADT)\n", names(gene_list)[i], " genes"),
+                           bool_mark_ymedian = F,
+                           bool_polygon_mean = T,
+                           col_points = rgb(0.5, 0.5, 0.5, 0.1),
+                           col_gene_highlight = col_palette2[names(gene_list)[i]],
+                           cex_axis = 1.5, 
+                           cex_lab = 1.5,
+                           cex_points = 2.5,
+                           density = 10,
+                           gene_names = gene_list[[i]],
+                           lty_polygon = 1,
+                           lwd_grid_major = 2,
+                           lwd_grid_minor = 1,
+                           lwd_axis = 1.5,
+                           lwd_axis_ticks = 1.5,
+                           lwd_polygon = 2,
+                           lwd_polygon_bold = 4)
+graphics.off()

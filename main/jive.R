@@ -5,6 +5,7 @@ jive <- function(mat_1, mat_2,
                  common_r, 
                  r_1,
                  r_2,
+                 return_full_prediction = F,
                  max_iter = 100){
   stopifnot(nrow(mat_1) == nrow(mat_2))
   
@@ -89,9 +90,20 @@ jive <- function(mat_1, mat_2,
     iter <- iter + 1
   }
   
+  if(return_full_prediction){
+    tmp_a_mat_1 = a_mat_1; tmp_a_mat_2 = a_mat_2
+    tmp_pred_mat_1 = pred_mat_1; tmp_pred_mat_2 = pred_mat_2
+  } else {
+    tmp_a_mat_1 = NA; tmp_a_mat_2 = NA
+    tmp_pred_mat_1 = NA; tmp_pred_mat_2 = NA
+  }
   list(embedding = embedding, 
        a_embedding_1 = a_embedding_1,
        a_embedding_2 = a_embedding_2,
+       a_mat_1 = tmp_a_mat_1,
+       a_mat_2 = tmp_a_mat_2,
+       pred_mat_1 = tmp_pred_mat_1,
+       pred_mat_2 = tmp_pred_mat_2,
        iter = iter,
        obj_vec = obj_vec)
 }

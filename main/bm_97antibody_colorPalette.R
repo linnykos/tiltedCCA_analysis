@@ -40,5 +40,5 @@ col_palette <- c(
 )
 col_palette <- col_palette[order(names(col_palette))]
 
-# plot(1:length(col_palette), pch = 16, col = col_palette, cex = 5)
+plot(1:length(col_palette), pch = 16, col = col_palette, cex = 5)
 

@@ -97,7 +97,13 @@ rownames(mat_2) <- paste0("n", 1:nrow(mat_2))
 colnames(mat_1) <- paste0("g", 1:ncol(mat_1))
 colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
 
+
 plot_idx <- sample(1:nrow(mat_1))
+orange_col <- rgb(235, 134, 47, maxColorValue = 255)
+purple_col <- rgb(122, 49, 126, maxColorValue = 255)
+blue_col <- rgb(129, 139, 191, maxColorValue = 255)
+col_vec <- c(purple_col, orange_col, blue_col)
+
 
 ################################
 # Step 2: Apply Tilted-CCA
@@ -133,16 +139,27 @@ multiSVD_obj <- tiltedCCA::tiltedCCA_decomposition(multiSVD_obj)
 # Step 3: Plot the data
 ################################
 
-png("simulation3_data.png", height = 1200, width = 2000, res = 300, units = "px")
-par(mfrow = c(1,2))
-plot(multiSVD_obj$svd_1$u[plot_idx,1], multiSVD_obj$svd_1$u[plot_idx,2],
-     main = "Modality 1",
-     xlab = "PCA's dim. 1", ylab = "PCA's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T)
-plot(multiSVD_obj$svd_2$u[plot_idx,1], multiSVD_obj$svd_2$u[plot_idx,2],
-     main = "Modality 2",
-     xlab = "PCA's dim. 1", ylab = "PCA's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T)
+svd_func <- function(mat){
+  svd_res <- svd(mat)
+  svd_res$u[,1:2] %*% diag(svd_res$d[1:2])
+}
+
+png("simulation3b_data-a.png", height = 600, width = 600, res = 300, units = "px")
+par(mfrow = c(1,1), mar = c(2,2,0.5,0.5))
+tmp <- svd_func(mat_1)
+plot(tmp[plot_idx,1], tmp[plot_idx,2],
+     main = "",
+     xlab = "", ylab = "",
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T)
+graphics.off()
+
+png("simulation3b_data-b.png", height = 600, width = 600, res = 300, units = "px")
+par(mfrow = c(1,1), mar = c(2,2,0.5,0.5))
+tmp <- svd_func(mat_2)
+plot(tmp[plot_idx,1], tmp[plot_idx,2],
+     main = "",
+     xlab = "", ylab = "",
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T)
 graphics.off()
 
 ################################
@@ -150,37 +167,16 @@ graphics.off()
 ################################
 
 names(multiSVD_obj)
-# image(t(multiSVD_obj$cca_obj$score_1))
-# multiSVD_obj$tcca_obj$tilt_perc
 
-svd_func <- function(mat){
-  svd_res <- svd(mat)
-  svd_res$u[,1:2] %*% diag(svd_res$d[1:2])
-}
-
-height <- 1000
-cex <- 1.3; cex.main <- 1.5
-png("simulation3_tcca.png", height = height, width = 3000/1200*height, res = 300, units = "px")
-par(mfrow = c(1,3))
-tmp <- svd_func(cbind(multiSVD_obj$common_mat_1, multiSVD_obj$common_mat_2))
+png("simulation3b_tcca-a.png", height = 600, width = 600, res = 300, units = "px")
+par(mfrow = c(1,1), mar = c(2,2,0.5,0.5))
+tmp <- svd_func(multiSVD_obj$tcca_obj$common_score)
 plot(tmp[plot_idx,1], tmp[plot_idx,2],
-     main = "Common embedding",
-     xlab = "Common's dim. 1", ylab = "Common's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T,
-     cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
-tmp <- svd_func(multiSVD_obj$distinct_mat_1)
-plot(tmp[plot_idx,1], tmp[plot_idx,2],
-     main = "Modality 1's distinct embedding",
-     xlab = "Distinct-1's dim. 1", ylab = "Distinct-1's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T,
-     cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
-tmp <- svd_func(multiSVD_obj$distinct_mat_2)
-plot(tmp[plot_idx,1], tmp[plot_idx,2],
-     main = "Modality 2's distinct embedding",
-     xlab = "Distinct-2's dim. 1", ylab = "Distinct-2's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T,
-     cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
+     main = "",
+     xlab = "", ylab = "",
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T)
 graphics.off()
+
 
 ################################
 # Step 5: For comparison, plot Consensus PCA
@@ -201,10 +197,11 @@ consensus_pca <- tiltedCCA::consensus_pca(mat_1 = mat_1, mat_2 = mat_2,
 
 tmp <- svd_func(consensus_pca$dimred_consensus)
 
-png("simulation3_consensuspca.png", height = 1200, width = 1000, res = 300, units = "px")
-par(mfrow = c(1,1))
+png("simulation3b_consensuspca.png", height = 600, width = 600, res = 300, units = "px")
+par(mfrow = c(1,1), mar = c(2,2,0.5,0.5))
+tmp <- svd_func(consensus_pca$dimred_consensus)
 plot(tmp[plot_idx,1], tmp[plot_idx,2],
-     main = "Consensus PCA embedding",
-     xlab = "Consensus PCA's dim. 1", ylab = "Consensus PCA's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T)
+     main = "",
+     xlab = "", ylab = "",
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T)
 graphics.off()

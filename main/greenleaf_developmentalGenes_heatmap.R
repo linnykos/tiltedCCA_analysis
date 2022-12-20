@@ -277,6 +277,25 @@ lines(x = seq(0, 1, length = n), y = y, lwd = 6, col = col)
 axis(2, labels = F, lwd = 2)
 graphics.off()
 
+png(paste0("../../../out/figures/main/10x_greenleaf_steadystate_forHeatmap1-cleaned.png"),
+    height = 900, width = 2500, units = "px", res = 500)
+par(mar = c(2.5,2.5,0.5,0.5), bg = NA)
+y <- np_res1$p[,1,1]; n <- length(y)
+ylim <- quantile(alignment_vec1, probs = c(0.1,0.95))
+ylim[1] <- min(ylim[1], min(y)); ylim[2] <- max(ylim[2], max(y))
+tmp <- alignment_vec1; tol <- .01
+tmp[which(tmp <= ylim[1]+tol)] <- NA
+tmp[which(tmp >= ylim[2]-tol)] <- NA
+plot(x = seq(0, 1, length = length(alignment_vec1)),
+     y = tmp, 
+     ylim = ylim,
+     col = rgb(0.5, 0.5, 0.5, 0.2), main = "", 
+     bty = "n", xlab = "", ylab = "",
+     pch = 16)
+lines(x = seq(0, 1, length = n), y = y, lwd = 9, col = "white")
+lines(x = seq(0, 1, length = n), y = y, lwd = 6, col = col)
+graphics.off()
+
 # the second lineage is tricker since 1) we want to fit the curve on all the points in
 #  the second lineage, and 2) we only plot the predictions for the relevant cells in heatmap_mat2,
 #  but np_res2 outputs the regression values on a grid
