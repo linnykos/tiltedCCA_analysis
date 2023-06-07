@@ -1,0 +1,685 @@
+
+           ___      .______        ______  __    __  .______      
+          /   \     |   _  \      /      ||  |  |  | |   _  \     
+         /  ^  \    |  |_)  |    |  ,----'|  |__|  | |  |_)  |    
+        /  /_\  \   |      /     |  |     |   __   | |      /     
+       /  _____  \  |  |\  \\___ |  `----.|  |  |  | |  |\  \\___.
+      /__/     \__\ | _| `._____| \______||__|  |__| | _| `._____|
+    
+Logging With ArchR!
+
+Start Time : 2022-07-15 00:54:13
+
+------- ArchR Info
+
+ArchRThreads = 1
+
+------- System Info
+
+Computer OS = unix
+
+------- Session Info
+
+R version 4.1.2 (2021-11-01)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/libopenblas-r0.3.3.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats4    grid      stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] rhdf5_2.38.1                SummarizedExperiment_1.24.0
+ [3] Biobase_2.54.0              MatrixGenerics_1.6.0       
+ [5] Rcpp_1.0.9                  Matrix_1.3-4               
+ [7] GenomicRanges_1.46.1        GenomeInfoDb_1.30.1        
+ [9] IRanges_2.28.0              S4Vectors_0.32.4           
+[11] BiocGenerics_0.40.0         matrixStats_0.62.0         
+[13] data.table_1.14.2           stringr_1.4.0              
+[15] plyr_1.8.7                  magrittr_2.0.3             
+[17] ggplot2_3.3.6               gtable_0.3.0               
+[19] gtools_3.9.3                gridExtra_2.3              
+[21] ArchR_1.0.2                 Signac_1.6.0               
+[23] SeuratObject_4.0.4          Seurat_4.1.0               
+
+loaded via a namespace (and not attached):
+  [1] fastmatch_1.1-3        igraph_1.3.1           lazyeval_0.2.2        
+  [4] splines_4.1.2          BiocParallel_1.28.3    listenv_0.8.0         
+  [7] scattermore_0.8        SnowballC_0.7.0        usethis_2.1.5         
+ [10] digest_0.6.29          htmltools_0.5.2        fansi_1.0.3           
+ [13] memoise_2.0.1          tensor_1.5             cluster_2.1.2         
+ [16] ROCR_1.0-11            remotes_2.4.2          globals_0.14.0        
+ [19] Biostrings_2.62.0      docopt_0.7.1           spatstat.sparse_2.1-1 
+ [22] prettyunits_1.1.1      colorspace_2.0-3       ggrepel_0.9.1         
+ [25] dplyr_1.0.9            callr_3.7.0            sparsesvd_0.2         
+ [28] crayon_1.5.1           RCurl_1.98-1.7         jsonlite_1.8.0        
+ [31] spatstat.data_2.2-0    survival_3.2-13        zoo_1.8-10            
+ [34] glue_1.6.2             polyclip_1.10-0        zlibbioc_1.40.0       
+ [37] XVector_0.34.0         leiden_0.3.9           DelayedArray_0.20.0   
+ [40] pkgbuild_1.3.1         Rhdf5lib_1.16.0        future.apply_1.8.1    
+ [43] abind_1.4-5            scales_1.2.0           DBI_1.1.3             
+ [46] spatstat.random_2.2-0  miniUI_0.1.1.1         viridisLite_0.4.0     
+ [49] xtable_1.8-4           reticulate_1.24        spatstat.core_2.4-2   
+ [52] htmlwidgets_1.5.4      httr_1.4.3             RColorBrewer_1.1-3    
+ [55] ellipsis_0.3.2         ica_1.0-2              pkgconfig_2.0.3       
+ [58] farver_2.1.1           ggseqlogo_0.1          uwot_0.1.11           
+ [61] deldir_1.0-6           utf8_1.2.2             tidyselect_1.1.2      
+ [64] rlang_1.0.4            reshape2_1.4.4         later_1.3.0           
+ [67] cachem_1.0.6           munsell_0.5.0          tools_4.1.2           
+ [70] cli_3.3.0              generics_0.1.3         devtools_2.4.3        
+ [73] ggridges_0.5.3         fastmap_1.1.0          goftest_1.2-3         
+ [76] processx_3.5.3         fs_1.5.2               fitdistrplus_1.1-8    
+ [79] purrr_0.3.4            RANN_2.6.1             pbapply_1.5-0         
+ [82] future_1.25.0          nlme_3.1-153           mime_0.12             
+ [85] slam_0.1-50            RcppRoll_0.3.0         brio_1.1.3            
+ [88] compiler_4.1.2         plotly_4.10.0          png_0.1-7             
+ [91] testthat_3.1.3         spatstat.utils_2.3-0   tibble_3.1.7          
+ [94] tweenr_1.0.2           stringi_1.7.8          ps_1.7.0              
+ [97] RSpectra_0.16-1        desc_1.4.1             lattice_0.20-45       
+[100] vctrs_0.4.1            rhdf5filters_1.6.0     pillar_1.7.0          
+[103] lifecycle_1.0.1        spatstat.geom_2.4-0    lmtest_0.9-40         
+[106] RcppAnnoy_0.0.19       cowplot_1.1.1          bitops_1.0-7          
+[109] irlba_2.3.5            httpuv_1.6.5           patchwork_1.1.1       
+[112] R6_2.5.1               promises_1.2.0.1       KernSmooth_2.23-20    
+[115] lsa_0.73.2             parallelly_1.31.1      sessioninfo_1.2.2     
+[118] codetools_0.2-18       pkgload_1.2.4          MASS_7.3-54           
+[121] assertthat_0.2.1       rprojroot_2.0.3        withr_2.5.0           
+[124] qlcMatrix_0.9.7        sctransform_0.3.3      Rsamtools_2.10.0      
+[127] GenomeInfoDbData_1.2.7 mgcv_1.8-38            parallel_4.1.2        
+[130] rpart_4.1-15           tidyr_1.2.0            Rtsne_0.16            
+[133] ggforce_0.3.3          shiny_1.7.1           
+
+
+------- Log Info
+
+
+2022-07-15 00:54:13 : peakSet, Class = GRanges
+GRanges object with 192251 ranges and 13 metadata columns:
+                               seqnames              ranges strand |     score
+                                  <Rle>           <IRanges>  <Rle> | <numeric>
+     Anterior_Primitive_Streak     chr1     3035602-3036202      * |  14.74770
+                      Epiblast     chr1     3062653-3063253      * |  22.27320
+                  ExE_endoderm     chr1     3072313-3072913      * |  12.62990
+                Mixed_mesoderm     chr1     3191496-3192096      * |  23.83290
+                  Neural_crest     chr1     3340575-3341175      * |   8.09325
+                           ...      ...                 ...    ... .       ...
+                   Spinal_cord     chrX 169902806-169903406      * |   9.54947
+  Forebrain_Midbrain_Hindbrain     chrX 169905921-169906521      * |  60.40740
+                   Endothelium     chrX 169915616-169916216      * |  11.75670
+                   Spinal_cord     chrX 169925487-169926087      * |  18.78800
+                   Endothelium     chrX 169937064-169937664      * |   7.97384
+                               replicateScoreQuantile groupScoreQuantile
+                                            <numeric>          <numeric>
+     Anterior_Primitive_Streak                  0.543              0.385
+                      Epiblast                  0.601              0.426
+                  ExE_endoderm                  0.446              0.224
+                Mixed_mesoderm                  0.689              0.548
+                  Neural_crest                  0.127              0.024
+                           ...                    ...                ...
+                   Spinal_cord                  0.251              0.083
+  Forebrain_Midbrain_Hindbrain                  0.857              0.790
+                   Endothelium                  0.304              0.088
+                   Spinal_cord                  0.557              0.358
+                   Endothelium                  0.230              0.051
+                               Reproducibility         GroupReplicate
+                                     <numeric>            <character>
+     Anterior_Primitive_Streak               2 Anterior_Primitive_S..
+                      Epiblast               2        Epiblast._.Rep2
+                  ExE_endoderm               2    ExE_endoderm._.Rep1
+                Mixed_mesoderm               2  Mixed_mesoderm._.Rep2
+                  Neural_crest               2    Neural_crest._.Rep1
+                           ...             ...                    ...
+                   Spinal_cord               2     Spinal_cord._.Rep2
+  Forebrain_Midbrain_Hindbrain               2 Forebrain_Midbrain_H..
+                   Endothelium               2     Endothelium._.Rep2
+                   Spinal_cord               2     Spinal_cord._.Rep1
+                   Endothelium               2     Endothelium._.Rep1
+                               distToGeneStart   nearestGene    peakType
+                                     <integer>   <character> <character>
+     Anterior_Primitive_Streak          635595          Xkr4      Distal
+                      Epiblast          608544          Xkr4      Distal
+                  ExE_endoderm          598884          Xkr4      Distal
+                Mixed_mesoderm          479701          Xkr4      Distal
+                  Neural_crest          330622          Xkr4    Intronic
+                           ...             ...           ...         ...
+                   Spinal_cord          123470 4933400A11Rik    Intronic
+  Forebrain_Midbrain_Hindbrain          126585 4933400A11Rik    Intronic
+                   Endothelium          136280 4933400A11Rik    Intronic
+                   Spinal_cord          146151 4933400A11Rik    Intronic
+                   Endothelium          157728 4933400A11Rik    Intronic
+                               distToTSS  nearestTSS        GC       idx
+                               <integer> <character> <numeric> <integer>
+     Anterior_Primitive_Streak    179729  uc007afg.1    0.4176         1
+                      Epiblast    152678  uc007afg.1    0.4676         2
+                  ExE_endoderm    143018  uc007afg.1    0.3694         3
+                Mixed_mesoderm     23835  uc007afg.1    0.4060         4
+                  Neural_crest    125242  uc007afg.1    0.3278         5
+                           ...       ...         ...       ...       ...
+                   Spinal_cord     23486  uc009rco.1    0.3627      3284
+  Forebrain_Midbrain_Hindbrain     20732  uc009rco.1    0.4642      3285
+                   Endothelium     11037  uc009rco.1    0.5008      3286
+                   Spinal_cord      1166  uc009rco.1    0.5058      3287
+                   Endothelium     10409  uc009rco.1    0.4210      3288
+                                       N
+                               <numeric>
+     Anterior_Primitive_Streak         0
+                      Epiblast         0
+                  ExE_endoderm         0
+                Mixed_mesoderm         0
+                  Neural_crest         0
+                           ...       ...
+                   Spinal_cord         0
+  Forebrain_Midbrain_Hindbrain         0
+                   Endothelium         0
+                   Spinal_cord         0
+                   Endothelium         0
+  -------
+  seqinfo: 20 sequences from an unspecified genome; no seqlengths
+
+2022-07-15 00:54:13 : Batch Execution w/ safelapply!, 0 mins elapsed.
+
+2022-07-15 00:54:14 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 00:54:14 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 00:54:14 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 00:54:15 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 00:54:15 : Transferring Fragments, 0.019 mins elapsed.
+
+2022-07-15 00:55:03 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 00:55:03 : Completed Dropping of Group(s), 0.815 mins elapsed.
+
+2022-07-15 00:55:03 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 00:55:04 : Adding E8.5_rep1 to PeakMatrix for Chr (1 of 20)!, 0.019 mins elapsed.
+2022-07-15 00:55:29 : Adding E8.5_rep1 to PeakMatrix for Chr (2 of 20)!, 0.438 mins elapsed.
+2022-07-15 00:55:59 : Adding E8.5_rep1 to PeakMatrix for Chr (3 of 20)!, 0.938 mins elapsed.
+2022-07-15 00:56:19 : Adding E8.5_rep1 to PeakMatrix for Chr (4 of 20)!, 1.266 mins elapsed.
+2022-07-15 00:56:45 : Adding E8.5_rep1 to PeakMatrix for Chr (5 of 20)!, 1.71 mins elapsed.
+2022-07-15 00:57:11 : Adding E8.5_rep1 to PeakMatrix for Chr (6 of 20)!, 2.139 mins elapsed.
+2022-07-15 00:57:32 : Adding E8.5_rep1 to PeakMatrix for Chr (7 of 20)!, 2.492 mins elapsed.
+2022-07-15 00:57:58 : Adding E8.5_rep1 to PeakMatrix for Chr (8 of 20)!, 2.925 mins elapsed.
+2022-07-15 00:58:21 : Adding E8.5_rep1 to PeakMatrix for Chr (9 of 20)!, 3.303 mins elapsed.
+2022-07-15 00:58:42 : Adding E8.5_rep1 to PeakMatrix for Chr (10 of 20)!, 3.657 mins elapsed.
+2022-07-15 00:59:01 : Adding E8.5_rep1 to PeakMatrix for Chr (11 of 20)!, 3.967 mins elapsed.
+2022-07-15 00:59:31 : Adding E8.5_rep1 to PeakMatrix for Chr (12 of 20)!, 4.47 mins elapsed.
+2022-07-15 00:59:48 : Adding E8.5_rep1 to PeakMatrix for Chr (13 of 20)!, 4.747 mins elapsed.
+2022-07-15 01:00:04 : Adding E8.5_rep1 to PeakMatrix for Chr (14 of 20)!, 5.026 mins elapsed.
+2022-07-15 01:00:19 : Adding E8.5_rep1 to PeakMatrix for Chr (15 of 20)!, 5.274 mins elapsed.
+2022-07-15 01:00:34 : Adding E8.5_rep1 to PeakMatrix for Chr (16 of 20)!, 5.527 mins elapsed.
+2022-07-15 01:00:46 : Adding E8.5_rep1 to PeakMatrix for Chr (17 of 20)!, 5.729 mins elapsed.
+2022-07-15 01:01:03 : Adding E8.5_rep1 to PeakMatrix for Chr (18 of 20)!, 6.01 mins elapsed.
+2022-07-15 01:01:15 : Adding E8.5_rep1 to PeakMatrix for Chr (19 of 20)!, 6.2 mins elapsed.
+2022-07-15 01:01:27 : Adding E8.5_rep1 to PeakMatrix for Chr (20 of 20)!, 6.404 mins elapsed.
+
+2022-07-15 01:01:35 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 01:01:35 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 01:01:36 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 01:01:36 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 01:01:36 : Transferring Fragments, 0.02 mins elapsed.
+
+2022-07-15 01:02:24 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 01:02:24 : Completed Dropping of Group(s), 0.806 mins elapsed.
+
+2022-07-15 01:02:24 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 01:02:25 : Adding E7.5_rep2 to PeakMatrix for Chr (1 of 20)!, 0.018 mins elapsed.
+2022-07-15 01:02:48 : Adding E7.5_rep2 to PeakMatrix for Chr (2 of 20)!, 0.412 mins elapsed.
+2022-07-15 01:03:15 : Adding E7.5_rep2 to PeakMatrix for Chr (3 of 20)!, 0.862 mins elapsed.
+2022-07-15 01:03:34 : Adding E7.5_rep2 to PeakMatrix for Chr (4 of 20)!, 1.171 mins elapsed.
+2022-07-15 01:03:58 : Adding E7.5_rep2 to PeakMatrix for Chr (5 of 20)!, 1.565 mins elapsed.
+2022-07-15 01:04:20 : Adding E7.5_rep2 to PeakMatrix for Chr (6 of 20)!, 1.942 mins elapsed.
+2022-07-15 01:04:38 : Adding E7.5_rep2 to PeakMatrix for Chr (7 of 20)!, 2.241 mins elapsed.
+2022-07-15 01:05:00 : Adding E7.5_rep2 to PeakMatrix for Chr (8 of 20)!, 2.61 mins elapsed.
+2022-07-15 01:05:18 : Adding E7.5_rep2 to PeakMatrix for Chr (9 of 20)!, 2.912 mins elapsed.
+2022-07-15 01:05:37 : Adding E7.5_rep2 to PeakMatrix for Chr (10 of 20)!, 3.218 mins elapsed.
+2022-07-15 01:05:54 : Adding E7.5_rep2 to PeakMatrix for Chr (11 of 20)!, 3.498 mins elapsed.
+2022-07-15 01:06:19 : Adding E7.5_rep2 to PeakMatrix for Chr (12 of 20)!, 3.93 mins elapsed.
+2022-07-15 01:06:35 : Adding E7.5_rep2 to PeakMatrix for Chr (13 of 20)!, 4.188 mins elapsed.
+2022-07-15 01:06:51 : Adding E7.5_rep2 to PeakMatrix for Chr (14 of 20)!, 4.454 mins elapsed.
+2022-07-15 01:07:04 : Adding E7.5_rep2 to PeakMatrix for Chr (15 of 20)!, 4.68 mins elapsed.
+2022-07-15 01:07:19 : Adding E7.5_rep2 to PeakMatrix for Chr (16 of 20)!, 4.919 mins elapsed.
+2022-07-15 01:07:30 : Adding E7.5_rep2 to PeakMatrix for Chr (17 of 20)!, 5.104 mins elapsed.
+2022-07-15 01:07:46 : Adding E7.5_rep2 to PeakMatrix for Chr (18 of 20)!, 5.371 mins elapsed.
+2022-07-15 01:07:56 : Adding E7.5_rep2 to PeakMatrix for Chr (19 of 20)!, 5.546 mins elapsed.
+2022-07-15 01:08:08 : Adding E7.5_rep2 to PeakMatrix for Chr (20 of 20)!, 5.732 mins elapsed.
+
+2022-07-15 01:08:16 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 01:08:16 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 01:08:16 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 01:08:16 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 01:08:16 : Transferring Fragments, 0.015 mins elapsed.
+
+2022-07-15 01:09:02 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 01:09:02 : Completed Dropping of Group(s), 0.771 mins elapsed.
+
+2022-07-15 01:09:02 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 01:09:03 : Adding E8.5_rep2 to PeakMatrix for Chr (1 of 20)!, 0.02 mins elapsed.
+2022-07-15 01:09:26 : Adding E8.5_rep2 to PeakMatrix for Chr (2 of 20)!, 0.395 mins elapsed.
+2022-07-15 01:09:52 : Adding E8.5_rep2 to PeakMatrix for Chr (3 of 20)!, 0.837 mins elapsed.
+2022-07-15 01:10:10 : Adding E8.5_rep2 to PeakMatrix for Chr (4 of 20)!, 1.129 mins elapsed.
+2022-07-15 01:10:33 : Adding E8.5_rep2 to PeakMatrix for Chr (5 of 20)!, 1.52 mins elapsed.
+2022-07-15 01:10:55 : Adding E8.5_rep2 to PeakMatrix for Chr (6 of 20)!, 1.89 mins elapsed.
+2022-07-15 01:11:13 : Adding E8.5_rep2 to PeakMatrix for Chr (7 of 20)!, 2.185 mins elapsed.
+2022-07-15 01:11:35 : Adding E8.5_rep2 to PeakMatrix for Chr (8 of 20)!, 2.547 mins elapsed.
+2022-07-15 01:11:53 : Adding E8.5_rep2 to PeakMatrix for Chr (9 of 20)!, 2.849 mins elapsed.
+2022-07-15 01:12:11 : Adding E8.5_rep2 to PeakMatrix for Chr (10 of 20)!, 3.146 mins elapsed.
+2022-07-15 01:12:27 : Adding E8.5_rep2 to PeakMatrix for Chr (11 of 20)!, 3.417 mins elapsed.
+2022-07-15 01:12:52 : Adding E8.5_rep2 to PeakMatrix for Chr (12 of 20)!, 3.83 mins elapsed.
+2022-07-15 01:13:07 : Adding E8.5_rep2 to PeakMatrix for Chr (13 of 20)!, 4.085 mins elapsed.
+2022-07-15 01:13:22 : Adding E8.5_rep2 to PeakMatrix for Chr (14 of 20)!, 4.338 mins elapsed.
+2022-07-15 01:13:36 : Adding E8.5_rep2 to PeakMatrix for Chr (15 of 20)!, 4.562 mins elapsed.
+2022-07-15 01:13:49 : Adding E8.5_rep2 to PeakMatrix for Chr (16 of 20)!, 4.788 mins elapsed.
+2022-07-15 01:14:00 : Adding E8.5_rep2 to PeakMatrix for Chr (17 of 20)!, 4.966 mins elapsed.
+2022-07-15 01:14:15 : Adding E8.5_rep2 to PeakMatrix for Chr (18 of 20)!, 5.219 mins elapsed.
+2022-07-15 01:14:25 : Adding E8.5_rep2 to PeakMatrix for Chr (19 of 20)!, 5.391 mins elapsed.
+2022-07-15 01:14:36 : Adding E8.5_rep2 to PeakMatrix for Chr (20 of 20)!, 5.576 mins elapsed.
+
+2022-07-15 01:14:44 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 01:14:44 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 01:14:44 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 01:14:45 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 01:14:45 : Transferring Fragments, 0.014 mins elapsed.
+
+2022-07-15 01:15:32 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 01:15:32 : Completed Dropping of Group(s), 0.808 mins elapsed.
+
+2022-07-15 01:15:33 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 01:15:33 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (1 of 20)!, 0.016 mins elapsed.
+2022-07-15 01:15:56 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (2 of 20)!, 0.396 mins elapsed.
+2022-07-15 01:16:24 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (3 of 20)!, 0.85 mins elapsed.
+2022-07-15 01:16:41 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (4 of 20)!, 1.147 mins elapsed.
+2022-07-15 01:17:05 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (5 of 20)!, 1.538 mins elapsed.
+2022-07-15 01:17:27 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (6 of 20)!, 1.906 mins elapsed.
+2022-07-15 01:17:45 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (7 of 20)!, 2.2 mins elapsed.
+2022-07-15 01:18:06 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (8 of 20)!, 2.553 mins elapsed.
+2022-07-15 01:18:24 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (9 of 20)!, 2.855 mins elapsed.
+2022-07-15 01:18:42 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (10 of 20)!, 3.154 mins elapsed.
+2022-07-15 01:18:57 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (11 of 20)!, 3.414 mins elapsed.
+2022-07-15 01:19:22 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (12 of 20)!, 3.824 mins elapsed.
+2022-07-15 01:19:37 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (13 of 20)!, 4.077 mins elapsed.
+2022-07-15 01:19:53 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (14 of 20)!, 4.335 mins elapsed.
+2022-07-15 01:20:06 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (15 of 20)!, 4.56 mins elapsed.
+2022-07-15 01:20:20 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (16 of 20)!, 4.79 mins elapsed.
+2022-07-15 01:20:30 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (17 of 20)!, 4.962 mins elapsed.
+2022-07-15 01:20:45 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (18 of 20)!, 5.21 mins elapsed.
+2022-07-15 01:20:55 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (19 of 20)!, 5.378 mins elapsed.
+2022-07-15 01:21:06 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (20 of 20)!, 5.559 mins elapsed.
+
+2022-07-15 01:21:14 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 01:21:14 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 01:21:14 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 01:21:14 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 01:21:14 : Transferring Fragments, 0.012 mins elapsed.
+
+2022-07-15 01:22:00 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 01:22:00 : Completed Dropping of Group(s), 0.775 mins elapsed.
+
+2022-07-15 01:22:00 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 01:22:01 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (1 of 20)!, 0.017 mins elapsed.
+2022-07-15 01:22:23 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (2 of 20)!, 0.373 mins elapsed.
+2022-07-15 01:22:49 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (3 of 20)!, 0.805 mins elapsed.
+2022-07-15 01:23:05 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (4 of 20)!, 1.083 mins elapsed.
+2022-07-15 01:23:28 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (5 of 20)!, 1.457 mins elapsed.
+2022-07-15 01:23:49 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (6 of 20)!, 1.807 mins elapsed.
+2022-07-15 01:24:05 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (7 of 20)!, 2.084 mins elapsed.
+2022-07-15 01:24:26 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (8 of 20)!, 2.434 mins elapsed.
+2022-07-15 01:24:44 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (9 of 20)!, 2.727 mins elapsed.
+2022-07-15 01:25:01 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (10 of 20)!, 3.014 mins elapsed.
+2022-07-15 01:25:16 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (11 of 20)!, 3.268 mins elapsed.
+2022-07-15 01:25:40 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (12 of 20)!, 3.671 mins elapsed.
+2022-07-15 01:25:53 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (13 of 20)!, 3.885 mins elapsed.
+2022-07-15 01:26:06 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (14 of 20)!, 4.104 mins elapsed.
+2022-07-15 01:26:19 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (15 of 20)!, 4.308 mins elapsed.
+2022-07-15 01:26:33 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (16 of 20)!, 4.549 mins elapsed.
+2022-07-15 01:26:44 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (17 of 20)!, 4.725 mins elapsed.
+2022-07-15 01:26:58 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (18 of 20)!, 4.971 mins elapsed.
+2022-07-15 01:27:09 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (19 of 20)!, 5.143 mins elapsed.
+2022-07-15 01:27:19 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (20 of 20)!, 5.319 mins elapsed.
+
+2022-07-15 01:27:27 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 01:27:27 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 01:27:27 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 01:27:28 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 01:27:28 : Transferring Fragments, 0.013 mins elapsed.
+
+2022-07-15 01:28:10 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 01:28:10 : Completed Dropping of Group(s), 0.718 mins elapsed.
+
+2022-07-15 01:28:10 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 01:28:11 : Adding E7.5_rep1 to PeakMatrix for Chr (1 of 20)!, 0.02 mins elapsed.
+2022-07-15 01:28:31 : Adding E7.5_rep1 to PeakMatrix for Chr (2 of 20)!, 0.36 mins elapsed.
+2022-07-15 01:28:55 : Adding E7.5_rep1 to PeakMatrix for Chr (3 of 20)!, 0.759 mins elapsed.
+2022-07-15 01:29:11 : Adding E7.5_rep1 to PeakMatrix for Chr (4 of 20)!, 1.011 mins elapsed.
+2022-07-15 01:29:30 : Adding E7.5_rep1 to PeakMatrix for Chr (5 of 20)!, 1.341 mins elapsed.
+2022-07-15 01:29:49 : Adding E7.5_rep1 to PeakMatrix for Chr (6 of 20)!, 1.658 mins elapsed.
+2022-07-15 01:30:04 : Adding E7.5_rep1 to PeakMatrix for Chr (7 of 20)!, 1.898 mins elapsed.
+2022-07-15 01:30:23 : Adding E7.5_rep1 to PeakMatrix for Chr (8 of 20)!, 2.216 mins elapsed.
+2022-07-15 01:30:37 : Adding E7.5_rep1 to PeakMatrix for Chr (9 of 20)!, 2.459 mins elapsed.
+2022-07-15 01:30:53 : Adding E7.5_rep1 to PeakMatrix for Chr (10 of 20)!, 2.726 mins elapsed.
+2022-07-15 01:31:07 : Adding E7.5_rep1 to PeakMatrix for Chr (11 of 20)!, 2.953 mins elapsed.
+2022-07-15 01:31:30 : Adding E7.5_rep1 to PeakMatrix for Chr (12 of 20)!, 3.337 mins elapsed.
+2022-07-15 01:31:42 : Adding E7.5_rep1 to PeakMatrix for Chr (13 of 20)!, 3.529 mins elapsed.
+2022-07-15 01:31:54 : Adding E7.5_rep1 to PeakMatrix for Chr (14 of 20)!, 3.73 mins elapsed.
+2022-07-15 01:32:05 : Adding E7.5_rep1 to PeakMatrix for Chr (15 of 20)!, 3.914 mins elapsed.
+2022-07-15 01:32:17 : Adding E7.5_rep1 to PeakMatrix for Chr (16 of 20)!, 4.126 mins elapsed.
+2022-07-15 01:32:27 : Adding E7.5_rep1 to PeakMatrix for Chr (17 of 20)!, 4.292 mins elapsed.
+2022-07-15 01:32:42 : Adding E7.5_rep1 to PeakMatrix for Chr (18 of 20)!, 4.531 mins elapsed.
+2022-07-15 01:32:51 : Adding E7.5_rep1 to PeakMatrix for Chr (19 of 20)!, 4.685 mins elapsed.
+2022-07-15 01:33:01 : Adding E7.5_rep1 to PeakMatrix for Chr (20 of 20)!, 4.859 mins elapsed.
+
+2022-07-15 01:33:09 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 01:33:09 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 01:33:09 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 01:33:10 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 01:33:10 : Transferring Fragments, 0.013 mins elapsed.
+
+2022-07-15 01:33:47 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 01:33:47 : Completed Dropping of Group(s), 0.637 mins elapsed.
+
+2022-07-15 01:33:47 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 01:33:48 : Adding E8.75_rep2 to PeakMatrix for Chr (1 of 20)!, 0.016 mins elapsed.
+2022-07-15 01:34:06 : Adding E8.75_rep2 to PeakMatrix for Chr (2 of 20)!, 0.318 mins elapsed.
+2022-07-15 01:34:28 : Adding E8.75_rep2 to PeakMatrix for Chr (3 of 20)!, 0.676 mins elapsed.
+2022-07-15 01:34:41 : Adding E8.75_rep2 to PeakMatrix for Chr (4 of 20)!, 0.894 mins elapsed.
+2022-07-15 01:34:59 : Adding E8.75_rep2 to PeakMatrix for Chr (5 of 20)!, 1.194 mins elapsed.
+2022-07-15 01:35:15 : Adding E8.75_rep2 to PeakMatrix for Chr (6 of 20)!, 1.474 mins elapsed.
+2022-07-15 01:35:29 : Adding E8.75_rep2 to PeakMatrix for Chr (7 of 20)!, 1.693 mins elapsed.
+2022-07-15 01:35:45 : Adding E8.75_rep2 to PeakMatrix for Chr (8 of 20)!, 1.975 mins elapsed.
+2022-07-15 01:36:00 : Adding E8.75_rep2 to PeakMatrix for Chr (9 of 20)!, 2.212 mins elapsed.
+2022-07-15 01:36:14 : Adding E8.75_rep2 to PeakMatrix for Chr (10 of 20)!, 2.449 mins elapsed.
+2022-07-15 01:36:26 : Adding E8.75_rep2 to PeakMatrix for Chr (11 of 20)!, 2.658 mins elapsed.
+2022-07-15 01:36:47 : Adding E8.75_rep2 to PeakMatrix for Chr (12 of 20)!, 3.001 mins elapsed.
+2022-07-15 01:36:58 : Adding E8.75_rep2 to PeakMatrix for Chr (13 of 20)!, 3.186 mins elapsed.
+2022-07-15 01:37:09 : Adding E8.75_rep2 to PeakMatrix for Chr (14 of 20)!, 3.367 mins elapsed.
+2022-07-15 01:37:19 : Adding E8.75_rep2 to PeakMatrix for Chr (15 of 20)!, 3.53 mins elapsed.
+2022-07-15 01:37:30 : Adding E8.75_rep2 to PeakMatrix for Chr (16 of 20)!, 3.721 mins elapsed.
+2022-07-15 01:37:39 : Adding E8.75_rep2 to PeakMatrix for Chr (17 of 20)!, 3.866 mins elapsed.
+2022-07-15 01:37:52 : Adding E8.75_rep2 to PeakMatrix for Chr (18 of 20)!, 4.079 mins elapsed.
+2022-07-15 01:38:00 : Adding E8.75_rep2 to PeakMatrix for Chr (19 of 20)!, 4.225 mins elapsed.
+2022-07-15 01:38:10 : Adding E8.75_rep2 to PeakMatrix for Chr (20 of 20)!, 4.377 mins elapsed.
+
+2022-07-15 01:38:16 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 01:38:16 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 01:38:16 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 01:38:17 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 01:38:17 : Transferring Fragments, 0.012 mins elapsed.
+
+2022-07-15 01:38:53 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 01:38:53 : Completed Dropping of Group(s), 0.615 mins elapsed.
+
+2022-07-15 01:38:53 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 01:38:54 : Adding E8.0_rep1 to PeakMatrix for Chr (1 of 20)!, 0.015 mins elapsed.
+2022-07-15 01:39:11 : Adding E8.0_rep1 to PeakMatrix for Chr (2 of 20)!, 0.3 mins elapsed.
+2022-07-15 01:39:31 : Adding E8.0_rep1 to PeakMatrix for Chr (3 of 20)!, 0.632 mins elapsed.
+2022-07-15 01:39:43 : Adding E8.0_rep1 to PeakMatrix for Chr (4 of 20)!, 0.84 mins elapsed.
+2022-07-15 01:40:00 : Adding E8.0_rep1 to PeakMatrix for Chr (5 of 20)!, 1.12 mins elapsed.
+2022-07-15 01:40:17 : Adding E8.0_rep1 to PeakMatrix for Chr (6 of 20)!, 1.397 mins elapsed.
+2022-07-15 01:40:29 : Adding E8.0_rep1 to PeakMatrix for Chr (7 of 20)!, 1.597 mins elapsed.
+2022-07-15 01:40:45 : Adding E8.0_rep1 to PeakMatrix for Chr (8 of 20)!, 1.871 mins elapsed.
+2022-07-15 01:40:58 : Adding E8.0_rep1 to PeakMatrix for Chr (9 of 20)!, 2.095 mins elapsed.
+2022-07-15 01:41:12 : Adding E8.0_rep1 to PeakMatrix for Chr (10 of 20)!, 2.325 mins elapsed.
+2022-07-15 01:41:24 : Adding E8.0_rep1 to PeakMatrix for Chr (11 of 20)!, 2.524 mins elapsed.
+2022-07-15 01:41:44 : Adding E8.0_rep1 to PeakMatrix for Chr (12 of 20)!, 2.853 mins elapsed.
+2022-07-15 01:41:54 : Adding E8.0_rep1 to PeakMatrix for Chr (13 of 20)!, 3.029 mins elapsed.
+2022-07-15 01:42:05 : Adding E8.0_rep1 to PeakMatrix for Chr (14 of 20)!, 3.208 mins elapsed.
+2022-07-15 01:42:15 : Adding E8.0_rep1 to PeakMatrix for Chr (15 of 20)!, 3.372 mins elapsed.
+2022-07-15 01:42:26 : Adding E8.0_rep1 to PeakMatrix for Chr (16 of 20)!, 3.559 mins elapsed.
+2022-07-15 01:42:35 : Adding E8.0_rep1 to PeakMatrix for Chr (17 of 20)!, 3.696 mins elapsed.
+2022-07-15 01:42:47 : Adding E8.0_rep1 to PeakMatrix for Chr (18 of 20)!, 3.902 mins elapsed.
+2022-07-15 01:42:55 : Adding E8.0_rep1 to PeakMatrix for Chr (19 of 20)!, 4.039 mins elapsed.
+2022-07-15 01:43:04 : Adding E8.0_rep1 to PeakMatrix for Chr (20 of 20)!, 4.189 mins elapsed.
+
+2022-07-15 01:43:11 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 01:43:11 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 01:43:11 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 01:43:11 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 01:43:11 : Transferring Fragments, 0.011 mins elapsed.
+
+2022-07-15 01:43:48 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 01:43:48 : Completed Dropping of Group(s), 0.618 mins elapsed.
+
+2022-07-15 01:43:48 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 01:43:49 : Adding E8.75_rep1 to PeakMatrix for Chr (1 of 20)!, 0.017 mins elapsed.
+2022-07-15 01:44:06 : Adding E8.75_rep1 to PeakMatrix for Chr (2 of 20)!, 0.31 mins elapsed.
+2022-07-15 01:44:26 : Adding E8.75_rep1 to PeakMatrix for Chr (3 of 20)!, 0.63 mins elapsed.
+2022-07-15 01:44:38 : Adding E8.75_rep1 to PeakMatrix for Chr (4 of 20)!, 0.834 mins elapsed.
+2022-07-15 01:44:54 : Adding E8.75_rep1 to PeakMatrix for Chr (5 of 20)!, 1.098 mins elapsed.
+2022-07-15 01:45:09 : Adding E8.75_rep1 to PeakMatrix for Chr (6 of 20)!, 1.36 mins elapsed.
+2022-07-15 01:45:21 : Adding E8.75_rep1 to PeakMatrix for Chr (7 of 20)!, 1.553 mins elapsed.
+2022-07-15 01:45:37 : Adding E8.75_rep1 to PeakMatrix for Chr (8 of 20)!, 1.815 mins elapsed.
+2022-07-15 01:45:49 : Adding E8.75_rep1 to PeakMatrix for Chr (9 of 20)!, 2.021 mins elapsed.
+2022-07-15 01:46:02 : Adding E8.75_rep1 to PeakMatrix for Chr (10 of 20)!, 2.238 mins elapsed.
+2022-07-15 01:46:14 : Adding E8.75_rep1 to PeakMatrix for Chr (11 of 20)!, 2.434 mins elapsed.
+2022-07-15 01:46:32 : Adding E8.75_rep1 to PeakMatrix for Chr (12 of 20)!, 2.743 mins elapsed.
+2022-07-15 01:46:43 : Adding E8.75_rep1 to PeakMatrix for Chr (13 of 20)!, 2.913 mins elapsed.
+2022-07-15 01:46:53 : Adding E8.75_rep1 to PeakMatrix for Chr (14 of 20)!, 3.085 mins elapsed.
+2022-07-15 01:47:02 : Adding E8.75_rep1 to PeakMatrix for Chr (15 of 20)!, 3.235 mins elapsed.
+2022-07-15 01:47:12 : Adding E8.75_rep1 to PeakMatrix for Chr (16 of 20)!, 3.409 mins elapsed.
+2022-07-15 01:47:20 : Adding E8.75_rep1 to PeakMatrix for Chr (17 of 20)!, 3.545 mins elapsed.
+2022-07-15 01:47:32 : Adding E8.75_rep1 to PeakMatrix for Chr (18 of 20)!, 3.73 mins elapsed.
+2022-07-15 01:47:39 : Adding E8.75_rep1 to PeakMatrix for Chr (19 of 20)!, 3.862 mins elapsed.
+2022-07-15 01:47:48 : Adding E8.75_rep1 to PeakMatrix for Chr (20 of 20)!, 4.001 mins elapsed.
+
+2022-07-15 01:47:54 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 01:47:54 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 01:47:54 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 01:47:54 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 01:47:54 : Transferring Fragments, 0.014 mins elapsed.
+
+2022-07-15 01:48:27 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 01:48:27 : Completed Dropping of Group(s), 0.554 mins elapsed.
+
+2022-07-15 01:48:27 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 01:48:28 : Adding E8.0_rep2 to PeakMatrix for Chr (1 of 20)!, 0.016 mins elapsed.
+2022-07-15 01:48:43 : Adding E8.0_rep2 to PeakMatrix for Chr (2 of 20)!, 0.263 mins elapsed.
+2022-07-15 01:49:00 : Adding E8.0_rep2 to PeakMatrix for Chr (3 of 20)!, 0.553 mins elapsed.
+2022-07-15 01:49:11 : Adding E8.0_rep2 to PeakMatrix for Chr (4 of 20)!, 0.739 mins elapsed.
+2022-07-15 01:49:26 : Adding E8.0_rep2 to PeakMatrix for Chr (5 of 20)!, 0.988 mins elapsed.
+2022-07-15 01:49:40 : Adding E8.0_rep2 to PeakMatrix for Chr (6 of 20)!, 1.221 mins elapsed.
+2022-07-15 01:49:51 : Adding E8.0_rep2 to PeakMatrix for Chr (7 of 20)!, 1.405 mins elapsed.
+2022-07-15 01:50:05 : Adding E8.0_rep2 to PeakMatrix for Chr (8 of 20)!, 1.643 mins elapsed.
+2022-07-15 01:50:17 : Adding E8.0_rep2 to PeakMatrix for Chr (9 of 20)!, 1.841 mins elapsed.
+2022-07-15 01:50:29 : Adding E8.0_rep2 to PeakMatrix for Chr (10 of 20)!, 2.039 mins elapsed.
+2022-07-15 01:50:40 : Adding E8.0_rep2 to PeakMatrix for Chr (11 of 20)!, 2.217 mins elapsed.
+2022-07-15 01:50:58 : Adding E8.0_rep2 to PeakMatrix for Chr (12 of 20)!, 2.51 mins elapsed.
+2022-07-15 01:51:07 : Adding E8.0_rep2 to PeakMatrix for Chr (13 of 20)!, 2.665 mins elapsed.
+2022-07-15 01:51:16 : Adding E8.0_rep2 to PeakMatrix for Chr (14 of 20)!, 2.823 mins elapsed.
+2022-07-15 01:51:25 : Adding E8.0_rep2 to PeakMatrix for Chr (15 of 20)!, 2.971 mins elapsed.
+2022-07-15 01:51:35 : Adding E8.0_rep2 to PeakMatrix for Chr (16 of 20)!, 3.138 mins elapsed.
+2022-07-15 01:51:43 : Adding E8.0_rep2 to PeakMatrix for Chr (17 of 20)!, 3.262 mins elapsed.
+2022-07-15 01:51:53 : Adding E8.0_rep2 to PeakMatrix for Chr (18 of 20)!, 3.439 mins elapsed.
+2022-07-15 01:52:01 : Adding E8.0_rep2 to PeakMatrix for Chr (19 of 20)!, 3.567 mins elapsed.
+2022-07-15 01:52:09 : Adding E8.0_rep2 to PeakMatrix for Chr (20 of 20)!, 3.698 mins elapsed.
+
+2022-07-15 01:52:15 : .createArrowGroup : Arrow Group already exists! Dropping Group from ArrowFile! This will take ~10-30 seconds!
+
+2022-07-15 01:52:15 : .dropGroupsFromArrow : Initializing Temp ArrowFile
+
+2022-07-15 01:52:15 : .dropGroupsFromArrow : Adding Metadata to Temp ArrowFile
+
+2022-07-15 01:52:16 : .dropGroupsFromArrow : Adding SubGroups to Temp ArrowFile
+2022-07-15 01:52:16 : Transferring Fragments, 0.017 mins elapsed.
+
+2022-07-15 01:52:37 : .dropGroupsFromArrow : Move Temp ArrowFile to ArrowFile
+2022-07-15 01:52:37 : Completed Dropping of Group(s), 0.37 mins elapsed.
+
+2022-07-15 01:52:37 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-15 01:52:38 : Adding E7.75_rep1 to PeakMatrix for Chr (1 of 20)!, 0.016 mins elapsed.
+2022-07-15 01:52:49 : Adding E7.75_rep1 to PeakMatrix for Chr (2 of 20)!, 0.198 mins elapsed.
+2022-07-15 01:53:00 : Adding E7.75_rep1 to PeakMatrix for Chr (3 of 20)!, 0.391 mins elapsed.
+2022-07-15 01:53:08 : Adding E7.75_rep1 to PeakMatrix for Chr (4 of 20)!, 0.521 mins elapsed.
+2022-07-15 01:53:18 : Adding E7.75_rep1 to PeakMatrix for Chr (5 of 20)!, 0.691 mins elapsed.
+2022-07-15 01:53:28 : Adding E7.75_rep1 to PeakMatrix for Chr (6 of 20)!, 0.852 mins elapsed.
+2022-07-15 01:53:36 : Adding E7.75_rep1 to PeakMatrix for Chr (7 of 20)!, 0.986 mins elapsed.
+2022-07-15 01:53:47 : Adding E7.75_rep1 to PeakMatrix for Chr (8 of 20)!, 1.16 mins elapsed.
+2022-07-15 01:53:55 : Adding E7.75_rep1 to PeakMatrix for Chr (9 of 20)!, 1.296 mins elapsed.
+2022-07-15 01:54:03 : Adding E7.75_rep1 to PeakMatrix for Chr (10 of 20)!, 1.439 mins elapsed.
+2022-07-15 01:54:11 : Adding E7.75_rep1 to PeakMatrix for Chr (11 of 20)!, 1.573 mins elapsed.
+2022-07-15 01:54:23 : Adding E7.75_rep1 to PeakMatrix for Chr (12 of 20)!, 1.765 mins elapsed.
+2022-07-15 01:54:30 : Adding E7.75_rep1 to PeakMatrix for Chr (13 of 20)!, 1.878 mins elapsed.
+2022-07-15 01:54:37 : Adding E7.75_rep1 to PeakMatrix for Chr (14 of 20)!, 1.998 mins elapsed.
+2022-07-15 01:54:43 : Adding E7.75_rep1 to PeakMatrix for Chr (15 of 20)!, 2.104 mins elapsed.
+2022-07-15 01:54:51 : Adding E7.75_rep1 to PeakMatrix for Chr (16 of 20)!, 2.227 mins elapsed.
+2022-07-15 01:54:56 : Adding E7.75_rep1 to PeakMatrix for Chr (17 of 20)!, 2.319 mins elapsed.
+2022-07-15 01:55:04 : Adding E7.75_rep1 to PeakMatrix for Chr (18 of 20)!, 2.453 mins elapsed.
+2022-07-15 01:55:10 : Adding E7.75_rep1 to PeakMatrix for Chr (19 of 20)!, 2.547 mins elapsed.
+2022-07-15 01:55:16 : Adding E7.75_rep1 to PeakMatrix for Chr (20 of 20)!, 2.656 mins elapsed.
+
+------- Completed
+
+End Time : 2022-07-15 01:55:22
+Elapsed Time Minutes = 61.1561742583911
+Elapsed Time Hours = 1.01926976170805
+
+-------
+
+
+

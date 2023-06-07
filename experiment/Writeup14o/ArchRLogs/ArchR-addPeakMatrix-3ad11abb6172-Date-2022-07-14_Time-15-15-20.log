@@ -1,0 +1,554 @@
+
+           ___      .______        ______  __    __  .______      
+          /   \     |   _  \      /      ||  |  |  | |   _  \     
+         /  ^  \    |  |_)  |    |  ,----'|  |__|  | |  |_)  |    
+        /  /_\  \   |      /     |  |     |   __   | |      /     
+       /  _____  \  |  |\  \\___ |  `----.|  |  |  | |  |\  \\___.
+      /__/     \__\ | _| `._____| \______||__|  |__| | _| `._____|
+    
+Logging With ArchR!
+
+Start Time : 2022-07-14 15:15:20
+
+------- ArchR Info
+
+ArchRThreads = 8
+
+------- System Info
+
+Computer OS = unix
+Total Cores = 16
+
+------- Session Info
+
+R version 4.1.2 (2021-11-01)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/libopenblas-r0.3.3.so
+
+Random number generation:
+ RNG:     L'Ecuyer-CMRG 
+ Normal:  Inversion 
+ Sample:  Rejection 
+ 
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+ [1] parallel  grid      stats4    stats     graphics  grDevices utils    
+ [8] datasets  methods   base     
+
+other attached packages:
+ [1] rhdf5_2.38.1                Rcpp_1.0.9                 
+ [3] Matrix_1.3-4                data.table_1.14.2          
+ [5] stringr_1.4.0               plyr_1.8.7                 
+ [7] magrittr_2.0.3              ggplot2_3.3.6              
+ [9] gtable_0.3.0                gtools_3.9.3               
+[11] gridExtra_2.3               ArchR_1.0.2                
+[13] SingleCellExperiment_1.16.0 SummarizedExperiment_1.24.0
+[15] Biobase_2.54.0              GenomicRanges_1.46.1       
+[17] GenomeInfoDb_1.30.1         IRanges_2.28.0             
+[19] S4Vectors_0.32.4            BiocGenerics_0.40.0        
+[21] MatrixGenerics_1.6.0        matrixStats_0.62.0         
+[23] SeuratObject_4.0.4          Seurat_4.1.0               
+
+loaded via a namespace (and not attached):
+  [1] igraph_1.3.1           lazyeval_0.2.2         splines_4.1.2         
+  [4] listenv_0.8.0          scattermore_0.8        usethis_2.1.5         
+  [7] digest_0.6.29          htmltools_0.5.2        fansi_1.0.3           
+ [10] memoise_2.0.1          tensor_1.5             cluster_2.1.2         
+ [13] ROCR_1.0-11            remotes_2.4.2          globals_0.14.0        
+ [16] spatstat.sparse_2.1-1  prettyunits_1.1.1      colorspace_2.0-3      
+ [19] ggrepel_0.9.1          dplyr_1.0.9            callr_3.7.0           
+ [22] crayon_1.5.1           RCurl_1.98-1.7         jsonlite_1.8.0        
+ [25] spatstat.data_2.2-0    survival_3.2-13        zoo_1.8-10            
+ [28] glue_1.6.2             polyclip_1.10-0        zlibbioc_1.40.0       
+ [31] XVector_0.34.0         leiden_0.3.9           DelayedArray_0.20.0   
+ [34] pkgbuild_1.3.1         Rhdf5lib_1.16.0        future.apply_1.8.1    
+ [37] abind_1.4-5            scales_1.2.0           DBI_1.1.3             
+ [40] spatstat.random_2.2-0  miniUI_0.1.1.1         viridisLite_0.4.0     
+ [43] xtable_1.8-4           reticulate_1.24        spatstat.core_2.4-2   
+ [46] htmlwidgets_1.5.4      httr_1.4.3             RColorBrewer_1.1-3    
+ [49] ellipsis_0.3.2         ica_1.0-2              pkgconfig_2.0.3       
+ [52] farver_2.1.1           uwot_0.1.11            deldir_1.0-6          
+ [55] utf8_1.2.2             tidyselect_1.1.2       labeling_0.4.2        
+ [58] rlang_1.0.4            reshape2_1.4.4         later_1.3.0           
+ [61] munsell_0.5.0          tools_4.1.2            cachem_1.0.6          
+ [64] cli_3.3.0              generics_0.1.3         devtools_2.4.3        
+ [67] ggridges_0.5.3         fastmap_1.1.0          goftest_1.2-3         
+ [70] processx_3.5.3         fs_1.5.2               fitdistrplus_1.1-8    
+ [73] purrr_0.3.4            RANN_2.6.1             pbapply_1.5-0         
+ [76] future_1.25.0          nlme_3.1-153           mime_0.12             
+ [79] brio_1.1.3             compiler_4.1.2         plotly_4.10.0         
+ [82] png_0.1-7              testthat_3.1.3         spatstat.utils_2.3-0  
+ [85] tibble_3.1.7           stringi_1.7.8          ps_1.7.0              
+ [88] desc_1.4.1             RSpectra_0.16-1        lattice_0.20-45       
+ [91] vctrs_0.4.1            rhdf5filters_1.6.0     pillar_1.7.0          
+ [94] lifecycle_1.0.1        spatstat.geom_2.4-0    lmtest_0.9-40         
+ [97] RcppAnnoy_0.0.19       cowplot_1.1.1          bitops_1.0-7          
+[100] irlba_2.3.5            httpuv_1.6.5           patchwork_1.1.1       
+[103] R6_2.5.1               promises_1.2.0.1       KernSmooth_2.23-20    
+[106] parallelly_1.31.1      sessioninfo_1.2.2      codetools_0.2-18      
+[109] MASS_7.3-54            assertthat_0.2.1       pkgload_1.2.4         
+[112] rprojroot_2.0.3        withr_2.5.0            sctransform_0.3.3     
+[115] GenomeInfoDbData_1.2.7 mgcv_1.8-38            rpart_4.1-15          
+[118] tidyr_1.2.0            Rtsne_0.16             shiny_1.7.1           
+
+
+------- Log Info
+
+
+2022-07-14 15:15:22 : peakSet, Class = GRanges
+GRanges object with 192251 ranges and 13 metadata columns:
+                               seqnames              ranges strand |     score
+                                  <Rle>           <IRanges>  <Rle> | <numeric>
+     Anterior_Primitive_Streak     chr1     3035602-3036202      * |  14.74770
+                      Epiblast     chr1     3062653-3063253      * |  22.27320
+                  ExE_endoderm     chr1     3072313-3072913      * |  12.62990
+                Mixed_mesoderm     chr1     3191496-3192096      * |  23.83290
+                  Neural_crest     chr1     3340575-3341175      * |   8.09325
+                           ...      ...                 ...    ... .       ...
+                   Spinal_cord     chrX 169902806-169903406      * |   9.54947
+  Forebrain_Midbrain_Hindbrain     chrX 169905921-169906521      * |  60.40740
+                   Endothelium     chrX 169915616-169916216      * |  11.75670
+                   Spinal_cord     chrX 169925487-169926087      * |  18.78800
+                   Endothelium     chrX 169937064-169937664      * |   7.97384
+                               replicateScoreQuantile groupScoreQuantile
+                                            <numeric>          <numeric>
+     Anterior_Primitive_Streak                  0.543              0.385
+                      Epiblast                  0.601              0.426
+                  ExE_endoderm                  0.446              0.224
+                Mixed_mesoderm                  0.689              0.548
+                  Neural_crest                  0.127              0.024
+                           ...                    ...                ...
+                   Spinal_cord                  0.251              0.083
+  Forebrain_Midbrain_Hindbrain                  0.857              0.790
+                   Endothelium                  0.304              0.088
+                   Spinal_cord                  0.557              0.358
+                   Endothelium                  0.230              0.051
+                               Reproducibility         GroupReplicate
+                                     <numeric>            <character>
+     Anterior_Primitive_Streak               2 Anterior_Primitive_S..
+                      Epiblast               2        Epiblast._.Rep2
+                  ExE_endoderm               2    ExE_endoderm._.Rep1
+                Mixed_mesoderm               2  Mixed_mesoderm._.Rep2
+                  Neural_crest               2    Neural_crest._.Rep1
+                           ...             ...                    ...
+                   Spinal_cord               2     Spinal_cord._.Rep2
+  Forebrain_Midbrain_Hindbrain               2 Forebrain_Midbrain_H..
+                   Endothelium               2     Endothelium._.Rep2
+                   Spinal_cord               2     Spinal_cord._.Rep1
+                   Endothelium               2     Endothelium._.Rep1
+                               distToGeneStart   nearestGene    peakType
+                                     <integer>   <character> <character>
+     Anterior_Primitive_Streak          635595          Xkr4      Distal
+                      Epiblast          608544          Xkr4      Distal
+                  ExE_endoderm          598884          Xkr4      Distal
+                Mixed_mesoderm          479701          Xkr4      Distal
+                  Neural_crest          330622          Xkr4    Intronic
+                           ...             ...           ...         ...
+                   Spinal_cord          123470 4933400A11Rik    Intronic
+  Forebrain_Midbrain_Hindbrain          126585 4933400A11Rik    Intronic
+                   Endothelium          136280 4933400A11Rik    Intronic
+                   Spinal_cord          146151 4933400A11Rik    Intronic
+                   Endothelium          157728 4933400A11Rik    Intronic
+                               distToTSS  nearestTSS        GC       idx
+                               <integer> <character> <numeric> <integer>
+     Anterior_Primitive_Streak    179729  uc007afg.1    0.4176         1
+                      Epiblast    152678  uc007afg.1    0.4676         2
+                  ExE_endoderm    143018  uc007afg.1    0.3694         3
+                Mixed_mesoderm     23835  uc007afg.1    0.4060         4
+                  Neural_crest    125242  uc007afg.1    0.3278         5
+                           ...       ...         ...       ...       ...
+                   Spinal_cord     23486  uc009rco.1    0.3627      3284
+  Forebrain_Midbrain_Hindbrain     20732  uc009rco.1    0.4642      3285
+                   Endothelium     11037  uc009rco.1    0.5008      3286
+                   Spinal_cord      1166  uc009rco.1    0.5058      3287
+                   Endothelium     10409  uc009rco.1    0.4210      3288
+                                       N
+                               <numeric>
+     Anterior_Primitive_Streak         0
+                      Epiblast         0
+                  ExE_endoderm         0
+                Mixed_mesoderm         0
+                  Neural_crest         0
+                           ...       ...
+                   Spinal_cord         0
+  Forebrain_Midbrain_Hindbrain         0
+                   Endothelium         0
+                   Spinal_cord         0
+                   Endothelium         0
+  -------
+  seqinfo: 20 sequences from an unspecified genome; no seqlengths
+
+2022-07-14 15:15:22 : Batch Execution w/ safelapply!, 0 mins elapsed.
+
+2022-07-14 15:15:23 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+
+2022-07-14 15:15:24 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+
+2022-07-14 15:15:25 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-14 15:15:25 : Adding E8.5_rep1 to PeakMatrix for Chr (1 of 20)!, 0.048 mins elapsed.
+
+2022-07-14 15:15:27 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-14 15:15:27 : Adding E7.5_rep2 to PeakMatrix for Chr (1 of 20)!, 0.063 mins elapsed.
+2022-07-14 15:15:29 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (1 of 20)!, 0.076 mins elapsed.
+
+2022-07-14 15:15:29 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-14 15:15:32 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (1 of 20)!, 0.093 mins elapsed.
+
+2022-07-14 15:15:32 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+
+2022-07-14 15:15:35 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-14 15:15:35 : Adding E8.5_rep2 to PeakMatrix for Chr (1 of 20)!, 0.112 mins elapsed.
+
+2022-07-14 15:15:38 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-14 15:15:39 : Adding E7.5_rep1 to PeakMatrix for Chr (1 of 20)!, 0.123 mins elapsed.
+2022-07-14 15:15:42 : Adding E8.75_rep2 to PeakMatrix for Chr (1 of 20)!, 0.125 mins elapsed.
+2022-07-14 15:15:45 : Adding E8.75_rep1 to PeakMatrix for Chr (1 of 20)!, 0.122 mins elapsed.
+2022-07-14 15:17:31 : Adding E8.75_rep1 to PeakMatrix for Chr (2 of 20)!, 1.897 mins elapsed.
+2022-07-14 15:17:34 : Adding E8.75_rep2 to PeakMatrix for Chr (2 of 20)!, 1.996 mins elapsed.
+2022-07-14 15:17:47 : Adding E7.5_rep1 to PeakMatrix for Chr (2 of 20)!, 2.264 mins elapsed.
+2022-07-14 15:17:52 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (2 of 20)!, 2.421 mins elapsed.
+2022-07-14 15:17:52 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (2 of 20)!, 2.46 mins elapsed.
+2022-07-14 15:17:53 : Adding E7.5_rep2 to PeakMatrix for Chr (2 of 20)!, 2.489 mins elapsed.
+2022-07-14 15:17:55 : Adding E8.5_rep2 to PeakMatrix for Chr (2 of 20)!, 2.437 mins elapsed.
+2022-07-14 15:18:02 : Adding E8.5_rep1 to PeakMatrix for Chr (2 of 20)!, 2.664 mins elapsed.
+2022-07-14 15:19:26 : Adding E8.75_rep1 to PeakMatrix for Chr (3 of 20)!, 3.799 mins elapsed.
+2022-07-14 15:19:38 : Adding E8.75_rep2 to PeakMatrix for Chr (3 of 20)!, 4.062 mins elapsed.
+2022-07-14 15:20:11 : Adding E7.5_rep1 to PeakMatrix for Chr (3 of 20)!, 4.67 mins elapsed.
+2022-07-14 15:20:29 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (3 of 20)!, 5.044 mins elapsed.
+2022-07-14 15:20:30 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (3 of 20)!, 5.084 mins elapsed.
+2022-07-14 15:20:33 : Adding E7.5_rep2 to PeakMatrix for Chr (3 of 20)!, 5.167 mins elapsed.
+2022-07-14 15:20:35 : Adding E8.75_rep1 to PeakMatrix for Chr (4 of 20)!, 4.951 mins elapsed.
+2022-07-14 15:20:35 : Adding E8.5_rep2 to PeakMatrix for Chr (3 of 20)!, 5.106 mins elapsed.
+2022-07-14 15:20:53 : Adding E8.75_rep2 to PeakMatrix for Chr (4 of 20)!, 5.315 mins elapsed.
+2022-07-14 15:20:59 : Adding E8.5_rep1 to PeakMatrix for Chr (3 of 20)!, 5.61 mins elapsed.
+2022-07-14 15:21:39 : Adding E7.5_rep1 to PeakMatrix for Chr (4 of 20)!, 6.125 mins elapsed.
+2022-07-14 15:22:06 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (4 of 20)!, 6.669 mins elapsed.
+2022-07-14 15:22:12 : Adding E8.75_rep1 to PeakMatrix for Chr (5 of 20)!, 6.568 mins elapsed.
+2022-07-14 15:22:12 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (4 of 20)!, 6.785 mins elapsed.
+2022-07-14 15:22:16 : Adding E8.5_rep2 to PeakMatrix for Chr (4 of 20)!, 6.79 mins elapsed.
+2022-07-14 15:22:18 : Adding E7.5_rep2 to PeakMatrix for Chr (4 of 20)!, 6.905 mins elapsed.
+2022-07-14 15:22:36 : Adding E8.75_rep2 to PeakMatrix for Chr (5 of 20)!, 7.033 mins elapsed.
+2022-07-14 15:22:51 : Adding E8.5_rep1 to PeakMatrix for Chr (4 of 20)!, 7.472 mins elapsed.
+2022-07-14 15:23:39 : Adding E7.5_rep1 to PeakMatrix for Chr (5 of 20)!, 8.139 mins elapsed.
+2022-07-14 15:23:43 : Adding E8.75_rep1 to PeakMatrix for Chr (6 of 20)!, 8.082 mins elapsed.
+2022-07-14 15:24:08 : Adding E8.75_rep2 to PeakMatrix for Chr (6 of 20)!, 8.556 mins elapsed.
+2022-07-14 15:24:16 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (5 of 20)!, 8.822 mins elapsed.
+2022-07-14 15:24:25 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (5 of 20)!, 9.006 mins elapsed.
+2022-07-14 15:24:30 : Adding E8.5_rep2 to PeakMatrix for Chr (5 of 20)!, 9.022 mins elapsed.
+2022-07-14 15:24:32 : Adding E7.5_rep2 to PeakMatrix for Chr (5 of 20)!, 9.142 mins elapsed.
+2022-07-14 15:24:47 : Adding E8.75_rep1 to PeakMatrix for Chr (7 of 20)!, 9.161 mins elapsed.
+2022-07-14 15:25:23 : Adding E8.5_rep1 to PeakMatrix for Chr (5 of 20)!, 10.01 mins elapsed.
+2022-07-14 15:25:25 : Adding E8.75_rep2 to PeakMatrix for Chr (7 of 20)!, 9.839 mins elapsed.
+2022-07-14 15:25:31 : Adding E7.5_rep1 to PeakMatrix for Chr (6 of 20)!, 10.005 mins elapsed.
+2022-07-14 15:26:17 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (6 of 20)!, 10.838 mins elapsed.
+2022-07-14 15:26:18 : Adding E8.75_rep1 to PeakMatrix for Chr (8 of 20)!, 10.678 mins elapsed.
+2022-07-14 15:26:32 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (6 of 20)!, 11.128 mins elapsed.
+2022-07-14 15:26:38 : Adding E8.5_rep2 to PeakMatrix for Chr (6 of 20)!, 11.151 mins elapsed.
+2022-07-14 15:26:43 : Adding E7.5_rep2 to PeakMatrix for Chr (6 of 20)!, 11.331 mins elapsed.
+2022-07-14 15:26:54 : Adding E7.5_rep1 to PeakMatrix for Chr (7 of 20)!, 11.374 mins elapsed.
+2022-07-14 15:27:00 : Adding E8.75_rep2 to PeakMatrix for Chr (8 of 20)!, 11.42 mins elapsed.
+2022-07-14 15:27:26 : Adding E8.75_rep1 to PeakMatrix for Chr (9 of 20)!, 11.815 mins elapsed.
+2022-07-14 15:27:49 : Adding E8.5_rep1 to PeakMatrix for Chr (6 of 20)!, 12.444 mins elapsed.
+2022-07-14 15:27:54 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (7 of 20)!, 12.456 mins elapsed.
+2022-07-14 15:28:14 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (7 of 20)!, 12.827 mins elapsed.
+2022-07-14 15:28:18 : Adding E8.75_rep2 to PeakMatrix for Chr (9 of 20)!, 12.726 mins elapsed.
+2022-07-14 15:28:19 : Adding E8.5_rep2 to PeakMatrix for Chr (7 of 20)!, 12.845 mins elapsed.
+2022-07-14 15:28:25 : Adding E7.5_rep2 to PeakMatrix for Chr (7 of 20)!, 13.035 mins elapsed.
+2022-07-14 15:28:39 : Adding E7.5_rep1 to PeakMatrix for Chr (8 of 20)!, 13.136 mins elapsed.
+2022-07-14 15:28:43 : Adding E8.75_rep1 to PeakMatrix for Chr (10 of 20)!, 13.098 mins elapsed.
+2022-07-14 15:29:35 : Adding E8.75_rep2 to PeakMatrix for Chr (10 of 20)!, 14.007 mins elapsed.
+2022-07-14 15:29:45 : Adding E8.5_rep1 to PeakMatrix for Chr (7 of 20)!, 14.37 mins elapsed.
+2022-07-14 15:29:45 : Adding E8.75_rep1 to PeakMatrix for Chr (11 of 20)!, 14.125 mins elapsed.
+2022-07-14 15:29:54 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (8 of 20)!, 14.459 mins elapsed.
+2022-07-14 15:29:59 : Adding E7.5_rep1 to PeakMatrix for Chr (9 of 20)!, 14.468 mins elapsed.
+2022-07-14 15:30:18 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (8 of 20)!, 14.893 mins elapsed.
+2022-07-14 15:30:28 : Adding E8.5_rep2 to PeakMatrix for Chr (8 of 20)!, 14.987 mins elapsed.
+2022-07-14 15:30:29 : Adding E7.5_rep2 to PeakMatrix for Chr (8 of 20)!, 15.102 mins elapsed.
+2022-07-14 15:30:42 : Adding E8.75_rep2 to PeakMatrix for Chr (11 of 20)!, 15.127 mins elapsed.
+2022-07-14 15:31:29 : Adding E7.5_rep1 to PeakMatrix for Chr (10 of 20)!, 15.967 mins elapsed.
+2022-07-14 15:31:30 : Adding E8.75_rep1 to PeakMatrix for Chr (12 of 20)!, 15.88 mins elapsed.
+2022-07-14 15:31:36 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (9 of 20)!, 16.167 mins elapsed.
+2022-07-14 15:32:00 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (9 of 20)!, 16.591 mins elapsed.
+2022-07-14 15:32:11 : Adding E8.5_rep1 to PeakMatrix for Chr (8 of 20)!, 16.816 mins elapsed.
+2022-07-14 15:32:12 : Adding E8.5_rep2 to PeakMatrix for Chr (9 of 20)!, 16.721 mins elapsed.
+2022-07-14 15:32:13 : Adding E7.5_rep2 to PeakMatrix for Chr (9 of 20)!, 16.833 mins elapsed.
+2022-07-14 15:32:26 : Adding E8.75_rep1 to PeakMatrix for Chr (13 of 20)!, 16.799 mins elapsed.
+2022-07-14 15:32:42 : Adding E8.75_rep2 to PeakMatrix for Chr (12 of 20)!, 17.121 mins elapsed.
+2022-07-14 15:32:44 : Adding E7.5_rep1 to PeakMatrix for Chr (11 of 20)!, 17.215 mins elapsed.
+2022-07-14 15:33:12 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (10 of 20)!, 17.759 mins elapsed.
+2022-07-14 15:33:22 : Adding E8.75_rep1 to PeakMatrix for Chr (14 of 20)!, 17.734 mins elapsed.
+2022-07-14 15:33:41 : Adding E8.75_rep2 to PeakMatrix for Chr (13 of 20)!, 18.119 mins elapsed.
+2022-07-14 15:33:45 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (10 of 20)!, 18.343 mins elapsed.
+2022-07-14 15:33:53 : Adding E8.5_rep2 to PeakMatrix for Chr (10 of 20)!, 18.4 mins elapsed.
+2022-07-14 15:33:54 : Adding E7.5_rep2 to PeakMatrix for Chr (10 of 20)!, 18.512 mins elapsed.
+2022-07-14 15:34:11 : Adding E8.75_rep1 to PeakMatrix for Chr (15 of 20)!, 18.553 mins elapsed.
+2022-07-14 15:34:14 : Adding E8.5_rep1 to PeakMatrix for Chr (9 of 20)!, 18.851 mins elapsed.
+2022-07-14 15:34:41 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (11 of 20)!, 19.238 mins elapsed.
+2022-07-14 15:34:42 : Adding E8.75_rep2 to PeakMatrix for Chr (14 of 20)!, 19.133 mins elapsed.
+2022-07-14 15:34:56 : Adding E7.5_rep1 to PeakMatrix for Chr (12 of 20)!, 19.407 mins elapsed.
+2022-07-14 15:35:09 : Adding E8.75_rep1 to PeakMatrix for Chr (16 of 20)!, 19.53 mins elapsed.
+2022-07-14 15:35:12 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (11 of 20)!, 19.782 mins elapsed.
+2022-07-14 15:35:22 : Adding E7.5_rep2 to PeakMatrix for Chr (11 of 20)!, 19.987 mins elapsed.
+2022-07-14 15:35:25 : Adding E8.5_rep2 to PeakMatrix for Chr (11 of 20)!, 19.935 mins elapsed.
+2022-07-14 15:35:35 : Adding E8.75_rep2 to PeakMatrix for Chr (15 of 20)!, 20.013 mins elapsed.
+2022-07-14 15:35:55 : Adding E8.75_rep1 to PeakMatrix for Chr (17 of 20)!, 20.297 mins elapsed.
+2022-07-14 15:36:08 : Adding E7.5_rep1 to PeakMatrix for Chr (13 of 20)!, 20.615 mins elapsed.
+2022-07-14 15:36:15 : Adding E8.5_rep1 to PeakMatrix for Chr (10 of 20)!, 20.879 mins elapsed.
+2022-07-14 15:36:39 : Adding E8.75_rep2 to PeakMatrix for Chr (16 of 20)!, 21.075 mins elapsed.
+2022-07-14 15:36:59 : Adding E8.75_rep1 to PeakMatrix for Chr (18 of 20)!, 21.362 mins elapsed.
+2022-07-14 15:37:00 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (12 of 20)!, 21.554 mins elapsed.
+2022-07-14 15:37:22 : Adding E7.5_rep1 to PeakMatrix for Chr (14 of 20)!, 21.848 mins elapsed.
+2022-07-14 15:37:26 : Adding E8.75_rep2 to PeakMatrix for Chr (17 of 20)!, 21.862 mins elapsed.
+2022-07-14 15:37:36 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (12 of 20)!, 22.197 mins elapsed.
+2022-07-14 15:37:43 : Adding E8.75_rep1 to PeakMatrix for Chr (19 of 20)!, 22.086 mins elapsed.
+2022-07-14 15:37:47 : Adding E8.5_rep2 to PeakMatrix for Chr (12 of 20)!, 22.304 mins elapsed.
+2022-07-14 15:37:52 : Adding E7.5_rep2 to PeakMatrix for Chr (12 of 20)!, 22.48 mins elapsed.
+2022-07-14 15:37:59 : Adding E8.5_rep1 to PeakMatrix for Chr (11 of 20)!, 22.61 mins elapsed.
+2022-07-14 15:38:21 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (13 of 20)!, 22.908 mins elapsed.
+2022-07-14 15:38:27 : Adding E7.5_rep1 to PeakMatrix for Chr (15 of 20)!, 22.936 mins elapsed.
+2022-07-14 15:38:29 : Adding E8.75_rep1 to PeakMatrix for Chr (20 of 20)!, 22.85 mins elapsed.
+2022-07-14 15:38:36 : Adding E8.75_rep2 to PeakMatrix for Chr (18 of 20)!, 23.023 mins elapsed.
+2022-07-14 15:38:59 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (13 of 20)!, 23.567 mins elapsed.
+
+2022-07-14 15:39:07 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-14 15:39:11 : Adding E8.5_rep2 to PeakMatrix for Chr (13 of 20)!, 23.706 mins elapsed.
+2022-07-14 15:39:13 : Adding E8.0_rep1 to PeakMatrix for Chr (1 of 20)!, 0.125 mins elapsed.
+2022-07-14 15:39:16 : Adding E7.5_rep2 to PeakMatrix for Chr (13 of 20)!, 23.873 mins elapsed.
+2022-07-14 15:39:20 : Adding E8.75_rep2 to PeakMatrix for Chr (19 of 20)!, 23.77 mins elapsed.
+2022-07-14 15:39:38 : Adding E7.5_rep1 to PeakMatrix for Chr (16 of 20)!, 24.107 mins elapsed.
+2022-07-14 15:39:43 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (14 of 20)!, 24.28 mins elapsed.
+2022-07-14 15:40:11 : Adding E8.75_rep2 to PeakMatrix for Chr (20 of 20)!, 24.61 mins elapsed.
+2022-07-14 15:40:21 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (14 of 20)!, 24.948 mins elapsed.
+2022-07-14 15:40:30 : Adding E7.5_rep1 to PeakMatrix for Chr (17 of 20)!, 24.979 mins elapsed.
+2022-07-14 15:40:35 : Adding E8.5_rep2 to PeakMatrix for Chr (14 of 20)!, 25.103 mins elapsed.
+2022-07-14 15:40:41 : Adding E7.5_rep2 to PeakMatrix for Chr (14 of 20)!, 25.288 mins elapsed.
+2022-07-14 15:40:46 : Adding E8.5_rep1 to PeakMatrix for Chr (12 of 20)!, 25.399 mins elapsed.
+
+2022-07-14 15:40:49 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-14 15:40:53 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (15 of 20)!, 25.448 mins elapsed.
+2022-07-14 15:40:56 : Adding E8.0_rep2 to PeakMatrix for Chr (1 of 20)!, 0.127 mins elapsed.
+2022-07-14 15:41:11 : Adding E8.0_rep1 to PeakMatrix for Chr (2 of 20)!, 2.082 mins elapsed.
+2022-07-14 15:41:38 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (15 of 20)!, 26.221 mins elapsed.
+2022-07-14 15:41:47 : Adding E8.5_rep2 to PeakMatrix for Chr (15 of 20)!, 26.305 mins elapsed.
+2022-07-14 15:41:51 : Adding E7.5_rep1 to PeakMatrix for Chr (18 of 20)!, 26.329 mins elapsed.
+2022-07-14 15:41:55 : Adding E7.5_rep2 to PeakMatrix for Chr (15 of 20)!, 26.532 mins elapsed.
+2022-07-14 15:42:09 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (16 of 20)!, 26.704 mins elapsed.
+2022-07-14 15:42:18 : Adding E8.5_rep1 to PeakMatrix for Chr (13 of 20)!, 26.921 mins elapsed.
+2022-07-14 15:42:38 : Adding E8.0_rep2 to PeakMatrix for Chr (2 of 20)!, 1.828 mins elapsed.
+2022-07-14 15:42:47 : Adding E7.5_rep1 to PeakMatrix for Chr (19 of 20)!, 27.263 mins elapsed.
+2022-07-14 15:42:52 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (16 of 20)!, 27.452 mins elapsed.
+2022-07-14 15:43:03 : Adding E8.5_rep2 to PeakMatrix for Chr (16 of 20)!, 27.567 mins elapsed.
+2022-07-14 15:43:08 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (17 of 20)!, 27.692 mins elapsed.
+2022-07-14 15:43:14 : Adding E7.5_rep2 to PeakMatrix for Chr (16 of 20)!, 27.842 mins elapsed.
+2022-07-14 15:43:16 : Adding E8.0_rep1 to PeakMatrix for Chr (3 of 20)!, 4.162 mins elapsed.
+2022-07-14 15:43:43 : Adding E7.5_rep1 to PeakMatrix for Chr (20 of 20)!, 28.191 mins elapsed.
+2022-07-14 15:43:49 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (17 of 20)!, 28.4 mins elapsed.
+2022-07-14 15:43:51 : Adding E8.5_rep1 to PeakMatrix for Chr (14 of 20)!, 28.474 mins elapsed.
+2022-07-14 15:44:02 : Adding E8.5_rep2 to PeakMatrix for Chr (17 of 20)!, 28.557 mins elapsed.
+2022-07-14 15:44:12 : Adding E7.5_rep2 to PeakMatrix for Chr (17 of 20)!, 28.816 mins elapsed.
+
+2022-07-14 15:44:26 : featureDF, Class = data.frame
+featureDF: nRows = 192251, nCols = 4
+  seqnames idx   start     end
+1     chr1   1 3035602 3036202
+2     chr1   2 3062653 3063253
+3     chr1   3 3072313 3072913
+4     chr1   4 3191496 3192096
+5     chr1   5 3340575 3341175
+6     chr1   6 3443943 3444543
+
+
+2022-07-14 15:44:27 : Adding E8.0_rep2 to PeakMatrix for Chr (3 of 20)!, 3.638 mins elapsed.
+2022-07-14 15:44:30 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (18 of 20)!, 29.065 mins elapsed.
+2022-07-14 15:44:32 : Adding E7.75_rep1 to PeakMatrix for Chr (1 of 20)!, 0.124 mins elapsed.
+2022-07-14 15:44:33 : Adding E8.0_rep1 to PeakMatrix for Chr (4 of 20)!, 5.457 mins elapsed.
+2022-07-14 15:45:10 : Adding E8.5_rep1 to PeakMatrix for Chr (15 of 20)!, 29.791 mins elapsed.
+2022-07-14 15:45:12 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (18 of 20)!, 29.785 mins elapsed.
+2022-07-14 15:45:25 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (19 of 20)!, 29.973 mins elapsed.
+2022-07-14 15:45:28 : Adding E8.5_rep2 to PeakMatrix for Chr (18 of 20)!, 29.985 mins elapsed.
+2022-07-14 15:45:31 : Adding E8.0_rep2 to PeakMatrix for Chr (4 of 20)!, 4.707 mins elapsed.
+2022-07-14 15:45:41 : Adding E7.5_rep2 to PeakMatrix for Chr (18 of 20)!, 30.297 mins elapsed.
+2022-07-14 15:45:49 : Adding E7.75_rep1 to PeakMatrix for Chr (2 of 20)!, 1.393 mins elapsed.
+2022-07-14 15:46:11 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (19 of 20)!, 30.767 mins elapsed.
+2022-07-14 15:46:18 : Adding E8.0_rep1 to PeakMatrix for Chr (5 of 20)!, 7.205 mins elapsed.
+2022-07-14 15:46:22 : Adding E8.5_rep2 to PeakMatrix for Chr (19 of 20)!, 30.893 mins elapsed.
+2022-07-14 15:46:25 : Adding E8.5_CRISPR_T_KO to PeakMatrix for Chr (20 of 20)!, 30.981 mins elapsed.
+2022-07-14 15:46:36 : Adding E8.5_rep1 to PeakMatrix for Chr (16 of 20)!, 31.221 mins elapsed.
+2022-07-14 15:46:42 : Adding E7.5_rep2 to PeakMatrix for Chr (19 of 20)!, 31.31 mins elapsed.
+2022-07-14 15:46:56 : Adding E8.0_rep2 to PeakMatrix for Chr (5 of 20)!, 6.126 mins elapsed.
+2022-07-14 15:47:04 : Adding E7.75_rep1 to PeakMatrix for Chr (3 of 20)!, 2.644 mins elapsed.
+2022-07-14 15:47:09 : Adding E8.5_CRISPR_T_WT to PeakMatrix for Chr (20 of 20)!, 31.734 mins elapsed.
+2022-07-14 15:47:23 : Adding E8.5_rep2 to PeakMatrix for Chr (20 of 20)!, 31.908 mins elapsed.
+2022-07-14 15:47:34 : Adding E8.5_rep1 to PeakMatrix for Chr (17 of 20)!, 32.184 mins elapsed.
+2022-07-14 15:47:39 : Adding E7.5_rep2 to PeakMatrix for Chr (20 of 20)!, 32.258 mins elapsed.
+2022-07-14 15:47:46 : Adding E7.75_rep1 to PeakMatrix for Chr (4 of 20)!, 3.355 mins elapsed.
+2022-07-14 15:47:50 : Adding E8.0_rep1 to PeakMatrix for Chr (6 of 20)!, 8.731 mins elapsed.
+2022-07-14 15:48:03 : Adding E8.0_rep2 to PeakMatrix for Chr (6 of 20)!, 7.244 mins elapsed.
+2022-07-14 15:48:24 : Adding E7.75_rep1 to PeakMatrix for Chr (5 of 20)!, 3.99 mins elapsed.
+2022-07-14 15:48:32 : Adding E8.5_rep1 to PeakMatrix for Chr (18 of 20)!, 33.158 mins elapsed.
+2022-07-14 15:48:32 : Adding E8.0_rep1 to PeakMatrix for Chr (7 of 20)!, 9.442 mins elapsed.
+2022-07-14 15:48:35 : Adding E8.0_rep2 to PeakMatrix for Chr (7 of 20)!, 7.786 mins elapsed.
+2022-07-14 15:48:53 : Adding E7.75_rep1 to PeakMatrix for Chr (6 of 20)!, 4.472 mins elapsed.
+2022-07-14 15:49:02 : Adding E8.5_rep1 to PeakMatrix for Chr (19 of 20)!, 33.66 mins elapsed.
+2022-07-14 15:49:15 : Adding E8.0_rep2 to PeakMatrix for Chr (8 of 20)!, 8.449 mins elapsed.
+2022-07-14 15:49:18 : Adding E8.0_rep1 to PeakMatrix for Chr (8 of 20)!, 10.195 mins elapsed.
+2022-07-14 15:49:18 : Adding E7.75_rep1 to PeakMatrix for Chr (7 of 20)!, 4.884 mins elapsed.
+2022-07-14 15:49:35 : Adding E8.5_rep1 to PeakMatrix for Chr (20 of 20)!, 34.217 mins elapsed.
+2022-07-14 15:49:47 : Adding E7.75_rep1 to PeakMatrix for Chr (8 of 20)!, 5.361 mins elapsed.
+2022-07-14 15:49:49 : Adding E8.0_rep2 to PeakMatrix for Chr (9 of 20)!, 9.019 mins elapsed.
+2022-07-14 15:49:55 : Adding E8.0_rep1 to PeakMatrix for Chr (9 of 20)!, 10.823 mins elapsed.
+2022-07-14 15:50:07 : Adding E7.75_rep1 to PeakMatrix for Chr (9 of 20)!, 5.706 mins elapsed.
+2022-07-14 15:50:17 : Adding E8.0_rep2 to PeakMatrix for Chr (10 of 20)!, 9.476 mins elapsed.
+2022-07-14 15:50:24 : Adding E8.0_rep1 to PeakMatrix for Chr (10 of 20)!, 11.311 mins elapsed.
+2022-07-14 15:50:26 : Adding E7.75_rep1 to PeakMatrix for Chr (10 of 20)!, 6.013 mins elapsed.
+2022-07-14 15:50:37 : Adding E8.0_rep2 to PeakMatrix for Chr (11 of 20)!, 9.82 mins elapsed.
+2022-07-14 15:50:42 : Adding E7.75_rep1 to PeakMatrix for Chr (11 of 20)!, 6.29 mins elapsed.
+2022-07-14 15:50:50 : Adding E8.0_rep1 to PeakMatrix for Chr (11 of 20)!, 11.737 mins elapsed.
+2022-07-14 15:51:05 : Adding E7.75_rep1 to PeakMatrix for Chr (12 of 20)!, 6.672 mins elapsed.
+2022-07-14 15:51:15 : Adding E8.0_rep2 to PeakMatrix for Chr (12 of 20)!, 10.443 mins elapsed.
+2022-07-14 15:51:19 : Adding E7.75_rep1 to PeakMatrix for Chr (13 of 20)!, 6.902 mins elapsed.
+2022-07-14 15:51:30 : Adding E8.0_rep1 to PeakMatrix for Chr (12 of 20)!, 12.403 mins elapsed.
+2022-07-14 15:51:33 : Adding E8.0_rep2 to PeakMatrix for Chr (13 of 20)!, 10.745 mins elapsed.
+2022-07-14 15:51:33 : Adding E7.75_rep1 to PeakMatrix for Chr (14 of 20)!, 7.14 mins elapsed.
+2022-07-14 15:51:46 : Adding E7.75_rep1 to PeakMatrix for Chr (15 of 20)!, 7.36 mins elapsed.
+2022-07-14 15:51:51 : Adding E8.0_rep1 to PeakMatrix for Chr (13 of 20)!, 12.757 mins elapsed.
+2022-07-14 15:51:52 : Adding E8.0_rep2 to PeakMatrix for Chr (14 of 20)!, 11.07 mins elapsed.
+2022-07-14 15:52:01 : Adding E7.75_rep1 to PeakMatrix for Chr (16 of 20)!, 7.599 mins elapsed.
+2022-07-14 15:52:10 : Adding E8.0_rep2 to PeakMatrix for Chr (15 of 20)!, 11.359 mins elapsed.
+2022-07-14 15:52:13 : Adding E7.75_rep1 to PeakMatrix for Chr (17 of 20)!, 7.795 mins elapsed.
+2022-07-14 15:52:13 : Adding E8.0_rep1 to PeakMatrix for Chr (14 of 20)!, 13.125 mins elapsed.
+2022-07-14 15:52:28 : Adding E7.75_rep1 to PeakMatrix for Chr (18 of 20)!, 8.058 mins elapsed.
+2022-07-14 15:52:29 : Adding E8.0_rep2 to PeakMatrix for Chr (16 of 20)!, 11.672 mins elapsed.
+2022-07-14 15:52:32 : Adding E8.0_rep1 to PeakMatrix for Chr (15 of 20)!, 13.443 mins elapsed.
+2022-07-14 15:52:40 : Adding E7.75_rep1 to PeakMatrix for Chr (19 of 20)!, 8.252 mins elapsed.
+2022-07-14 15:52:44 : Adding E8.0_rep2 to PeakMatrix for Chr (17 of 20)!, 11.929 mins elapsed.
+2022-07-14 15:52:52 : Adding E7.75_rep1 to PeakMatrix for Chr (20 of 20)!, 8.448 mins elapsed.
+2022-07-14 15:52:54 : Adding E8.0_rep1 to PeakMatrix for Chr (16 of 20)!, 13.808 mins elapsed.
+2022-07-14 15:53:04 : Adding E8.0_rep2 to PeakMatrix for Chr (18 of 20)!, 12.267 mins elapsed.
+2022-07-14 15:53:09 : Adding E8.0_rep1 to PeakMatrix for Chr (17 of 20)!, 14.045 mins elapsed.
+2022-07-14 15:53:14 : Adding E8.0_rep2 to PeakMatrix for Chr (19 of 20)!, 12.434 mins elapsed.
+2022-07-14 15:53:24 : Adding E8.0_rep1 to PeakMatrix for Chr (18 of 20)!, 14.309 mins elapsed.
+2022-07-14 15:53:25 : Adding E8.0_rep2 to PeakMatrix for Chr (20 of 20)!, 12.609 mins elapsed.
+2022-07-14 15:53:34 : Adding E8.0_rep1 to PeakMatrix for Chr (19 of 20)!, 14.475 mins elapsed.
+2022-07-14 15:53:40 : Adding E8.0_rep1 to PeakMatrix for Chr (20 of 20)!, 14.576 mins elapsed.
+
+------- Completed
+
+End Time : 2022-07-14 15:53:45
+Elapsed Time Minutes = 38.4311287800471
+Elapsed Time Hours = 0.640519004927741
+
+-------
+
+
+

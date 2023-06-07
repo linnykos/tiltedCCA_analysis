@@ -1,0 +1,1181 @@
+
+           ___      .______        ______  __    __  .______      
+          /   \     |   _  \      /      ||  |  |  | |   _  \     
+         /  ^  \    |  |_)  |    |  ,----'|  |__|  | |  |_)  |    
+        /  /_\  \   |      /     |  |     |   __   | |      /     
+       /  _____  \  |  |\  \\___ |  `----.|  |  |  | |  |\  \\___.
+      /__/     \__\ | _| `._____| \______||__|  |__| | _| `._____|
+    
+Logging With ArchR!
+
+Start Time : 2022-07-15 11:43:59
+
+------- ArchR Info
+
+ArchRThreads = 1
+
+------- System Info
+
+Computer OS = unix
+
+------- Session Info
+
+R version 4.1.2 (2021-11-01)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib64/libopenblas-r0.3.3.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] stats4    grid      stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] rhdf5_2.38.1                SummarizedExperiment_1.24.0
+ [3] Biobase_2.54.0              MatrixGenerics_1.6.0       
+ [5] Rcpp_1.0.9                  Matrix_1.3-4               
+ [7] GenomicRanges_1.46.1        GenomeInfoDb_1.30.1        
+ [9] IRanges_2.28.0              S4Vectors_0.32.4           
+[11] BiocGenerics_0.40.0         matrixStats_0.62.0         
+[13] data.table_1.14.2           stringr_1.4.0              
+[15] plyr_1.8.7                  magrittr_2.0.3             
+[17] ggplot2_3.3.6               gtable_0.3.0               
+[19] gtools_3.9.3                gridExtra_2.3              
+[21] ArchR_1.0.2                 Signac_1.6.0               
+[23] SeuratObject_4.0.4          Seurat_4.1.0               
+
+loaded via a namespace (and not attached):
+  [1] fastmatch_1.1-3        igraph_1.3.1           lazyeval_0.2.2        
+  [4] splines_4.1.2          BiocParallel_1.28.3    listenv_0.8.0         
+  [7] scattermore_0.8        SnowballC_0.7.0        digest_0.6.29         
+ [10] htmltools_0.5.2        fansi_1.0.3            tensor_1.5            
+ [13] cluster_2.1.2          ROCR_1.0-11            globals_0.14.0        
+ [16] Biostrings_2.62.0      docopt_0.7.1           spatstat.sparse_2.1-1 
+ [19] colorspace_2.0-3       ggrepel_0.9.1          dplyr_1.0.9           
+ [22] sparsesvd_0.2          crayon_1.5.1           RCurl_1.98-1.7        
+ [25] jsonlite_1.8.0         spatstat.data_2.2-0    survival_3.2-13       
+ [28] zoo_1.8-10             glue_1.6.2             polyclip_1.10-0       
+ [31] zlibbioc_1.40.0        XVector_0.34.0         leiden_0.3.9          
+ [34] DelayedArray_0.20.0    Rhdf5lib_1.16.0        future.apply_1.8.1    
+ [37] abind_1.4-5            scales_1.2.0           DBI_1.1.3             
+ [40] spatstat.random_2.2-0  miniUI_0.1.1.1         viridisLite_0.4.0     
+ [43] xtable_1.8-4           reticulate_1.24        spatstat.core_2.4-2   
+ [46] htmlwidgets_1.5.4      httr_1.4.3             RColorBrewer_1.1-3    
+ [49] ellipsis_0.3.2         ica_1.0-2              pkgconfig_2.0.3       
+ [52] farver_2.1.1           ggseqlogo_0.1          uwot_0.1.11           
+ [55] deldir_1.0-6           utf8_1.2.2             tidyselect_1.1.2      
+ [58] rlang_1.0.4            reshape2_1.4.4         later_1.3.0           
+ [61] munsell_0.5.0          tools_4.1.2            cli_3.3.0             
+ [64] generics_0.1.3         ggridges_0.5.3         fastmap_1.1.0         
+ [67] goftest_1.2-3          fitdistrplus_1.1-8     purrr_0.3.4           
+ [70] RANN_2.6.1             pbapply_1.5-0          future_1.25.0         
+ [73] nlme_3.1-153           mime_0.12              slam_0.1-50           
+ [76] RcppRoll_0.3.0         compiler_4.1.2         plotly_4.10.0         
+ [79] png_0.1-7              spatstat.utils_2.3-0   tibble_3.1.7          
+ [82] tweenr_1.0.2           stringi_1.7.8          lattice_0.20-45       
+ [85] vctrs_0.4.1            rhdf5filters_1.6.0     pillar_1.7.0          
+ [88] lifecycle_1.0.1        spatstat.geom_2.4-0    lmtest_0.9-40         
+ [91] RcppAnnoy_0.0.19       cowplot_1.1.1          bitops_1.0-7          
+ [94] irlba_2.3.5            httpuv_1.6.5           patchwork_1.1.1       
+ [97] R6_2.5.1               promises_1.2.0.1       KernSmooth_2.23-20    
+[100] lsa_0.73.2             parallelly_1.31.1      codetools_0.2-18      
+[103] MASS_7.3-54            assertthat_0.2.1       withr_2.5.0           
+[106] qlcMatrix_0.9.7        sctransform_0.3.3      Rsamtools_2.10.0      
+[109] GenomeInfoDbData_1.2.7 mgcv_1.8-38            parallel_4.1.2        
+[112] rpart_4.1-15           tidyr_1.2.0            Rtsne_0.16            
+[115] ggforce_0.3.3          shiny_1.7.1           
+
+
+------- Log Info
+
+
+2022-07-15 11:43:59 : getMatrixFromProject Input-Parameters, Class = list
+
+getMatrixFromProject Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromProject Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromProject Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromProject Input-Parameters$verbose: length = 1
+[1] TRUE
+
+
+getMatrixFromProject Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromProject Input-Parameters$threads: length = 1
+[1] 1
+
+
+getMatrixFromProject Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+2022-07-15 11:44:00 : Reading PeakMatrix : E8.5_rep1(1 of 11), 0.03 mins elapsed.
+
+2022-07-15 11:44:00 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E8.5_rep1 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E8.5_rep1.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 11319
+[1] "E8.5_rep1#TGTAACTCATGAATCT-1" "E8.5_rep1#CTTATGTTCCGGCTAA-1"
+[3] "E8.5_rep1#ACCTTCATCCCTGTTA-1" "E8.5_rep1#TACCTGCTCATTAGTG-1"
+[5] "E8.5_rep1#GAGCATGCATTGCGGT-1" "E8.5_rep1#TTACGTTTCTGGCATG-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:44:01 : featureDF E8.5_rep1, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:44:01 : Getting PeakMatrix from ArrowFile : E8.5_rep1.arrow, 0.006 mins elapsed.
+
+2022-07-15 11:45:07 : mat E8.5_rep1, Class = dgCMatrix
+mat E8.5_rep1: nRows = 192251, nCols = 11319
+mat E8.5_rep1: NonZeroEntries = 129622082, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E8.5_rep1#TGTAACTCATGAATCT-1 E8.5_rep1#CTTATGTTCCGGCTAA-1
+[1,]                            .                            .
+[2,]                            .                            .
+[3,]                            .                            .
+[4,]                            .                            .
+[5,]                            2                            3
+     E8.5_rep1#ACCTTCATCCCTGTTA-1 E8.5_rep1#TACCTGCTCATTAGTG-1
+[1,]                            .                            .
+[2,]                            .                            .
+[3,]                            .                            .
+[4,]                            1                            2
+[5,]                            .                            .
+     E8.5_rep1#GAGCATGCATTGCGGT-1
+[1,]                            .
+[2,]                            .
+[3,]                            .
+[4,]                            2
+[5,]                            .
+
+
+2022-07-15 11:45:09 : Organizing SE PeakMatrix from ArrowFile : E8.5_rep1.arrow, 1.146 mins elapsed.
+
+2022-07-15 11:45:10 : se E8.5_rep1, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 11319 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(11319): E8.5_rep1#TGTAACTCATGAATCT-1
+  E8.5_rep1#CTTATGTTCCGGCTAA-1 ... E8.5_rep1#GAGGACTAGGCGGATG-1
+  E8.5_rep1#TCAGCGATCCTTAGTT-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:45:10 : Completed PeakMatrix : E8.5_rep1(1 of 11), 1.185 mins elapsed.
+2022-07-15 11:45:10 : Reading PeakMatrix : E7.5_rep2(2 of 11), 1.185 mins elapsed.
+
+2022-07-15 11:45:10 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E7.5_rep2 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E7.5_rep2.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 13321
+[1] "E7.5_rep2#GCCCATAAGGACCTTG-1" "E7.5_rep2#TGCTGGATCAAGCTAC-1"
+[3] "E7.5_rep2#TCAGTGAGTTACATCC-1" "E7.5_rep2#GCCACTAAGTGAGCAA-1"
+[5] "E7.5_rep2#TATCACGCATTCAGCA-1" "E7.5_rep2#ATTACGTCATGGCCCA-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:45:10 : featureDF E7.5_rep2, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:45:10 : Getting PeakMatrix from ArrowFile : E7.5_rep2.arrow, 0.005 mins elapsed.
+
+2022-07-15 11:46:05 : mat E7.5_rep2, Class = dgCMatrix
+mat E7.5_rep2: nRows = 192251, nCols = 13321
+mat E7.5_rep2: NonZeroEntries = 116861360, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E7.5_rep2#GCCCATAAGGACCTTG-1 E7.5_rep2#TGCTGGATCAAGCTAC-1
+[1,]                            .                            .
+[2,]                            .                            .
+[3,]                            .                            .
+[4,]                            .                            .
+[5,]                            .                            .
+     E7.5_rep2#TCAGTGAGTTACATCC-1 E7.5_rep2#GCCACTAAGTGAGCAA-1
+[1,]                            .                            .
+[2,]                            .                            3
+[3,]                            .                            .
+[4,]                            .                            .
+[5,]                            .                            .
+     E7.5_rep2#TATCACGCATTCAGCA-1
+[1,]                            .
+[2,]                            .
+[3,]                            .
+[4,]                            .
+[5,]                            .
+
+
+2022-07-15 11:46:07 : Organizing SE PeakMatrix from ArrowFile : E7.5_rep2.arrow, 0.947 mins elapsed.
+
+2022-07-15 11:46:07 : se E7.5_rep2, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 13321 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(13321): E7.5_rep2#GCCCATAAGGACCTTG-1
+  E7.5_rep2#TGCTGGATCAAGCTAC-1 ... E7.5_rep2#ACATTGCAGGTCGAGG-1
+  E7.5_rep2#TCGGTTTGTGCATTAG-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:46:07 : Completed PeakMatrix : E7.5_rep2(2 of 11), 2.145 mins elapsed.
+2022-07-15 11:46:07 : Reading PeakMatrix : E8.5_CRISPR_T_WT(3 of 11), 2.145 mins elapsed.
+
+2022-07-15 11:46:07 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E8.5_CRISPR_T_WT 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E8.5_CRISPR_T_WT.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 7691
+[1] "E8.5_CRISPR_T_WT#GCAATGAAGCTGTAAC-1" "E8.5_CRISPR_T_WT#GTGCACGGTAGCTGCG-1"
+[3] "E8.5_CRISPR_T_WT#GCCTTAGAGTCAGTAC-1" "E8.5_CRISPR_T_WT#AGAACCAAGCTGGAAA-1"
+[5] "E8.5_CRISPR_T_WT#ACCACACCAAATTCGT-1" "E8.5_CRISPR_T_WT#CAATAAGCATAAGTCT-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:46:08 : featureDF E8.5_CRISPR_T_WT, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:46:08 : Getting PeakMatrix from ArrowFile : E8.5_CRISPR_T_WT.arrow, 0.005 mins elapsed.
+
+2022-07-15 11:46:57 : mat E8.5_CRISPR_T_WT, Class = dgCMatrix
+mat E8.5_CRISPR_T_WT: nRows = 192251, nCols = 7691
+mat E8.5_CRISPR_T_WT: NonZeroEntries = 105650576, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E8.5_CRISPR_T_WT#GCAATGAAGCTGTAAC-1 E8.5_CRISPR_T_WT#GTGCACGGTAGCTGCG-1
+[1,]                                   .                                   2
+[2,]                                   .                                   4
+[3,]                                   1                                   2
+[4,]                                   .                                   .
+[5,]                                   2                                   .
+     E8.5_CRISPR_T_WT#GCCTTAGAGTCAGTAC-1 E8.5_CRISPR_T_WT#AGAACCAAGCTGGAAA-1
+[1,]                                   .                                   .
+[2,]                                   2                                   .
+[3,]                                   .                                   .
+[4,]                                   .                                   .
+[5,]                                   .                                   .
+     E8.5_CRISPR_T_WT#ACCACACCAAATTCGT-1
+[1,]                                   .
+[2,]                                   .
+[3,]                                   .
+[4,]                                   3
+[5,]                                   .
+
+
+2022-07-15 11:46:58 : Organizing SE PeakMatrix from ArrowFile : E8.5_CRISPR_T_WT.arrow, 0.846 mins elapsed.
+
+2022-07-15 11:46:59 : se E8.5_CRISPR_T_WT, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 7691 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(7691): E8.5_CRISPR_T_WT#GCAATGAAGCTGTAAC-1
+  E8.5_CRISPR_T_WT#GTGCACGGTAGCTGCG-1 ...
+  E8.5_CRISPR_T_WT#CTGGTCAAGTTCCTCA-1
+  E8.5_CRISPR_T_WT#GCTCAACCAGGCAAGC-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:46:59 : Completed PeakMatrix : E8.5_CRISPR_T_WT(3 of 11), 2.999 mins elapsed.
+2022-07-15 11:46:59 : Reading PeakMatrix : E8.5_rep2(4 of 11), 2.999 mins elapsed.
+
+2022-07-15 11:46:59 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E8.5_rep2 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E8.5_rep2.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 11447
+[1] "E8.5_rep2#AATACCGGTGGATTAT-1" "E8.5_rep2#CCTTTAGTCGCTATAA-1"
+[3] "E8.5_rep2#CTTAAGATCAAACCGT-1" "E8.5_rep2#TTGTGTGCATCGCTCC-1"
+[5] "E8.5_rep2#CGGTTGGGTGAGACTC-1" "E8.5_rep2#CGGAGTCTCGGTTACG-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:46:59 : featureDF E8.5_rep2, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:46:59 : Getting PeakMatrix from ArrowFile : E8.5_rep2.arrow, 0.005 mins elapsed.
+
+2022-07-15 11:47:52 : mat E8.5_rep2, Class = dgCMatrix
+mat E8.5_rep2: nRows = 192251, nCols = 11447
+mat E8.5_rep2: NonZeroEntries = 113822225, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E8.5_rep2#AATACCGGTGGATTAT-1 E8.5_rep2#CCTTTAGTCGCTATAA-1
+[1,]                            1                            .
+[2,]                            .                            .
+[3,]                            .                            .
+[4,]                            .                            .
+[5,]                            1                            .
+     E8.5_rep2#CTTAAGATCAAACCGT-1 E8.5_rep2#TTGTGTGCATCGCTCC-1
+[1,]                            .                            .
+[2,]                            .                            .
+[3,]                            .                            .
+[4,]                            1                            .
+[5,]                            .                            .
+     E8.5_rep2#CGGTTGGGTGAGACTC-1
+[1,]                            .
+[2,]                            .
+[3,]                            .
+[4,]                            .
+[5,]                            .
+
+
+2022-07-15 11:47:53 : Organizing SE PeakMatrix from ArrowFile : E8.5_rep2.arrow, 0.909 mins elapsed.
+
+2022-07-15 11:47:54 : se E8.5_rep2, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 11447 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(11447): E8.5_rep2#AATACCGGTGGATTAT-1
+  E8.5_rep2#CCTTTAGTCGCTATAA-1 ... E8.5_rep2#GGTCCATCAGGACCAA-1
+  E8.5_rep2#GGTTAGCGTGTCACGG-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:47:54 : Completed PeakMatrix : E8.5_rep2(4 of 11), 3.916 mins elapsed.
+2022-07-15 11:47:54 : Reading PeakMatrix : E8.5_CRISPR_T_KO(5 of 11), 3.916 mins elapsed.
+
+2022-07-15 11:47:54 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E8.5_CRISPR_T_KO 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E8.5_CRISPR_T_KO.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 7529
+[1] "E8.5_CRISPR_T_KO#CACTTTGTCAGAAACG-1" "E8.5_CRISPR_T_KO#GGGTCAACAAGTCGCT-1"
+[3] "E8.5_CRISPR_T_KO#GGTAGGAGTTTCCTCC-1" "E8.5_CRISPR_T_KO#GAGTATCTCATGGTTA-1"
+[5] "E8.5_CRISPR_T_KO#AAACCAACAGAGGCTA-1" "E8.5_CRISPR_T_KO#CGCTAATAGCAACATC-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:47:54 : featureDF E8.5_CRISPR_T_KO, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:47:54 : Getting PeakMatrix from ArrowFile : E8.5_CRISPR_T_KO.arrow, 0.005 mins elapsed.
+
+2022-07-15 11:48:39 : mat E8.5_CRISPR_T_KO, Class = dgCMatrix
+mat E8.5_CRISPR_T_KO: nRows = 192251, nCols = 7529
+mat E8.5_CRISPR_T_KO: NonZeroEntries = 100666229, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E8.5_CRISPR_T_KO#CACTTTGTCAGAAACG-1 E8.5_CRISPR_T_KO#GGGTCAACAAGTCGCT-1
+[1,]                                   1                                   2
+[2,]                                   2                                   .
+[3,]                                   .                                   .
+[4,]                                   3                                   4
+[5,]                                   .                                   2
+     E8.5_CRISPR_T_KO#GGTAGGAGTTTCCTCC-1 E8.5_CRISPR_T_KO#GAGTATCTCATGGTTA-1
+[1,]                                   .                                   .
+[2,]                                   .                                   .
+[3,]                                   2                                   .
+[4,]                                   .                                   4
+[5,]                                   .                                   .
+     E8.5_CRISPR_T_KO#AAACCAACAGAGGCTA-1
+[1,]                                   2
+[2,]                                   2
+[3,]                                   .
+[4,]                                   .
+[5,]                                   .
+
+
+2022-07-15 11:48:40 : Organizing SE PeakMatrix from ArrowFile : E8.5_CRISPR_T_KO.arrow, 0.781 mins elapsed.
+
+2022-07-15 11:48:41 : se E8.5_CRISPR_T_KO, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 7529 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(7529): E8.5_CRISPR_T_KO#CACTTTGTCAGAAACG-1
+  E8.5_CRISPR_T_KO#GGGTCAACAAGTCGCT-1 ...
+  E8.5_CRISPR_T_KO#AGCCGGTTCATTTAGG-1
+  E8.5_CRISPR_T_KO#TAACCAGGTCGTTATC-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:48:41 : Completed PeakMatrix : E8.5_CRISPR_T_KO(5 of 11), 4.705 mins elapsed.
+2022-07-15 11:48:41 : Reading PeakMatrix : E7.5_rep1(6 of 11), 4.706 mins elapsed.
+
+2022-07-15 11:48:41 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E7.5_rep1 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E7.5_rep1.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 8977
+[1] "E7.5_rep1#GTGGACACAAGGCCAA-1" "E7.5_rep1#CCTAGTTGTTTGGTTC-1"
+[3] "E7.5_rep1#CACGCAATCGTCAAGT-1" "E7.5_rep1#ATATGTCCAGGCTAGA-1"
+[5] "E7.5_rep1#GTTCCTGGTGTCCAAA-1" "E7.5_rep1#ACACCTTGTAGTTGGC-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:48:41 : featureDF E7.5_rep1, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:48:41 : Getting PeakMatrix from ArrowFile : E7.5_rep1.arrow, 0.008 mins elapsed.
+
+2022-07-15 11:49:26 : mat E7.5_rep1, Class = dgCMatrix
+mat E7.5_rep1: nRows = 192251, nCols = 8977
+mat E7.5_rep1: NonZeroEntries = 98066645, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E7.5_rep1#GTGGACACAAGGCCAA-1 E7.5_rep1#CCTAGTTGTTTGGTTC-1
+[1,]                            .                            .
+[2,]                            .                            .
+[3,]                            .                            .
+[4,]                            .                            .
+[5,]                            .                            .
+     E7.5_rep1#CACGCAATCGTCAAGT-1 E7.5_rep1#ATATGTCCAGGCTAGA-1
+[1,]                            .                            .
+[2,]                            .                            .
+[3,]                            2                            .
+[4,]                            .                            .
+[5,]                            .                            .
+     E7.5_rep1#GTTCCTGGTGTCCAAA-1
+[1,]                            .
+[2,]                            .
+[3,]                            .
+[4,]                            .
+[5,]                            .
+
+
+2022-07-15 11:49:28 : Organizing SE PeakMatrix from ArrowFile : E7.5_rep1.arrow, 0.777 mins elapsed.
+
+2022-07-15 11:49:28 : se E7.5_rep1, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 8977 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(8977): E7.5_rep1#GTGGACACAAGGCCAA-1
+  E7.5_rep1#CCTAGTTGTTTGGTTC-1 ... E7.5_rep1#TTGCAATCAAACGCGA-1
+  E7.5_rep1#ATTCCTAGTACTTCAC-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:49:28 : Completed PeakMatrix : E7.5_rep1(6 of 11), 5.491 mins elapsed.
+2022-07-15 11:49:28 : Reading PeakMatrix : E8.75_rep2(7 of 11), 5.491 mins elapsed.
+
+2022-07-15 11:49:28 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E8.75_rep2 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E8.75_rep2.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 5619
+[1] "E8.75_rep2#TTGTTGCGTTGTGATG-1" "E8.75_rep2#GAGGAGGCAACAGGTG-1"
+[3] "E8.75_rep2#GTTTAGCAGTAAGTCC-1" "E8.75_rep2#CCGTTATGTCCTCCAA-1"
+[5] "E8.75_rep2#ACCTGTTGTACCAGGT-1" "E8.75_rep2#TGTGATCAGTTCCCGT-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:49:28 : featureDF E8.75_rep2, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:49:28 : Getting PeakMatrix from ArrowFile : E8.75_rep2.arrow, 0.005 mins elapsed.
+
+2022-07-15 11:50:08 : mat E8.75_rep2, Class = dgCMatrix
+mat E8.75_rep2: nRows = 192251, nCols = 5619
+mat E8.75_rep2: NonZeroEntries = 83294240, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E8.75_rep2#TTGTTGCGTTGTGATG-1 E8.75_rep2#GAGGAGGCAACAGGTG-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             1                             .
+     E8.75_rep2#GTTTAGCAGTAAGTCC-1 E8.75_rep2#CCGTTATGTCCTCCAA-1
+[1,]                             .                             .
+[2,]                             2                             1
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             4                             .
+     E8.75_rep2#ACCTGTTGTACCAGGT-1
+[1,]                             2
+[2,]                             .
+[3,]                             .
+[4,]                             2
+[5,]                             .
+
+
+2022-07-15 11:50:09 : Organizing SE PeakMatrix from ArrowFile : E8.75_rep2.arrow, 0.68 mins elapsed.
+
+2022-07-15 11:50:09 : se E8.75_rep2, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 5619 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(5619): E8.75_rep2#TTGTTGCGTTGTGATG-1
+  E8.75_rep2#GAGGAGGCAACAGGTG-1 ... E8.75_rep2#TAGGTTATCCTAAGTA-1
+  E8.75_rep2#GAAGTGATCTACTAAG-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:50:09 : Completed PeakMatrix : E8.75_rep2(7 of 11), 6.179 mins elapsed.
+2022-07-15 11:50:09 : Reading PeakMatrix : E8.0_rep1(8 of 11), 6.179 mins elapsed.
+
+2022-07-15 11:50:09 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E8.0_rep1 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E8.0_rep1.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 7656
+[1] "E8.0_rep1#GCGAAGCCACCTGCTC-1" "E8.0_rep1#TGGATTGGTGAGCACT-1"
+[3] "E8.0_rep1#CAATCTAAGCACAGGG-1" "E8.0_rep1#TCATTTGGTGGGTGAA-1"
+[5] "E8.0_rep1#TTTCACCCAGTAAGTA-1" "E8.0_rep1#GATTCAATCGATTTGA-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:50:10 : featureDF E8.0_rep1, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:50:10 : Getting PeakMatrix from ArrowFile : E8.0_rep1.arrow, 0.005 mins elapsed.
+
+2022-07-15 11:50:45 : mat E8.0_rep1, Class = dgCMatrix
+mat E8.0_rep1: nRows = 192251, nCols = 7656
+mat E8.0_rep1: NonZeroEntries = 83995139, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E8.0_rep1#GCGAAGCCACCTGCTC-1 E8.0_rep1#TGGATTGGTGAGCACT-1
+[1,]                            .                            .
+[2,]                            .                            .
+[3,]                            1                            .
+[4,]                            .                            .
+[5,]                            .                            2
+     E8.0_rep1#CAATCTAAGCACAGGG-1 E8.0_rep1#TCATTTGGTGGGTGAA-1
+[1,]                            .                            .
+[2,]                            .                            .
+[3,]                            .                            .
+[4,]                            .                            .
+[5,]                            .                            .
+     E8.0_rep1#TTTCACCCAGTAAGTA-1
+[1,]                            .
+[2,]                            .
+[3,]                            2
+[4,]                            .
+[5,]                            .
+
+
+2022-07-15 11:50:46 : Organizing SE PeakMatrix from ArrowFile : E8.0_rep1.arrow, 0.615 mins elapsed.
+
+2022-07-15 11:50:47 : se E8.0_rep1, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 7656 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(7656): E8.0_rep1#GCGAAGCCACCTGCTC-1
+  E8.0_rep1#TGGATTGGTGAGCACT-1 ... E8.0_rep1#TGATCAATCTATTGTC-1
+  E8.0_rep1#TGTTCCTCAGACAAAC-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:50:47 : Completed PeakMatrix : E8.0_rep1(8 of 11), 6.806 mins elapsed.
+2022-07-15 11:50:47 : Reading PeakMatrix : E8.75_rep1(9 of 11), 6.808 mins elapsed.
+
+2022-07-15 11:50:47 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E8.75_rep1 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E8.75_rep1.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 4076
+[1] "E8.75_rep1#AAGTTACGTCATCAAG-1" "E8.75_rep1#GTTCCTGGTGCATTAG-1"
+[3] "E8.75_rep1#TAAGCCTAGAGGCTAA-1" "E8.75_rep1#TCTAAGGGTTTACCGT-1"
+[5] "E8.75_rep1#ATGTTCAAGACAACGA-1" "E8.75_rep1#CTCGACAAGGATCACT-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:50:47 : featureDF E8.75_rep1, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:50:47 : Getting PeakMatrix from ArrowFile : E8.75_rep1.arrow, 0.005 mins elapsed.
+
+2022-07-15 11:51:16 : mat E8.75_rep1, Class = dgCMatrix
+mat E8.75_rep1: nRows = 192251, nCols = 4076
+mat E8.75_rep1: NonZeroEntries = 71542550, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E8.75_rep1#AAGTTACGTCATCAAG-1 E8.75_rep1#GTTCCTGGTGCATTAG-1
+[1,]                             1                             .
+[2,]                             .                             .
+[3,]                             .                             1
+[4,]                             .                             .
+[5,]                             .                             .
+     E8.75_rep1#TAAGCCTAGAGGCTAA-1 E8.75_rep1#TCTAAGGGTTTACCGT-1
+[1,]                             .                             .
+[2,]                             2                             .
+[3,]                             1                             .
+[4,]                             .                             .
+[5,]                             1                             .
+     E8.75_rep1#ATGTTCAAGACAACGA-1
+[1,]                             .
+[2,]                             .
+[3,]                             .
+[4,]                             .
+[5,]                             .
+
+
+2022-07-15 11:51:17 : Organizing SE PeakMatrix from ArrowFile : E8.75_rep1.arrow, 0.502 mins elapsed.
+
+2022-07-15 11:51:18 : se E8.75_rep1, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 4076 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(4076): E8.75_rep1#AAGTTACGTCATCAAG-1
+  E8.75_rep1#GTTCCTGGTGCATTAG-1 ... E8.75_rep1#TAATCCGCAAACAACA-1
+  E8.75_rep1#TCGTTTCCAACTAGAA-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:51:18 : Completed PeakMatrix : E8.75_rep1(9 of 11), 7.318 mins elapsed.
+2022-07-15 11:51:18 : Reading PeakMatrix : E8.0_rep2(10 of 11), 7.318 mins elapsed.
+
+2022-07-15 11:51:18 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E8.0_rep2 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E8.0_rep2.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 6382
+[1] "E8.0_rep2#GCGGATACACCTAAGC-1" "E8.0_rep2#CATAATCCATTGTTGG-1"
+[3] "E8.0_rep2#TCATGAGGTTAAGCCA-1" "E8.0_rep2#CAAGTTATCAGTGAAG-1"
+[5] "E8.0_rep2#GTCAGGCTCATTTGCT-1" "E8.0_rep2#TTAGGCTAGTCACCAG-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:51:18 : featureDF E8.0_rep2, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:51:18 : Getting PeakMatrix from ArrowFile : E8.0_rep2.arrow, 0.005 mins elapsed.
+
+2022-07-15 11:51:49 : mat E8.0_rep2, Class = dgCMatrix
+mat E8.0_rep2: nRows = 192251, nCols = 6382
+mat E8.0_rep2: NonZeroEntries = 72098083, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E8.0_rep2#GCGGATACACCTAAGC-1 E8.0_rep2#CATAATCCATTGTTGG-1
+[1,]                            .                            .
+[2,]                            .                            .
+[3,]                            .                            .
+[4,]                            .                            .
+[5,]                            .                            .
+     E8.0_rep2#TCATGAGGTTAAGCCA-1 E8.0_rep2#CAAGTTATCAGTGAAG-1
+[1,]                            .                            .
+[2,]                            .                            .
+[3,]                            .                            1
+[4,]                            .                            .
+[5,]                            .                            .
+     E8.0_rep2#GTCAGGCTCATTTGCT-1
+[1,]                            .
+[2,]                            .
+[3,]                            .
+[4,]                            .
+[5,]                            .
+
+
+2022-07-15 11:51:50 : Organizing SE PeakMatrix from ArrowFile : E8.0_rep2.arrow, 0.53 mins elapsed.
+
+2022-07-15 11:51:50 : se E8.0_rep2, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 6382 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(6382): E8.0_rep2#GCGGATACACCTAAGC-1
+  E8.0_rep2#CATAATCCATTGTTGG-1 ... E8.0_rep2#GGCCTTCGTTGCGGAT-1
+  E8.0_rep2#AATTTGCCACCGGTAT-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:51:50 : Completed PeakMatrix : E8.0_rep2(10 of 11), 7.857 mins elapsed.
+2022-07-15 11:51:50 : Reading PeakMatrix : E7.75_rep1(11 of 11), 7.857 mins elapsed.
+
+2022-07-15 11:51:50 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                         E7.75_rep1 
+"/home/mnt/nzh/nzhanglab/data/GSE205117_Reik_mouseembryo/ftp1.babraham.ac.uk/data/processed/atac/archR/ArrowFiles/E7.75_rep1.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "PeakMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 5120
+[1] "E7.75_rep1#CGGGCTTAGTTCCTGC-1" "E7.75_rep1#GACCTCAAGCGCAATT-1"
+[3] "E7.75_rep1#CGTGCTTTCCAAATCA-1" "E7.75_rep1#AATGCATGTCCTAAGA-1"
+[5] "E7.75_rep1#TATGACTCATCAATCG-1" "E7.75_rep1#GCAGGCAAGGAGGCAT-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getMatrixFromProject-b1f27a960537-Date-2022-07-15_Time-11-43-59.log"
+
+
+
+2022-07-15 11:51:50 : featureDF E7.75_rep1, Class = DFrame
+DataFrame with 192251 rows and 4 columns
+       seqnames     idx     start       end
+          <Rle> <array>   <array>   <array>
+1          chr1       1   3035602   3036202
+2          chr1       2   3062653   3063253
+3          chr1       3   3072313   3072913
+4          chr1       4   3191496   3192096
+5          chr1       5   3340575   3341175
+...         ...     ...       ...       ...
+192247     chrX    3284 169902806 169903406
+192248     chrX    3285 169905921 169906521
+192249     chrX    3286 169915616 169916216
+192250     chrX    3287 169925487 169926087
+192251     chrX    3288 169937064 169937664
+
+2022-07-15 11:51:50 : Getting PeakMatrix from ArrowFile : E7.75_rep1.arrow, 0.005 mins elapsed.
+
+2022-07-15 11:52:10 : mat E7.75_rep1, Class = dgCMatrix
+mat E7.75_rep1: nRows = 192251, nCols = 5120
+mat E7.75_rep1: NonZeroEntries = 42145787, EntryRange = [ 1 , 4 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     E7.75_rep1#CGGGCTTAGTTCCTGC-1 E7.75_rep1#GACCTCAAGCGCAATT-1
+[1,]                             .                             .
+[2,]                             1                             2
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     E7.75_rep1#CGTGCTTTCCAAATCA-1 E7.75_rep1#AATGCATGTCCTAAGA-1
+[1,]                             2                             .
+[2,]                             4                             .
+[3,]                             .                             .
+[4,]                             4                             2
+[5,]                             .                             .
+     E7.75_rep1#TATGACTCATCAATCG-1
+[1,]                             .
+[2,]                             4
+[3,]                             .
+[4,]                             .
+[5,]                             .
+
+
+2022-07-15 11:52:11 : Organizing SE PeakMatrix from ArrowFile : E7.75_rep1.arrow, 0.348 mins elapsed.
+
+2022-07-15 11:52:11 : se E7.75_rep1, Class = RangedSummarizedExperiment
+class: RangedSummarizedExperiment 
+dim: 192251 5120 
+metadata(0):
+assays(1): PeakMatrix
+rownames: NULL
+rowData names(1): idx
+colnames(5120): E7.75_rep1#CGGGCTTAGTTCCTGC-1
+  E7.75_rep1#GACCTCAAGCGCAATT-1 ... E7.75_rep1#CAATGACTCTAATCTC-1
+  E7.75_rep1#GGTATTTCACTTACAG-1
+colData names(35): BlacklistRatio nDiFrags ... ReadsInPeaks FRIP
+
+2022-07-15 11:52:11 : Completed PeakMatrix : E7.75_rep1(11 of 11), 8.214 mins elapsed.
+2022-07-15 11:52:11 : Organizing colData, 8.214 mins elapsed.
+2022-07-15 11:52:12 : Organizing rowData, 8.221 mins elapsed.
+2022-07-15 11:52:12 : Organizing rowRanges, 8.224 mins elapsed.
+2022-07-15 11:52:12 : Organizing Assays (1 of 1), 8.226 mins elapsed.
+2022-07-15 11:54:46 : Constructing SummarizedExperiment, 10.786 mins elapsed.
+2022-07-15 12:01:24 : Finished Matrix Creation, 17.431 mins elapsed.
