@@ -189,6 +189,20 @@ plot1 <- plot1 + ggplot2::ggtitle("") + ggplot2::ylab("RNA UMAP 2") + ggplot2::x
 ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_rna-umap_slides.png"),
                 plot1, device = "png", width = 4, height = 4, units = "in")
 
+gray_vec <- rep("gray50", length(unique(bm$ct)))
+names(gray_vec) <- unique(bm$ct)
+plot1 <- Seurat::DimPlot(bm, reduction = "adt.umap", group.by = "ct", cols = gray_vec, pt.size = 0.1)
+plot1 <- plot1 + Seurat::NoLegend() 
+plot1 <- plot1 + ggplot2::ggtitle("") + ggplot2::ylab("AB UMAP 2") + ggplot2::xlab("AB UMAP 1")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_adt-umap_slides2.png"),
+                plot1, device = "png", width = 4, height = 4, units = "in")
+
+plot1 <- Seurat::DimPlot(bm, reduction = "rna.umap", group.by = "ct", cols = gray_vec, pt.size = 0.1)
+plot1 <- plot1 + Seurat::NoLegend()
+plot1 <- plot1 + ggplot2::ggtitle("") + ggplot2::ylab("RNA UMAP 2") + ggplot2::xlab("RNA UMAP 1")
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/abseq_bm97Ref_rna-umap_slides2.png"),
+                plot1, device = "png", width = 4, height = 4, units = "in")
+
 
 bm[["consensusUMAP"]]@cell.embeddings <- tiltedCCA:::.rotate_matrix(
   source_mat = bm[["rna.umap"]]@cell.embeddings,

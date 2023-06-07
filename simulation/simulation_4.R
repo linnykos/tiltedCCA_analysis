@@ -108,6 +108,24 @@ plot(tmp[plot_idx,1], tmp[plot_idx,2],
      pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T)
 graphics.off()
 
+png("simulation4_data-a2.png", height = 600, width = 600, res = 300, units = "px")
+par(mfrow = c(1,1), mar = c(2,2,0.5,0.5))
+tmp <- svd_func(mat_1)
+plot(tmp[plot_idx,1], tmp[plot_idx,2],
+     main = "",
+     xlab = "", ylab = "",
+     pch = 16, col = "gray50", asp = T)
+graphics.off()
+
+png("simulation4_data-b2.png", height = 600, width = 600, res = 300, units = "px")
+par(mfrow = c(1,1), mar = c(2,2,0.5,0.5))
+tmp <- svd_func(mat_2)
+plot(tmp[plot_idx,1], tmp[plot_idx,2],
+     main = "",
+     xlab = "", ylab = "",
+     pch = 16, col = "gray50", asp = T)
+graphics.off()
+
 ################################
 # Step 4: Plot Tilted-CCA's result
 ################################
@@ -141,6 +159,25 @@ graphics.off()
 png("simulation4_tcca-a.png", height = 600, width = 600, res = 300, units = "px")
 par(mfrow = c(1,1), mar = c(2,2,0.5,0.5))
 tmp <- svd_func(multiSVD_obj$tcca_obj$common_score)
+plot(tmp[plot_idx,1], tmp[plot_idx,2],
+     main = "",
+     xlab = "", ylab = "",
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T)
+graphics.off()
+
+png("simulation4_tcca-b.png", height = 600, width = 600, res = 300, units = "px")
+par(mfrow = c(1,1), mar = c(2,2,0.5,0.5))
+tmp <- svd_func(multiSVD_obj$tcca_obj$distinct_score_1)
+plot(tmp[plot_idx,1], tmp[plot_idx,2],
+     main = "",
+     xlab = "", ylab = "",
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T)
+graphics.off()
+
+
+png("simulation4_tcca-c.png", height = 600, width = 600, res = 300, units = "px")
+par(mfrow = c(1,1), mar = c(2,2,0.5,0.5))
+tmp <- svd_func(multiSVD_obj$tcca_obj$distinct_score_2)
 plot(tmp[plot_idx,1], tmp[plot_idx,2],
      main = "",
      xlab = "", ylab = "",

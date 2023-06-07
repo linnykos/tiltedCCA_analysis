@@ -98,6 +98,10 @@ colnames(mat_1) <- paste0("g", 1:ncol(mat_1))
 colnames(mat_2) <- paste0("p", 1:ncol(mat_2))
 
 plot_idx <- sample(1:nrow(mat_1))
+orange_col <- rgb(235, 134, 47, maxColorValue = 255)
+purple_col <- rgb(122, 49, 126, maxColorValue = 255)
+blue_col <- rgb(129, 139, 191, maxColorValue = 255)
+col_vec <- c(purple_col, orange_col, blue_col)
 
 ################################
 # Step 2: Apply Tilted-CCA
@@ -133,16 +137,23 @@ multiSVD_obj <- tiltedCCA::tiltedCCA_decomposition(multiSVD_obj)
 # Step 3: Plot the data
 ################################
 
+svd_func <- function(mat){
+  svd_res <- svd(mat)
+  svd_res$u[,1:2] %*% diag(svd_res$d[1:2])
+}
+
 png("simulation3_data.png", height = 1200, width = 2000, res = 300, units = "px")
 par(mfrow = c(1,2))
-plot(multiSVD_obj$svd_1$u[plot_idx,1], multiSVD_obj$svd_1$u[plot_idx,2],
+tmp <- svd_func(mat_1)
+plot(tmp[plot_idx,1], tmp[plot_idx,2],
      main = "Modality 1",
      xlab = "PCA's dim. 1", ylab = "PCA's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T)
-plot(multiSVD_obj$svd_2$u[plot_idx,1], multiSVD_obj$svd_2$u[plot_idx,2],
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T)
+tmp <- svd_func(mat_2)
+plot(tmp[plot_idx,1], tmp[plot_idx,2],
      main = "Modality 2",
      xlab = "PCA's dim. 1", ylab = "PCA's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T)
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T)
 graphics.off()
 
 ################################
@@ -153,11 +164,6 @@ names(multiSVD_obj)
 # image(t(multiSVD_obj$cca_obj$score_1))
 # multiSVD_obj$tcca_obj$tilt_perc
 
-svd_func <- function(mat){
-  svd_res <- svd(mat)
-  svd_res$u[,1:2] %*% diag(svd_res$d[1:2])
-}
-
 height <- 1000
 cex <- 1.3; cex.main <- 1.5
 png("simulation3_tcca.png", height = height, width = 3000/1200*height, res = 300, units = "px")
@@ -166,19 +172,19 @@ tmp <- svd_func(cbind(multiSVD_obj$common_mat_1, multiSVD_obj$common_mat_2))
 plot(tmp[plot_idx,1], tmp[plot_idx,2],
      main = "Common embedding",
      xlab = "Common's dim. 1", ylab = "Common's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T,
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T,
      cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
 tmp <- svd_func(multiSVD_obj$distinct_mat_1)
 plot(tmp[plot_idx,1], tmp[plot_idx,2],
      main = "Modality 1's distinct embedding",
      xlab = "Distinct-1's dim. 1", ylab = "Distinct-1's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T,
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T,
      cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
 tmp <- svd_func(multiSVD_obj$distinct_mat_2)
 plot(tmp[plot_idx,1], tmp[plot_idx,2],
      main = "Modality 2's distinct embedding",
      xlab = "Distinct-2's dim. 1", ylab = "Distinct-2's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T,
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T,
      cex.lab = cex, cex = cex, cex.axis = cex, cex.main = cex.main)
 graphics.off()
 
@@ -206,5 +212,5 @@ par(mfrow = c(1,1))
 plot(tmp[plot_idx,1], tmp[plot_idx,2],
      main = "Consensus PCA embedding",
      xlab = "Consensus PCA's dim. 1", ylab = "Consensus PCA's dim. 2",
-     pch = 16, col = true_cluster[plot_idx], asp = T)
+     pch = 16, col = col_vec[true_cluster[plot_idx]], asp = T)
 graphics.off()
