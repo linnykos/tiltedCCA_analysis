@@ -38,7 +38,7 @@ for(j in 1:ncol(tmp)){
   tmp[,j] <- new_vec
 }
 
-bm[["ADT"]]@data <- tmp
+bm[["ADT"]]@data <- t(tmp)
 
 bm <- Seurat::ScaleData(bm)
 bm <- Seurat::RunPCA(bm, reduction.name = 'apca', verbose = F)
