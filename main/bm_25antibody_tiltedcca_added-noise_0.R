@@ -156,6 +156,6 @@ bm[["distinct2_tcca"]] <- tiltedCCA:::create_SeuratDim(input_obj = multiSVD_obj,
                                                        verbose = 1)
 
 save(multiSVD_obj, bm, 
-     percentage, cor_vec,
+     percentage, 
      date_of_run, session_info,
      file = paste0("../../../out/main/citeseq_bm25_tcca_added-noise_", percentage, ".RData"))
