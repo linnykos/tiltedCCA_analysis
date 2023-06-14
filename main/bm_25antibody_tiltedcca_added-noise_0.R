@@ -24,21 +24,7 @@ Seurat::DefaultAssay(bm) <- "ADT"
 
 # add Poisson noise according to the multiples of the 95th quantile of the non-zeros of bm[["ADT"]]@data
 # At 100%, we can reasonably expect that all the signal is wiped out
-percentage <- 0.1 # some number between 0 and 1
-tmp <- t(bm[["ADT"]]@data)
-cor_vec <- rep(NA, ncol(tmp))
-n <- nrow(tmp)
-for(j in 1:ncol(tmp)){
-  sd_val <- stats::sd(tmp[,j])
-  noise_vec <- stats::rnorm(n, mean = 0, sd = percentage*4*sd_val)
-  new_vec <- tmp[,j] + noise_vec
-  cor_vec[j] <- stats::cor(new_vec, tmp[,j])
-  print(paste0("Correlation for variable ", j, ": ", round(cor_vec[j], 2)))
-  
-  tmp[,j] <- new_vec
-}
-
-bm[["ADT"]]@data <- t(tmp)
+percentage <- 0 # some number between 0 and 1
 
 bm <- Seurat::ScaleData(bm)
 bm <- Seurat::RunPCA(bm, reduction.name = 'apca', verbose = F)
