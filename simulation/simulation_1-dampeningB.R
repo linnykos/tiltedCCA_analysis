@@ -50,9 +50,9 @@ for(shrink in shrink_vec){
     
     set.seed(10)
     multiSVD_obj <- tiltedCCA::create_multiSVD(mat_1 = res$mat_1, mat_2 = res$mat_2,
-                                               dims_1 = 1:2, dims_2 = 1:2,
+                                               dims_1 = 1:3, dims_2 = 1:3,
                                                center_1 = T, center_2 = T,
-                                               normalize_row = F,
+                                               normalize_row = T,
                                                normalize_singular_value = F,
                                                recenter_1 = F, recenter_2 = F,
                                                rescale_1 = F, rescale_2 = F,
@@ -62,9 +62,9 @@ for(shrink in shrink_vec){
                                               large_clustering_2 = res$clustering_2,
                                               num_metacells = NULL)
     multiSVD_obj <- tiltedCCA::compute_snns(input_obj = multiSVD_obj,
-                                            latent_k = 2,
-                                            num_neigh = 80,
-                                            bool_cosine = F,
+                                            latent_k = 3,
+                                            num_neigh = 20,
+                                            bool_cosine = T,
                                             bool_intersect = F,
                                             min_deg = 0)
     multiSVD_obj <- tiltedCCA::tiltedCCA(input_obj = multiSVD_obj,

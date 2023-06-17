@@ -18,7 +18,7 @@ plot(tmp[plot_idx,1], tmp[plot_idx,2],
 
 ###########
 
-k <- 6
+k <- 11
 cex <- 1.3; cex.main <- 1.5
 multiSVD_obj <- result_list[[k]]$example_res
 true_cluster <- result_list[[k]]$true_cluster
