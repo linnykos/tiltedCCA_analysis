@@ -91,7 +91,7 @@ multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
                                          latent_k = 50,
                                          num_neigh = 3,
                                          bool_cosine = T,
-                                         bool_intersect = T,
+                                         bool_intersect = F,
                                          min_deg = 1,
                                          verbose = 2)
 
@@ -120,6 +120,7 @@ ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_common
 
 
 multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
+                                      fix_tilt_perc = 0,
                                       verbose = 1)
 multiSVD_obj <- tiltedCCA:::fine_tuning(input_obj = multiSVD_obj,
                                         verbose = 1)
