@@ -4,7 +4,7 @@ library(Signac)
 library(tiltedCCA)
 source("bm_25antibody_colorPalette.R")
 
-percentage_vec <- c(0.25, 0.5, 1) # c(0.1, 0.25, 0.5, 1)
+percentage_vec <- c(0, 0.1, 0.25, 0.5, 1) # c(0.1, 0.25, 0.5, 1)
 for(percentage in percentage_vec){
   print(paste0("Trying percentage ", percentage))
   load(paste0("../../../out/main/citeseq_bm25_tcca_added-noise_", percentage, ".RData"))

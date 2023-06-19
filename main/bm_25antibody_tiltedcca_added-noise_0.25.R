@@ -97,18 +97,17 @@ multiSVD_obj <- tiltedCCA:::create_multiSVD(mat_1 = mat_1b, mat_2 = mat_2b,
                                             scale_1 = T, scale_2 = T,
                                             verbose = 1)
 multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
-                                           large_clustering_1 = NULL, 
-                                           large_clustering_2 = NULL, 
+                                           large_clustering_1 = as.factor(bm$RNA_snn_res.0.25), 
+                                           large_clustering_2 = as.factor(bm$ADT_snn_res.0.25), 
                                            num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
-                                         latent_k = 20,
-                                         num_neigh = 30,
+                                         latent_k = 50,
+                                         num_neigh = 3,
                                          bool_cosine = T,
-                                         bool_intersect = F,
-                                         min_deg = 30,
+                                         bool_intersect = T,
+                                         min_deg = 1,
                                          verbose = 2)
-
 
 tmp <- bm; tmp_mat <- multiSVD_obj$laplacian_list$common_laplacian
 colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
