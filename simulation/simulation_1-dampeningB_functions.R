@@ -2,8 +2,8 @@ generate_B <- function(shrink = 0){
   stopifnot(shrink >= 0, shrink <= 1)
   
   shrink2 <- min(2*shrink, 1)
-  val1 <- (1-shrink2)*0.1 + shrink2*0.89
-  val2 <- (1-shrink)*0.1 + shrink*0.89
+  val1 <- (1-shrink2)*0.6 + shrink2*0.89
+  val2 <- (1-shrink)*0.6 + shrink*0.89
   
   B_mat <- matrix(c(0.9, val1, val2,
                     val1, 0.9, val2,
@@ -23,13 +23,21 @@ simulation_function <- function(shrink = 1){
   svd_u_2[,1] <- svd_u_2[,1]/sqrt(sum(svd_u_2[,1]^2))
   svd_u_2[,2] <- svd_u_2[,2]/sqrt(sum(svd_u_2[,2]^2))
   
-  p_1 <- 10; p_2 <- 10
-  svd_d_1 <- sqrt(n*p_1)*c(1.5,1); svd_d_2 <- sqrt(n*p_2)*c(1.5,1)
-  svd_v_1 <- tiltedCCA::generate_random_orthogonal(p_1, 2)
-  svd_v_2 <- tiltedCCA::generate_random_orthogonal(p_2, 2)
+  p <- 200
+  svd_d_1 <- sqrt(n*p)*c(1.5,1); svd_d_2 <- sqrt(n*p)*c(1.5,1)
+  svd_v_1 <- tiltedCCA::generate_random_orthogonal(p, 2)
+  svd_v_2 <- tiltedCCA::generate_random_orthogonal(p, 2)
   
   mat_1 <- tcrossprod(svd_u_1 %*% diag(svd_d_1), svd_v_1)
   mat_2 <- tcrossprod(svd_u_2 %*% diag(svd_d_2), svd_v_2)
+  
+  # add some noise
+  sd_vec <- c(0.5, 1, 5)
+  for(j in 1:p){
+    idx <- j %% 3; if(idx == 0) idx <- 3
+    mat_1[,j] <- mat_1[,j] + stats::rnorm(nrow(mat_1), mean = 0, sd = sd_vec[idx])
+    mat_2[,j] <- mat_2[,j] + stats::rnorm(nrow(mat_2), mean = 0, sd = sd_vec[idx])
+  }
   
   mat_1 <- scale(mat_1, center = T, scale = T)
   mat_2 <- scale(mat_2, center = T, scale = T)

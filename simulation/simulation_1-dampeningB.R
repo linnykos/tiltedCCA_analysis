@@ -62,8 +62,8 @@ for(shrink in shrink_vec){
                                               large_clustering_2 = res$clustering_2,
                                               num_metacells = NULL)
     multiSVD_obj <- tiltedCCA::compute_snns(input_obj = multiSVD_obj,
-                                            latent_k = 3,
-                                            num_neigh = 20,
+                                            latent_k = 10,
+                                            num_neigh = 3,
                                             bool_cosine = T,
                                             bool_intersect = F,
                                             min_deg = 0)
@@ -113,10 +113,4 @@ for(i in 1:length(result_list)){
 for(i in 1:length(result_list)){
   print(median(result_list[[i]]$alignment))
 }
-
-###########################################
-
-k <- 11
-
-
 
