@@ -1,3 +1,5 @@
+*.png
+.png
 .DS_Store
 *.tar.gz
 *.Rproj.user

@@ -21,25 +21,6 @@ bm <- Seurat::FindNeighbors(bm, dims = 1:30)
 bm <- Seurat::FindClusters(bm, resolution = 0.25)
 
 Seurat::DefaultAssay(bm) <- "ADT"
-
-# add Poisson noise according to the multiples of the 95th quantile of the non-zeros of bm[["ADT"]]@data
-# At 100%, we can reasonably expect that all the signal is wiped out
-percentage <- 0.1 # some number between 0 and 1
-tmp <- t(bm[["ADT"]]@data)
-cor_vec <- rep(NA, ncol(tmp))
-n <- nrow(tmp)
-for(j in 1:ncol(tmp)){
-  sd_val <- stats::sd(tmp[,j])
-  noise_vec <- stats::rnorm(n, mean = 0, sd = percentage*4*sd_val)
-  new_vec <- tmp[,j] + noise_vec
-  cor_vec[j] <- stats::cor(new_vec, tmp[,j])
-  print(paste0("Correlation for variable ", j, ": ", round(cor_vec[j], 2)))
-  
-  tmp[,j] <- new_vec
-}
-
-bm[["ADT"]]@data <- t(tmp)
-
 bm <- Seurat::ScaleData(bm)
 bm <- Seurat::RunPCA(bm, reduction.name = 'apca', verbose = F)
 set.seed(10)
@@ -49,20 +30,36 @@ set.seed(10)
 bm <- Seurat::FindNeighbors(bm, dims = 1:18, reduction = "apca")
 bm <- Seurat::FindClusters(bm, resolution = 0.25)
 
+plot1 <-Seurat::DimPlot(bm, reduction = "rna.umap",
+                        group.by = "celltype.l2", label = TRUE,
+                        repel = TRUE, label.size = 2.5,
+                        cols = col_palette)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (CITE-Seq, RNA+ADT)\nRNA UMAP"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_rna-umap.png"),
+                plot1, device = "png", width = 6.5, height = 5, units = "in")
+plot1 <-Seurat::DimPlot(bm, reduction = "rna.umap",
+                        group.by = "RNA_snn_res.0.25", label = TRUE,
+                        repel = TRUE, label.size = 2.5)
+plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (CITE-Seq, RNA+ADT)\nRNA clustering"))
+plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_rna-clustering.png"),
+                plot1, device = "png", width = 6.5, height = 5, units = "in")
+
 plot1 <-Seurat::DimPlot(bm, reduction = "adt.umap",
                         group.by = "celltype.l2", label = TRUE,
                         repel = TRUE, label.size = 2.5,
                         cols = col_palette)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (CITE-Seq, RNA+ADT)\nADT UMAP"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_adt-umap_added-noise_", percentage, ".png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_adt-umap.png"),
                 plot1, device = "png", width = 6.5, height = 5, units = "in")
 plot1 <-Seurat::DimPlot(bm, reduction = "adt.umap",
                         group.by = "ADT_snn_res.0.25", label = TRUE,
                         repel = TRUE, label.size = 2.5)
 plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (CITE-Seq, RNA+ADT)\nADT clustering"))
 plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_adt-clustering_added-noise_", percentage, ".png"),
+ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_adt-clustering.png"),
                 plot1, device = "png", width = 6.5, height = 5, units = "in")
 
 #########
@@ -102,49 +99,23 @@ multiSVD_obj <- tiltedCCA:::form_metacells(input_obj = multiSVD_obj,
                                            num_metacells = 5000,
                                            verbose = 1)
 multiSVD_obj <- tiltedCCA:::compute_snns(input_obj = multiSVD_obj,
-                                         latent_k = 50,
-                                         num_neigh = 3,
+                                         latent_k = 20,
+                                         num_neigh = 30,
                                          bool_cosine = T,
                                          bool_intersect = F,
-                                         min_deg = 1,
+                                         min_deg = 30,
                                          verbose = 2)
 
-
-tmp <- bm; tmp_mat <- multiSVD_obj$laplacian_list$common_laplacian
-colnames(tmp_mat) <- paste0("tmp_", 1:ncol(tmp_mat))
-set.seed(10); tmp_umap <- Seurat::RunUMAP(tmp_mat)@cell.embeddings
-tmp_umap_full <- matrix(NA, nrow = ncol(tmp), ncol = 2)
-for(i in 1:length(multiSVD_obj$metacell_obj$metacell_clustering_list)){
-  idx <- multiSVD_obj$metacell_obj$metacell_clustering_list[[i]]
-  tmp_umap_full[idx,] <- rep(tmp_umap[i,], each = length(idx))
-}
-set.seed(10)
-tmp_umap_full <- jitter(tmp_umap_full)
-rownames(tmp_umap_full) <- colnames(tmp)
-tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap_full, key = "commonLapUMAP")
-# tmp[["common_laplacian"]] <- Seurat::CreateDimReducObject(tmp_umap, key = "commonLapUMAP")
-plot1 <- Seurat::DimPlot(tmp, reduction = "common_laplacian",
-                         group.by = "celltype.l2", label = TRUE,
-                         repel = TRUE, label.size = 2.5,
-                         cols = col_palette)
-plot1 <- plot1 + ggplot2::ggtitle(paste0("Human BM (Abseq, RNA+ADT)\nCommon Laplacian"))
-plot1 <- plot1 + ggplot2::theme(legend.text = ggplot2::element_text(size = 5))
-ggplot2::ggsave(filename = paste0("../../../out/figures/main/citeseq_bm25_common-laplacian_added-noise_", percentage, ".png"),
-                plot1, device = "png", width = 6.5, height = 5, units = "in")
-
-
 multiSVD_obj <- tiltedCCA:::tiltedCCA(input_obj = multiSVD_obj,
-                                      fix_tilt_perc = 0,
                                       verbose = 1)
 multiSVD_obj <- tiltedCCA:::fine_tuning(input_obj = multiSVD_obj,
                                         verbose = 1)
 multiSVD_obj <- tiltedCCA:::tiltedCCA_decomposition(input_obj = multiSVD_obj,
                                                     verbose = 1)
 
-save(multiSVD_obj, bm, 
-     percentage, cor_vec,
+save(multiSVD_obj, bm,
      date_of_run, session_info,
-     file = paste0("../../../out/main/citeseq_bm25_tcca_added-noise_", percentage, ".RData"))
+     file = "../../../out/main/citeseq_bm25_tcca.RData")
 
 #################################
 
@@ -170,7 +141,8 @@ bm[["distinct2_tcca"]] <- tiltedCCA:::create_SeuratDim(input_obj = multiSVD_obj,
                                                        seurat_assay = "RNA",
                                                        verbose = 1)
 
-save(multiSVD_obj, bm, 
-     percentage, cor_vec,
+save(multiSVD_obj, bm,
      date_of_run, session_info,
-     file = paste0("../../../out/main/citeseq_bm25_tcca_added-noise_", percentage, ".RData"))
+     file = "../../../out/main/citeseq_bm25_tcca.RData")
+
+##########
